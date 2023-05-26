@@ -32,4 +32,6 @@ services:
     container_name: om_backend-tests
     command: tail -f /dev/null
     volumes:
-      - ../backend/src:/src
+      - ../backend/src:/work/src
+      - ../backend/tests:/work/tests
+    working_dir: /work
