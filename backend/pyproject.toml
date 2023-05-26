@@ -1,0 +1,38 @@
+[build-system]
+requires = ["wheel", "setuptools", "toml"]
+build-backend = "setuptools.build_meta"
+
+[dependencies]
+runtime = [
+    "fastapi[all] >=0.95,<0.96",
+    "marshmallow>=3.19,<3.20",
+    "alembic>=1.11,<1.12",
+    "SQLAlchemy>=2.0,<2.1",
+    "marshmallow-sqlalchemy>=0.29,<0.30",
+    "aiosqlite>=0.19,<0.20",
+    "fastapi-pagination>=0.12,<0.13"
+]
+test = [
+    "pytest >=7.3,<7.4",
+    "pytest-asyncio >=0.21,<0.22",
+    "pytest-cov >=4.1,<4.2",
+    "coverage >=7.2,<7.3",
+    "httpx >=0.24,<0.25"
+]
+dev = [
+    "black >=23.3,<23.4",
+    "isort >=5.12,<5.13",
+    "pre-commit >=3.3,<3.4",
+    "flake8 >=6.0,<6.1"
+]
+
+[tool.isort]
+profile = "black"
+known_third_party = ["fastapi", "pydantic", "starlette"]
+
+[tool.black]
+target-version = ['py37', 'py38', 'py39', 'py310']
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "../tests"]
+asyncio_mode = "auto"
