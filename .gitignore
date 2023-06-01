@@ -1,6 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,python,database,visualstudiocode,intellij
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,python,database,visualstudiocode,intellij
-# Slightly modified manually to not include anything from visualstudiocode settings
+
+# Slightly modified manually to not include anything from visualstudiocode settings : ignore the whole .vscode folder
 
 ### Database ###
 *.accdb

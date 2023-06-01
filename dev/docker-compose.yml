@@ -3,7 +3,7 @@ services:
     build: ../backend
     container_name: om_backend
     volumes:
-      - ../backend/src:/src
+      - ../backend/src:/app/src
     ports:
       - 8000:80
   # frontend-ui:
@@ -22,7 +22,6 @@ services:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
     container_name: om_backend-tools
-    command: tail -f /dev/null
     volumes:
       - ../backend/src:/work
   backend-tests:
@@ -30,7 +29,6 @@ services:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
     container_name: om_backend-tests
-    command: tail -f /dev/null
     volumes:
       - ../backend/src:/work/src
       - ../backend/tests:/work/tests

@@ -5,7 +5,7 @@
 ## devel usage
 
 ```sh
-pip install -U invoke toml  # only once
+pip install -U invoke  # only once
 invoke install-deps --package dev db-upgrade serve
 ```
 

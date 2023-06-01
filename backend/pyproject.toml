@@ -1,5 +1,5 @@
 [build-system]
-requires = ["wheel", "setuptools", "toml"]
+requires = ["wheel", "setuptools"]
 build-backend = "setuptools.build_meta"
 
 [dependencies]
@@ -19,11 +19,13 @@ test = [
     "coverage >=7.2,<7.3",
     "httpx >=0.24,<0.25"
 ]
-dev = [
+qa =  [
     "black >=23.3,<23.4",
     "isort >=5.12,<5.13",
-    "pre-commit >=3.3,<3.4",
     "flake8 >=6.0,<6.1"
+]
+dev = [
+    "pre-commit >=3.3,<3.4",
 ]
 
 [tool.isort]

@@ -4,35 +4,36 @@ import pathlib
 import sys
 import tempfile
 
+import tomllib
 from invoke import task
 
-deps_options = ("runtime", "test", "dev")
+deps_options = ("runtime", "test", "qa", "dev")
 
 
 @task
-def install_deps(c, package=deps_options[0]):
+def install_deps(c, package=deps_options[0], no_previous=False):
     """install dependencies for runtime (default) or extra packages
 
     packages:
         - runtime: default, to run the backend
         - test: to run the test suite
-        - dev: all deps to develop the backend"""
+        - qa: to check code quality
+        - dev: specific packages for development machine"""
     if package not in deps_options:
         print(
             f"Invalid deps package `{package}`. Choose from: {','.join(deps_options)}"
         )
         sys.exit(1)
 
-    try:
-        import toml
-    except ImportError:
-        c.run("pip install toml>=0.10.2")
-
     packages = []
-    manifest = toml.load("pyproject.toml")
+    with open("pyproject.toml", "rb") as f:
+        manifest = tomllib.load(f)
     # include deps from required package and previous ones in list
-    for option in deps_options[: deps_options.index(package) + 1]:
-        packages += manifest["dependencies"][option]
+    if no_previous:
+        packages = manifest["dependencies"][package]
+    else:
+        for option in deps_options[: deps_options.index(package) + 1]:
+            packages += manifest["dependencies"][option]
 
     c.run(
         "pip install -r /dev/stdin",
@@ -124,3 +125,41 @@ def db_init_no_migration(c):
             "BaseMeta.metadata.drop_all(engine)\n"
             "BaseMeta.metadata.create_all(engine)\n'"
         )
+
+
+@task
+def report_qa_tools_versions(c):
+    print("black:")
+    black_res = c.run(f"{sys.executable} -m black --version", warn=True)
+    print()
+    print("flake8:")
+    flake8_res = c.run(f"{sys.executable} -m flake8 --version", warn=True)
+    print()
+    print("isort:")
+    isort_res = c.run(f"{sys.executable} -m isort --version", warn=True)
+    print()
+
+    if black_res.exited or flake8_res.exited or isort_res.exited:
+        sys.exit(1)
+
+
+@task
+def check_qa(c):
+    with c.cd("src"):
+        print("black:")
+        black_res = c.run(f"{sys.executable} -m black --check backend", warn=True)
+        print()
+        print("flake8:")
+        flake8_res = c.run(
+            f"{sys.executable} -m flake8 backend --count --max-line-length=88 --statistics",
+            warn=True,
+        )
+        print()
+        print("isort:")
+        isort_res = c.run(
+            f"{sys.executable} -m  isort --profile black --check backend", warn=True
+        )
+        print()
+
+        if black_res.exited or flake8_res.exited or isort_res.exited:
+            sys.exit(1)

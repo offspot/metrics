@@ -1,13 +1,11 @@
 import pathlib
+import tomllib
 
-try:
-    import toml
-except ImportError:
-    raise EnvironmentError("Please install `toml` to use setup.py")
 from setuptools import find_packages, setup
 
 here = pathlib.Path(__file__).resolve().parent
-manifest = toml.load(here / "pyproject.toml")
+with open(here / "pyproject.toml", "rb") as f:
+    manifest = tomllib.load(f)
 
 metadata = dict()
 with open(here / "src/backend/__init__.py", "r") as fh:
