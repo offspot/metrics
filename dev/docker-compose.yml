@@ -1,0 +1,34 @@
+services:
+  backend:
+    build: ../backend
+    container_name: om_backend
+    volumes:
+      - ../backend/src:/app/src
+    ports:
+      - 8000:80
+  # frontend-ui:
+  #   build: ../frontend-ui
+  #   container_name: om_frontend-ui
+  #   volumes:
+  #     - ../frontend-ui/src:/app
+  #   ports:
+  #     - 8001:80
+  #   environment:
+  #     METRICS_BACKEND_WEBAPI: http://localhost:8000/v1
+  #   depends_on:
+  #     - backend
+  backend-tools:
+    build:
+      dockerfile: ../dev/backend-tools-tests/Dockerfile
+      context: ../backend
+    container_name: om_backend-tools
+    volumes:
+      - ../backend/src:/work
+  backend-tests:
+    build:
+      dockerfile: ../dev/backend-tools-tests/Dockerfile
+      context: ../backend
+    container_name: om_backend-tests
+    volumes:
+      - ../backend/src:/work/src
+      - ../backend/tests:/work/tests
