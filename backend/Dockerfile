@@ -1,5 +1,5 @@
 FROM python:3.11-slim
-#LABEL org.opencontainers.image.source https://github.com/offspot/metrics
+LABEL org.opencontainers.image.source https://github.com/offspot/metrics
 
 # to set to your clients' origins
 ENV ALLOWED_ORIGINS http://localhost

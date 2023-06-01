@@ -1,11 +1,9 @@
 import pathlib
-import sys
 
 try:
     import toml
 except ImportError:
-    print("Please install `toml` to use setup.py")
-    sys.exit(1)
+    raise EnvironmentError("Please install `toml` to use setup.py")
 from setuptools import find_packages, setup
 
 here = pathlib.Path(__file__).resolve().parent
@@ -32,16 +30,12 @@ setup(
     long_description_content_type="text/markdown",
     license="GPL-3.0-or-later",
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     ],
     packages=find_packages("src"),
     package_dir={"": "src"},
-    python_requires=">=3.8",
+    python_requires=">=3.11",
     install_requires=manifest["dependencies"]["runtime"],
     tests_require=manifest["dependencies"]["test"],
     extras_require={

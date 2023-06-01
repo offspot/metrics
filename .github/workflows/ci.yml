@@ -26,7 +26,14 @@ jobs:
           cd backend
           invoke install-deps --package dev
 
-      - name: Backend - Unit tests with pytest
+      - name: Backend - Run tests
         run: |
           cd backend
-          PYTHONPATH=src pytest tests/unit
+          invoke test
+
+      - name: Backend - Upload coverage report to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/src/coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true

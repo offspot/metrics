@@ -1,10 +1,8 @@
 import io
 import os
 import pathlib
-import platform
 import sys
 import tempfile
-import urllib.request
 
 from invoke import task
 
@@ -60,7 +58,7 @@ def test(c, args="", path=""):
         try:
             c.run(
                 f"{sys.executable} -m pytest --cov=backend "
-                f"--cov-report term-missing {args} "
+                f"--cov-report term-missing --cov-report html {args} "
                 f"../tests{'/' + path if path else ''}",
                 pty=True,
                 env={
@@ -73,44 +71,6 @@ def test(c, args="", path=""):
             if not custom_db_url and db_path.exists():
                 db_path.unlink()
         c.run("coverage xml", pty=True)
-
-
-@task
-def get_codecov(c):
-    """codecov binary path. Downloaded first if not present"""
-    has_system_bin = c.run("command -v codecov", warn=True).exited == 0
-    codecov_bin = pathlib.Path("./codecov").resolve()
-
-    # download a local copy if none present
-    if not codecov_bin.exists() and not has_system_bin:
-        system = {"Linux": "linux", "Darwin": "macos"}.get(platform.system(), "-")
-        url = f"https://uploader.codecov.io/latest/{system}/codecov"
-        print("Downloading codecov from", url)
-        with urllib.request.urlopen(url) as response, open(  # nosec
-            codecov_bin, "wb"
-        ) as fh:
-            fh.write(response.read())
-        c.run(f"chmod +x {codecov_bin}")
-        return str(codecov_bin)
-    if has_system_bin:
-        return "codecov"
-    return codecov_bin
-
-
-@task
-def upload_coverage(c):
-    """upload coverage report to codecov. requires CODECOV_TOKEN"""
-    report_fpath = pathlib.Path("src/coverage.xml")
-    if not report_fpath.exists():
-        print(f"Coverage report missing at {report_fpath}. Launching tests…")
-        test(c)
-
-    codecov_bin = get_codecov(c)
-    token = os.getenv("CODECOV_TOKEN")
-    c.run(
-        f"{codecov_bin} --file {report_fpath}" + (f" --token {token}" if token else ""),
-        pty=True,
-    )
 
 
 @task
@@ -164,9 +124,3 @@ def db_init_no_migration(c):
             "BaseMeta.metadata.drop_all(engine)\n"
             "BaseMeta.metadata.create_all(engine)\n'"
         )
-
-
-@task
-def load_demo_fixture(c):
-    with c.cd("src"):
-        c.run(f"{sys.executable} ./demo/data.py", env={"PYTHONPATH": "."})

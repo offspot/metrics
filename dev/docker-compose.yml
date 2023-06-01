@@ -24,7 +24,7 @@ services:
     container_name: om_backend-tools
     command: tail -f /dev/null
     volumes:
-      - ../backend/src:/src
+      - ../backend/src:/work
   backend-tests:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -34,4 +34,3 @@ services:
     volumes:
       - ../backend/src:/work/src
       - ../backend/tests:/work/tests
-    working_dir: /work
