@@ -23,7 +23,8 @@ services:
       context: ../backend
     container_name: om_backend-tools
     volumes:
-      - ../backend/src:/work
+      - ../backend/src:/work/src
+      - ../backend/tests:/work/tests
   backend-tests:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile

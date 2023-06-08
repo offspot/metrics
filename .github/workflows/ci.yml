@@ -23,7 +23,7 @@ jobs:
       - name: Backend - Setup QA dependencies
         run: |
           cd backend
-          invoke install-deps --package qa --no-previous
+          invoke install-deps --package qa
 
       - name: Backend - Report QA tool versions
         run: |
@@ -52,7 +52,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip invoke
           cd backend
-          invoke install-deps --package dev
+          invoke install-deps --package test
 
       - name: Backend - Run tests
         run: |

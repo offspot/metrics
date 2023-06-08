@@ -21,7 +21,7 @@ def create_app() -> FastAPI:
     )
 
     @app.get("/")
-    async def landing():
+    async def landing() -> RedirectResponse:
         """Redirect to root of latest version of the API"""
         return RedirectResponse(f"{PREFIX}/", status_code=308)
 

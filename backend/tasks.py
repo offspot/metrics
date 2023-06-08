@@ -138,8 +138,11 @@ def report_qa_tools_versions(c):
     print("isort:")
     isort_res = c.run(f"{sys.executable} -m isort --version", warn=True)
     print()
+    print("mypy:")
+    mypy_res = c.run(f"{sys.executable} -m mypy --version", warn=True)
+    print()
 
-    if black_res.exited or flake8_res.exited or isort_res.exited:
+    if black_res.exited or flake8_res.exited or isort_res.exited or mypy_res.exited:
         sys.exit(1)
 
 
@@ -157,9 +160,15 @@ def check_qa(c):
         print()
         print("isort:")
         isort_res = c.run(
-            f"{sys.executable} -m  isort --profile black --check backend", warn=True
+            f"{sys.executable} -m isort --profile black --check backend", warn=True
         )
         print()
-
         if black_res.exited or flake8_res.exited or isort_res.exited:
             sys.exit(1)
+
+    print("mypy:")
+    mypy_res = c.run(f"{sys.executable} -m mypy --strict src tests", warn=True)
+    print("")  # clearing mypy's output (missing CRLF)
+
+    if mypy_res.exited:
+        sys.exit(1)

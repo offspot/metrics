@@ -15,5 +15,5 @@ router = APIRouter(
         },
     },
 )
-async def echo():
+async def echo() -> str:
     return "ECHO"
