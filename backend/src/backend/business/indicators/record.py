@@ -9,3 +9,6 @@ class Record:
 
     value: int
     dimensions: DimensionsValues
+
+    def get_dimension_value(self, dimension: int) -> str | None:
+        return self.dimensions[dimension] if len(self.dimensions) > dimension else None

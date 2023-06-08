@@ -56,6 +56,11 @@ def test(c, args="", path=""):
             tempfile.NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name
         )
     with c.cd("src"):
+        if not custom_db_url:
+            c.run(
+                "alembic upgrade head",
+                env={"DATABASE_URL": f"sqlite+aiosqlite:////{db_path.resolve()}"},
+            )
         try:
             c.run(
                 f"{sys.executable} -m pytest --cov=backend "
@@ -85,14 +90,28 @@ def serve(c, args=""):
 
 
 @task
-def alembic(c, args=""):
+def alembic(c, args="", test_db=False):
     with c.cd("src"):
-        c.run(f"{sys.executable} -m alembic {args}")
+        c.run(
+            f"{sys.executable} -m alembic {args}",
+            env={
+                "DATABASE_URL": os.environ["TEST_DATABASE_URL"]
+                if test_db
+                else os.environ["DATABASE_URL"]
+            },
+        )
 
 
 @task
-def db_upgrade(c, rev="head"):
-    c.run(f'invoke alembic --args "upgrade {rev}"')
+def db_upgrade(c, rev="head", test_db=False):
+    c.run(
+        f'invoke alembic --args "upgrade {rev}"',
+        env={
+            "DATABASE_URL": os.environ["TEST_DATABASE_URL"]
+            if test_db
+            else os.environ["DATABASE_URL"]
+        },
+    )
 
 
 @task
@@ -154,7 +173,8 @@ def check_qa(c):
         print()
         print("flake8:")
         flake8_res = c.run(
-            f"{sys.executable} -m flake8 backend --count --max-line-length=88 --statistics",
+            f"{sys.executable} -m flake8 backend --count --max-line-length=88"
+            " --statistics",
             warn=True,
         )
         print()

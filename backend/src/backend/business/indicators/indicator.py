@@ -17,11 +17,11 @@ class Indicator(abc.ABC):
     a given processing period.
     """
 
-    _recorders: Dict[DimensionsValues, Recorder]
+    unique_id = 0  # this ID is unique to each kind of indicator
 
     def __init__(self) -> None:
         super().__init__()
-        self.reset_state()
+        self.recorders: Dict[DimensionsValues, Recorder] = {}
 
     @abc.abstractmethod
     def can_process_input(self, input: Input) -> bool:
@@ -48,21 +48,21 @@ class Indicator(abc.ABC):
         Either return the already existing recorder whose dimensions values are
         matching, or creates a new recorder with appropriate dimension values"""
         dimensions_values = self.get_dimensions_values(input)
-        if dimensions_values not in self._recorders:
-            self._recorders[dimensions_values] = self.create_new_recorder()
-        return self._recorders[dimensions_values]
+        if dimensions_values not in self.recorders:
+            self.recorders[dimensions_values] = self.create_new_recorder()
+        return self.recorders[dimensions_values]
 
     def reset_state(self) -> None:
         """Reset the list of recorders.
 
         This is typically done at the start of a new processing period"""
-        self._recorders = {}
+        self.recorders = {}
 
     def get_records(
         self,
     ) -> Generator[Record, None, None]:
         """Return all records (values with associated dimensions)."""
-        for dimensions_values, record in self._recorders.items():
+        for dimensions_values, record in self.recorders.items():
             yield Record(value=record.get_value(), dimensions=dimensions_values)
 
     def process_input(self, input: Input) -> None:

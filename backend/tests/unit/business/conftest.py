@@ -1,15 +1,19 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Generator, TypeAlias, cast
 
 import pytest
 
 from backend.business.indicators import DimensionsValues
 from backend.business.indicators.indicator import Indicator
+from backend.business.indicators.processor import Processor
 from backend.business.indicators.recorder import IntCounterRecorder, Recorder
 from backend.business.inputs.input import Input
 
 IndicatorGenerator: TypeAlias = Generator[Indicator, None, None]
 InputGenerator: TypeAlias = Generator[Input, None, None]
+ProcessorGenerator: TypeAlias = Generator[Processor, None, None]
+DatetimeGenerator: TypeAlias = Generator[datetime, None, None]
 
 
 @dataclass
@@ -30,6 +34,8 @@ class AnotherTestInput(Input):
 class TotalIndicator(Indicator):
     """An indicator counting number of inputs, without any grouping"""
 
+    unique_id = -1
+
     def can_process_input(self, input: Input) -> bool:
         return isinstance(input, TestInput)
 
@@ -42,6 +48,8 @@ class TotalIndicator(Indicator):
 
 class TotalByContentIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content"""
+
+    unique_id = -2
 
     def can_process_input(self, input: Input) -> bool:
         return isinstance(input, TestInput)
@@ -56,6 +64,8 @@ class TotalByContentIndicator(Indicator):
 
 class TotalByContentAndSubfolderIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content and subfolder"""
+
+    unique_id = -3
 
     def can_process_input(self, input: Input) -> bool:
         return isinstance(input, TestInput)
@@ -101,3 +111,23 @@ def total_by_content_indicator() -> IndicatorGenerator:
 @pytest.fixture()
 def total_by_content_and_subfolder_indicator() -> IndicatorGenerator:
     yield TotalByContentAndSubfolderIndicator()
+
+
+@pytest.fixture()
+def init_datetime() -> DatetimeGenerator:
+    yield datetime.fromisoformat("2023-06-08 10:08:00")
+
+
+@pytest.fixture()
+def next_datetime_same_hour() -> DatetimeGenerator:
+    yield datetime.fromisoformat("2023-06-08 10:58:00")
+
+
+@pytest.fixture()
+def next_datetime_next_hour() -> DatetimeGenerator:
+    yield datetime.fromisoformat("2023-06-08 11:08:00")
+
+
+@pytest.fixture()
+def processor(init_datetime: datetime) -> ProcessorGenerator:
+    yield Processor(init_datetime)

@@ -1,11 +1,19 @@
 from datetime import datetime
+from typing import Optional
 
-from sqlalchemy import DateTime
-from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
+from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    MappedAsDataclass,
+    mapped_column,
+    relationship,
+)
 from sqlalchemy.sql.schema import MetaData
 
 
-class Base(MappedAsDataclass, DeclarativeBase):
+class Base(AsyncAttrs, MappedAsDataclass, DeclarativeBase):
     # This map details the specific transformation of types between Python and
     # SQLite. This is only needed for the case where a specific SQLite
     # type has to be used or when we want to ensure a specific setting (like the
@@ -30,6 +38,39 @@ class Base(MappedAsDataclass, DeclarativeBase):
     pass
 
 
-# class Sample(Base):
-#     __tablename__ = "sample"
-#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
+class IndicatorPeriod(Base):
+    __tablename__ = "indicator_period"
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    year: Mapped[int]
+    month: Mapped[int]
+    day: Mapped[int]
+    weekday: Mapped[int]
+    hour: Mapped[int]
+
+
+class IndicatorDimension(Base):
+    __tablename__ = "indicator_dimension"
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    # only 3 dimension values are supported for now, this is supposed to be way enough
+    value0: Mapped[Optional[str]]
+    value1: Mapped[Optional[str]]
+    value2: Mapped[Optional[str]]
+
+
+class IndicatorRecord(Base):
+    __tablename__ = "indicator_record"
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    indicator_id: Mapped[int] = mapped_column(index=True)
+    value: Mapped[int]
+
+    period_id: Mapped[int] = mapped_column(
+        ForeignKey("indicator_period.id"), init=False
+    )
+
+    period: Mapped["IndicatorPeriod"] = relationship(init=False)
+
+    dimension_id: Mapped[int] = mapped_column(
+        ForeignKey("indicator_dimension.id"), init=False
+    )
+
+    dimension: Mapped["IndicatorDimension"] = relationship(init=False)
