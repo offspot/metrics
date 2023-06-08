@@ -1,42 +1,41 @@
-from typing import Tuple
-
 import pytest
 
-from backend.business.indicators.indicator import IndicatorInterface
-from backend.business.indicators.recorder import IntCounterRecorder, RecorderInterface
-from backend.business.inputs.input import InputInterface
+from backend.business.indicators import DimensionsValues
+from backend.business.indicators.indicator import Indicator
+from backend.business.indicators.recorder import IntCounterRecorder, Recorder
+from backend.business.inputs.input import Input
 
 
-class SampleGenericIndicator(IndicatorInterface):
-    def create_new_recorder(self) -> RecorderInterface:
+class SampleGenericIndicator(Indicator):
+    def create_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def can_process_input(self, input: InputInterface) -> bool:
+    def can_process_input(self, input: Input) -> bool:
         return True
 
-    def get_dimensions_values(self, input: InputInterface) -> Tuple[str]:
+    def get_dimensions_values(self, input: Input) -> DimensionsValues:
         return ()
 
 
 @pytest.mark.parametrize(
     "subclass, parentclass",
     [
-        (SampleGenericIndicator, IndicatorInterface),
-        (IntCounterRecorder, RecorderInterface),
+        (SampleGenericIndicator, Indicator),
+        (IntCounterRecorder, Recorder),
     ],
 )
-def test_subclass(subclass, parentclass):
+def test_subclass(subclass: type, parentclass: type) -> None:
     assert issubclass(subclass, parentclass)
 
 
 @pytest.mark.parametrize(
     "abstractclass",
     [
-        IndicatorInterface,
-        RecorderInterface,
+        Indicator,
+        Recorder,
     ],
 )
-def test_abstract_class(abstractclass):
+def test_abstract_class(abstractclass: type) -> None:
     with pytest.raises(TypeError):
         abstractclass()
 
@@ -48,5 +47,5 @@ def test_abstract_class(abstractclass):
         IntCounterRecorder,
     ],
 )
-def test_concrete_class(concreteclass):
+def test_concrete_class(concreteclass: type) -> None:
     concreteclass()

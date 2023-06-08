@@ -1,15 +1,19 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Generator, TypeAlias, cast
 
 import pytest
 
-from backend.business.indicators.indicator import IndicatorInterface
-from backend.business.indicators.recorder import IntCounterRecorder, RecorderInterface
-from backend.business.inputs.input import InputInterface
+from backend.business.indicators import DimensionsValues
+from backend.business.indicators.indicator import Indicator
+from backend.business.indicators.recorder import IntCounterRecorder, Recorder
+from backend.business.inputs.input import Input
+
+IndicatorGenerator: TypeAlias = Generator[Indicator, None, None]
+InputGenerator: TypeAlias = Generator[Input, None, None]
 
 
 @dataclass
-class TestInput(InputInterface):
+class TestInput(Input):
     """Test input, with a content and a subfolder"""
 
     content: str
@@ -17,87 +21,83 @@ class TestInput(InputInterface):
 
 
 @dataclass
-class AnotherTestInput(InputInterface):
+class AnotherTestInput(Input):
     """Another test input, with nothing, just not supported by test indicators"""
 
-    pass
+    ...
 
 
-class TotalIndicator(IndicatorInterface):
+class TotalIndicator(Indicator):
     """An indicator counting number of inputs, without any grouping"""
 
-    def can_process_input(self, input: InputInterface) -> bool:
-        if type(input) is TestInput:
-            return True
-        return False
+    def can_process_input(self, input: Input) -> bool:
+        return type(input) is TestInput
 
-    def create_new_recorder(self) -> RecorderInterface:
+    def create_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: InputInterface) -> Tuple[str]:
-        return ()
+    def get_dimensions_values(self, input: Input) -> DimensionsValues:
+        return tuple()
 
 
-class TotalByContentIndicator(IndicatorInterface):
+class TotalByContentIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content"""
 
-    def can_process_input(self, input: InputInterface) -> bool:
-        if type(input) is TestInput:
-            return True
-        return False
+    def can_process_input(self, input: Input) -> bool:
+        return type(input) is TestInput
 
-    def create_new_recorder(self) -> RecorderInterface:
+    def create_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: TestInput) -> Tuple[str]:
+    def get_dimensions_values(self, input: Input) -> DimensionsValues:
+        input = cast(TestInput, input)
         return (input.content,)
 
 
-class TotalByContentAndSubfolderIndicator(IndicatorInterface):
+class TotalByContentAndSubfolderIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content and subfolder"""
 
-    def can_process_input(self, input: InputInterface) -> bool:
-        if type(input) is TestInput:
-            return True
-        return False
+    def can_process_input(self, input: Input) -> bool:
+        return type(input) is TestInput
 
-    def create_new_recorder(self) -> RecorderInterface:
+    def create_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: TestInput) -> Tuple[str]:
+    def get_dimensions_values(self, input: Input) -> DimensionsValues:
+        input = cast(TestInput, input)
         return (input.content, input.subfolder)
 
 
 @pytest.fixture(scope="session")
-def input1():
+def input1() -> InputGenerator:
     yield TestInput(content="content1", subfolder="subfolder1")
 
 
 @pytest.fixture(scope="session")
-def input2():
+def input2() -> InputGenerator:
     yield TestInput(content="content1", subfolder="subfolder2")
 
 
 @pytest.fixture(scope="session")
-def input3():
+def input3() -> InputGenerator:
     yield TestInput(content="content2", subfolder="subfolder1")
 
 
 @pytest.fixture(scope="session")
-def another_input():
+def another_input() -> InputGenerator:
     yield AnotherTestInput()
 
 
 @pytest.fixture()
-def total_indicator() -> TotalIndicator:
+def total_indicator() -> IndicatorGenerator:
     yield TotalIndicator()
 
 
 @pytest.fixture()
-def total_by_content_indicator() -> TotalByContentIndicator:
+def total_by_content_indicator() -> IndicatorGenerator:
     yield TotalByContentIndicator()
 
 
 @pytest.fixture()
-def total_by_content_and_subfolder_indicator() -> TotalByContentIndicator:
+def total_by_content_and_subfolder_indicator() -> IndicatorGenerator:
     yield TotalByContentAndSubfolderIndicator()

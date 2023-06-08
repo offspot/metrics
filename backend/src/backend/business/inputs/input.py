@@ -1,7 +1,7 @@
 import abc
 
 
-class InputInterface(metaclass=abc.ABCMeta):
+class Input(abc.ABC):
     """A generic input interface"""
 
-    pass  # pragma: nocover
+    ...

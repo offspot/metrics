@@ -1,33 +1,32 @@
 import abc
 
-from backend.business.inputs.input import InputInterface
+from backend.business.inputs.input import Input
 
 
-class RecorderInterface(metaclass=abc.ABCMeta):
+class Recorder(abc.ABC):
     """Generic interface to recorder types"""
 
     @abc.abstractmethod
-    def process_input(self, input: InputInterface) -> None:
+    def process_input(self, input: Input) -> None:
         """Process an input by updating recorder internal state"""
-        raise NotImplementedError  # pragma: nocover
+        ...  # pragma: nocover
 
     @abc.abstractmethod
-    def get_value(self) -> None:
+    def get_value(self) -> int:
         """Return the current value of the recorder, based on internal state"""
-        raise NotImplementedError  # pragma: nocover
+        ...  # pragma: nocover
 
 
-@abc.abstractmethod
-class IntCounterRecorder(RecorderInterface):
+class IntCounterRecorder(Recorder):
     """Basic recorder type counting the number of inputs that have been processed"""
 
-    # internal state is simply a counter
-    counter: int = 0
+    def __init__(self) -> None:
+        self.counter = 0
 
-    def process_input(self, input: InputInterface) -> None:
+    def process_input(self, input: Input) -> None:
         """Processing an input consists simply in updating the counter"""
         self.counter += 1
 
-    def get_value(self) -> None:
+    def get_value(self) -> int:
         """Retrieving the value consists simply is getting the counter"""
         return self.counter

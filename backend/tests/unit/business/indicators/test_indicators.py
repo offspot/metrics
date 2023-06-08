@@ -1,17 +1,17 @@
-from backend.business.indicators.indicator import IndicatorInterface
+from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
 from backend.business.indicators.record import Record
-from backend.business.inputs.input import InputInterface
+from backend.business.inputs.input import Input
 
 
-def test_no_input(total_indicator: IndicatorInterface):
+def test_no_input(total_indicator: Indicator) -> None:
     processor = Processor()
     processor.indicators.append(total_indicator)
     records = list(total_indicator.get_records())
     assert len(records) == 0
 
 
-def test_one_input(input1: InputInterface, total_indicator: IndicatorInterface):
+def test_one_input(input1: Input, total_indicator: Indicator) -> None:
     processor = Processor()
     processor.indicators = [total_indicator]
     processor.process_input(input1)
@@ -22,9 +22,7 @@ def test_one_input(input1: InputInterface, total_indicator: IndicatorInterface):
     assert records == expected_records
 
 
-def test_one_input_repeated(
-    input1: InputInterface, total_indicator: IndicatorInterface
-):
+def test_one_input_repeated(input1: Input, total_indicator: Indicator) -> None:
     processor = Processor()
     processor.indicators = [total_indicator]
     processor.process_input(input1)
@@ -36,9 +34,7 @@ def test_one_input_repeated(
     assert records == expected_records
 
 
-def test_another_input(
-    total_indicator: IndicatorInterface, another_input: InputInterface
-):
+def test_another_input(total_indicator: Indicator, another_input: Input) -> None:
     processor = Processor()
     processor.indicators = [total_indicator]
     processor.process_input(another_input)
@@ -47,12 +43,12 @@ def test_another_input(
 
 
 def test_total_by_content(
-    input1: InputInterface,
-    input2: InputInterface,
-    input3: InputInterface,
-    another_input: InputInterface,
-    total_by_content_indicator: IndicatorInterface,
-):
+    input1: Input,
+    input2: Input,
+    input3: Input,
+    another_input: Input,
+    total_by_content_indicator: Indicator,
+) -> None:
     processor = Processor()
     processor.indicators = [total_by_content_indicator]
     processor.process_input(input1)
@@ -69,12 +65,12 @@ def test_total_by_content(
 
 
 def test_total_by_content_and_subfolder(
-    input1: InputInterface,
-    input2: InputInterface,
-    input3: InputInterface,
-    another_input: InputInterface,
-    total_by_content_and_subfolder_indicator: IndicatorInterface,
-):
+    input1: Input,
+    input2: Input,
+    input3: Input,
+    another_input: Input,
+    total_by_content_and_subfolder_indicator: Indicator,
+) -> None:
     processor = Processor()
     processor.indicators = [total_by_content_and_subfolder_indicator]
     processor.process_input(input1)
@@ -92,12 +88,12 @@ def test_total_by_content_and_subfolder(
 
 
 def test_reset(
-    input1: InputInterface,
-    input2: InputInterface,
-    input3: InputInterface,
-    another_input: InputInterface,
-    total_by_content_and_subfolder_indicator: IndicatorInterface,
-):
+    input1: Input,
+    input2: Input,
+    input3: Input,
+    another_input: Input,
+    total_by_content_and_subfolder_indicator: Indicator,
+) -> None:
     processor = Processor()
     processor.indicators = [total_by_content_and_subfolder_indicator]
     processor.process_input(input1)
