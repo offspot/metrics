@@ -31,7 +31,7 @@ class TotalIndicator(Indicator):
     """An indicator counting number of inputs, without any grouping"""
 
     def can_process_input(self, input: Input) -> bool:
-        return type(input) is TestInput
+        return isinstance(input, TestInput)
 
     def create_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
@@ -44,7 +44,7 @@ class TotalByContentIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content"""
 
     def can_process_input(self, input: Input) -> bool:
-        return type(input) is TestInput
+        return isinstance(input, TestInput)
 
     def create_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
@@ -58,7 +58,7 @@ class TotalByContentAndSubfolderIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content and subfolder"""
 
     def can_process_input(self, input: Input) -> bool:
-        return type(input) is TestInput
+        return isinstance(input, TestInput)
 
     def create_new_recorder(self) -> Recorder:
         return IntCounterRecorder()

@@ -165,12 +165,10 @@ def check_qa(c):
         print()
         if black_res.exited or flake8_res.exited or isort_res.exited:
             sys.exit(1)
-    
+
     print("mypy:")
-    mypy_res = c.run(
-        f"{sys.executable} -m mypy --strict src tests", warn=True
-    )
-    print()
+    mypy_res = c.run(f"{sys.executable} -m mypy --strict src tests", warn=True)
+    print("")  # clearing mypy's output (missing CRLF)
 
     if mypy_res.exited:
         sys.exit(1)

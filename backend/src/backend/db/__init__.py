@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 from sqlalchemy import SelectBase, create_engine, func, select
 from sqlalchemy.orm import Session as OrmSession
@@ -9,7 +9,7 @@ from backend.constants import BackendConf
 Session = sessionmaker(bind=create_engine(url=BackendConf.database_url, echo=False))
 
 
-def dbsession(func: Any) -> Any:
+def dbsession(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator to create an SQLAlchemy ORM session object and wrap the function
     inside the session. A `session` argument is automatically set. Commit is
     automatically performed when the function finish (and before returning to
