@@ -16,5 +16,5 @@ services:
       - ../backend/tasks.py:/work/tasks.py
       - ../backend/tests:/work/tests
     environment:
-      DATABASE_URL: sqlite+aiosqlite://///work/src/backend/dev.db
-      TEST_DATABASE_URL: sqlite+aiosqlite://///work/tests/test.db
+      DATABASE_URL: sqlite+pysqlite://///work/src/backend/dev.db
+      TEST_DATABASE_URL: sqlite+pysqlite://///work/tests/test.db

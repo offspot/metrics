@@ -91,7 +91,7 @@ def test_total_by_content_and_subfolder(
     assert records == expected_records
 
 
-async def test_process_tick(
+def test_process_tick(
     processor: Processor,
     input1: Input,
     input2: Input,
@@ -106,7 +106,7 @@ async def test_process_tick(
     processor.process_input(input2)
     processor.process_input(another_input)
     processor.process_input(input3)
-    await processor.process_tick(next_datetime_next_hour)
+    processor.process_tick(next_datetime_next_hour)
     processor.process_input(input1)
     processor.process_input(input2)
     records = list(total_by_content_and_subfolder_indicator.get_records())

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.period import Period
@@ -28,9 +28,9 @@ class Processor:
             indicator.reset_state()
 
     @dbsession
-    async def process_tick(self, now: datetime, session: AsyncSession) -> None:
+    def process_tick(self, now: datetime, session: Session) -> None:
         """Process a clock tick"""
-        await Persister.persist_indicators(
+        Persister.persist_indicators(
             period=self.current_period, indicators=self.indicators, session=session
         )
         now_period = Period(now)

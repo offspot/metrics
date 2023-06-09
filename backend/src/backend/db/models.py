@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey
-from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -13,7 +12,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.sql.schema import MetaData
 
 
-class Base(AsyncAttrs, MappedAsDataclass, DeclarativeBase):
+class Base(MappedAsDataclass, DeclarativeBase):
     # This map details the specific transformation of types between Python and
     # SQLite. This is only needed for the case where a specific SQLite
     # type has to be used or when we want to ensure a specific setting (like the

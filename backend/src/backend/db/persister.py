@@ -1,7 +1,7 @@
 from typing import List
 
 import sqlalchemy as sa
-from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.period import Period as PeriodBiz
@@ -18,17 +18,15 @@ class TooManyDimensions(Exception):
 
 class Persister:
     @classmethod
-    async def persist_indicators(
-        cls, period: PeriodBiz, indicators: List[Indicator], session: AsyncSession
+    def persist_indicators(
+        cls, period: PeriodBiz, indicators: List[Indicator], session: Session
     ) -> None:
-        dbPeriod = (
-            await session.execute(
-                sa.select(PeriodDb)
-                .where(PeriodDb.year == period.year)
-                .where(PeriodDb.month == period.month)
-                .where(PeriodDb.day == period.day)
-                .where(PeriodDb.hour == period.hour)
-            )
+        dbPeriod = session.execute(
+            sa.select(PeriodDb)
+            .where(PeriodDb.year == period.year)
+            .where(PeriodDb.month == period.month)
+            .where(PeriodDb.day == period.day)
+            .where(PeriodDb.hour == period.hour)
         ).scalar_one_or_none()
 
         if not dbPeriod:
@@ -47,13 +45,11 @@ class Persister:
                 if nb_dimensions > 3:
                     raise TooManyDimensions()
 
-                dbDimension = (
-                    await session.execute(
-                        sa.select(DimensionDb)
-                        .where(DimensionDb.value0 == record.get_dimension_value(0))
-                        .where(DimensionDb.value1 == record.get_dimension_value(1))
-                        .where(DimensionDb.value2 == record.get_dimension_value(2))
-                    )
+                dbDimension = session.execute(
+                    sa.select(DimensionDb)
+                    .where(DimensionDb.value0 == record.get_dimension_value(0))
+                    .where(DimensionDb.value1 == record.get_dimension_value(1))
+                    .where(DimensionDb.value2 == record.get_dimension_value(2))
                 ).scalar_one_or_none()
 
                 if not dbDimension:

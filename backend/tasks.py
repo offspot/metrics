@@ -59,7 +59,7 @@ def test(c, args="", path=""):
         if not custom_db_url:
             c.run(
                 "alembic upgrade head",
-                env={"DATABASE_URL": f"sqlite+aiosqlite:////{db_path.resolve()}"},
+                env={"DATABASE_URL": f"sqlite+pysqlite:////{db_path.resolve()}"},
             )
         try:
             c.run(
@@ -70,7 +70,7 @@ def test(c, args="", path=""):
                 env={
                     "DATABASE_URL": custom_db_url
                     if custom_db_url
-                    else f"sqlite+aiosqlite:////{db_path.resolve()}"
+                    else f"sqlite+pysqlite:////{db_path.resolve()}"
                 },
             )
         finally:

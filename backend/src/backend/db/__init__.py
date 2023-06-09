@@ -1,14 +1,12 @@
 from typing import Any, Callable
 
-from sqlalchemy import SelectBase, func, select
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy import SelectBase, create_engine, func, select
 from sqlalchemy.orm import Session as OrmSession
+from sqlalchemy.orm import sessionmaker
 
 from backend.constants import BackendConf
 
-AsyncSession = async_sessionmaker(
-    bind=create_async_engine(url=BackendConf.database_url, echo=False)
-)
+Session = sessionmaker(bind=create_engine(url=BackendConf.database_url, echo=False))
 
 
 def dbsession(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -19,10 +17,10 @@ def dbsession(func: Callable[..., Any]) -> Callable[..., Any]:
     automatic.
     """
 
-    async def inner(*args: Any, **kwargs: Any) -> Any:
-        async with AsyncSession.begin() as session:
+    def inner(*args: Any, **kwargs: Any) -> Any:
+        with Session.begin() as session:
             kwargs["session"] = session
-            await func(*args, **kwargs)
+            return func(*args, **kwargs)
 
     return inner
 

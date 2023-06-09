@@ -9,7 +9,6 @@ runtime = [
     "alembic>=1.11,<1.12",
     "SQLAlchemy>=2.0,<2.1",
     "marshmallow-sqlalchemy>=0.29,<0.30",
-    "aiosqlite>=0.19,<0.20",
     "fastapi-pagination>=0.12,<0.13"
 ]
 test = [
