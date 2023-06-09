@@ -1,5 +1,10 @@
-from typing import Any
+from typing import Any, Generator
 
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+from backend.constants import BackendConf
 from backend.db.initializer import Initializer
 
 
@@ -9,3 +14,11 @@ def pytest_sessionstart(session: Any) -> None:
     before performing collection and entering the run test loop.
     """
     Initializer.check_if_schema_is_up_to_date()
+
+
+@pytest.fixture
+def dbsession() -> Generator[Session, None, None]:
+    with Session(create_engine(url=BackendConf.database_url, echo=False)) as session:
+        session.begin()
+        yield session
+        session.rollback()

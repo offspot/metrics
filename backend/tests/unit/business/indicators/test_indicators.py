@@ -1,9 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
 from backend.business.indicators.record import Record
 from backend.business.inputs.input import Input
+from backend.db import count_from_stmt
+from backend.db.models import IndicatorDimension, IndicatorPeriod, IndicatorRecord
 
 
 def test_no_input(processor: Processor, total_indicator: Indicator) -> None:
@@ -99,6 +104,7 @@ def test_process_tick(
     another_input: Input,
     total_by_content_and_subfolder_indicator: Indicator,
     next_datetime_next_hour: datetime,
+    dbsession: Session,
 ) -> None:
     processor.indicators = [total_by_content_and_subfolder_indicator]
     processor.process_input(input1)
@@ -106,12 +112,13 @@ def test_process_tick(
     processor.process_input(input2)
     processor.process_input(another_input)
     processor.process_input(input3)
-    processor.process_tick(next_datetime_next_hour)
+    processor.process_tick(next_datetime_next_hour, dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
     processor.process_input(input1)
     processor.process_input(input2)
-    records = list(total_by_content_and_subfolder_indicator.get_records())
-    expected_records = [
-        Record(value=1, dimensions=("content1", "subfolder1")),
-        Record(value=1, dimensions=("content1", "subfolder2")),
-    ]
-    assert records == expected_records
+    processor.process_tick(next_datetime_next_hour + timedelta(hours=1), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 5
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2

@@ -2,9 +2,9 @@ from datetime import datetime
 
 import pytest
 import sqlalchemy as sa
+from sqlalchemy.orm import Session
 
 from backend.business.indicators.processor import Processor
-from backend.db import Session
 from backend.db.models import IndicatorPeriod
 
 
@@ -27,23 +27,23 @@ def test_periods(
     expected_day: int,
     expected_hour: int,
     expected_weekday: int,
+    dbsession: Session,
 ) -> None:
     processor = Processor(datetime.fromisoformat(init_iso_datetime))
     init_period = processor.current_period
-    processor.process_tick(datetime.fromisoformat(next_iso_datetime))
+    processor.process_tick(datetime.fromisoformat(next_iso_datetime), dbsession)
     next_period = processor.current_period
     assert (init_period != next_period) == has_changed
-    with Session.begin() as session:
-        dbPeriod = session.execute(
-            sa.select(IndicatorPeriod)
-            .where(IndicatorPeriod.year == init_period.year)
-            .where(IndicatorPeriod.month == init_period.month)
-            .where(IndicatorPeriod.day == init_period.day)
-            .where(IndicatorPeriod.hour == init_period.hour)
-        ).scalar_one_or_none()
-        assert dbPeriod
-        assert dbPeriod.year == expected_year
-        assert dbPeriod.month == expected_month
-        assert dbPeriod.day == expected_day
-        assert dbPeriod.hour == expected_hour
-        assert dbPeriod.weekday == expected_weekday
+    dbPeriod = dbsession.execute(
+        sa.select(IndicatorPeriod)
+        .where(IndicatorPeriod.year == init_period.year)
+        .where(IndicatorPeriod.month == init_period.month)
+        .where(IndicatorPeriod.day == init_period.day)
+        .where(IndicatorPeriod.hour == init_period.hour)
+    ).scalar_one_or_none()
+    assert dbPeriod
+    assert dbPeriod.year == expected_year
+    assert dbPeriod.month == expected_month
+    assert dbPeriod.day == expected_day
+    assert dbPeriod.hour == expected_hour
+    assert dbPeriod.weekday == expected_weekday

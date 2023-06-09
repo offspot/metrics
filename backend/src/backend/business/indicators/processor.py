@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.period import Period
 from backend.business.inputs.input import Input
-from backend.db import dbsession
 from backend.db.persister import Persister
 
 
@@ -27,7 +26,6 @@ class Processor:
         for indicator in self.indicators:
             indicator.reset_state()
 
-    @dbsession
     def process_tick(self, now: datetime, session: Session) -> None:
         """Process a clock tick"""
         Persister.persist_indicators(
