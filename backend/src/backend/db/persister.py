@@ -53,12 +53,10 @@ class Persister:
                 ).scalar_one_or_none()
 
                 if not dbDimension:
-                    # sa.literal is usefull only due to a SQLAlchemy/mypy issue
-                    # see https://github.com/sqlalchemy/sqlalchemy/issues/9919
                     dbDimension = DimensionDb(
-                        sa.literal(record.get_dimension_value(0)),
-                        sa.literal(record.get_dimension_value(1)),
-                        sa.literal(record.get_dimension_value(2)),
+                        record.get_dimension_value(0),
+                        record.get_dimension_value(1),
+                        record.get_dimension_value(2),
                     )
                     session.add(dbDimension)
 

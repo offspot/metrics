@@ -3,15 +3,17 @@ import os
 import pathlib
 import sys
 import tempfile
+from typing import List
 
 import tomllib
-from invoke import task
+from invoke.context import Context
+from invoke.tasks import task  # pyright: ignore[reportUnknownVariableType]
 
 deps_options = ("runtime", "test", "qa", "dev")
 
 
 @task
-def install_deps(c, package=deps_options[0], no_previous=False):
+def install_deps(c: Context, package: str = deps_options[0], no_previous: bool = False):
     """install dependencies for runtime (default) or extra packages
 
     packages:
@@ -25,7 +27,7 @@ def install_deps(c, package=deps_options[0], no_previous=False):
         )
         sys.exit(1)
 
-    packages = []
+    packages: List[str] = []
     with open("pyproject.toml", "rb") as f:
         manifest = tomllib.load(f)
     # include deps from required package and previous ones in list
@@ -45,18 +47,19 @@ def install_deps(c, package=deps_options[0], no_previous=False):
 
 
 @task
-def test(c, args="", path=""):
+def test(c: Context, args: str = "", path: str = ""):
     """execute pytest with coverage
 
     args: additional pytest args to pass. ex: -x -v
     path: sub-folder or test file to test to limit scope"""
     custom_db_url = os.getenv("TEST_DATABASE_URL")
+    db_path = None
     if not custom_db_url:
         db_path = pathlib.Path(
             tempfile.NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name
         )
-    with c.cd("src"):
-        if not custom_db_url:
+    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
+        if db_path:
             c.run(
                 "alembic upgrade head",
                 env={"DATABASE_URL": f"sqlite+pysqlite:////{db_path.resolve()}"},
@@ -69,20 +72,20 @@ def test(c, args="", path=""):
                 pty=True,
                 env={
                     "DATABASE_URL": custom_db_url
-                    if custom_db_url
+                    if not db_path
                     else f"sqlite+pysqlite:////{db_path.resolve()}"
                 },
             )
         finally:
-            if not custom_db_url and db_path.exists():
+            if not custom_db_url and db_path and db_path.exists():
                 db_path.unlink()
         c.run("coverage xml", pty=True)
 
 
 @task
-def serve(c, args=""):
+def serve(c: Context, args: str = ""):
     """run devel HTTP server locally. Use --args to specify additional uvicorn args"""
-    with c.cd("src"):
+    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
         c.run(
             f"{sys.executable} -m uvicorn backend.entrypoint:app --reload {args}",
             pty=True,
@@ -90,8 +93,8 @@ def serve(c, args=""):
 
 
 @task
-def alembic(c, args="", test_db=False):
-    with c.cd("src"):
+def alembic(c: Context, args: str = "", test_db: bool = False):
+    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
         c.run(
             f"{sys.executable} -m alembic {args}",
             env={
@@ -103,7 +106,7 @@ def alembic(c, args="", test_db=False):
 
 
 @task
-def db_upgrade(c, rev="head", test_db=False):
+def db_upgrade(c: Context, rev: str = "head", test_db: bool = False):
     c.run(
         f'invoke alembic --args "upgrade {rev}"',
         env={
@@ -115,28 +118,28 @@ def db_upgrade(c, rev="head", test_db=False):
 
 
 @task
-def db_downgrade(c, rev="-1"):
+def db_downgrade(c: Context, rev: str = "-1"):
     c.run(f'invoke alembic --args "downgrade {rev}"')
 
 
 @task
-def db_list(c):
+def db_list(c: Context):
     c.run('invoke alembic --args "history -i"')
 
 
 @task
-def db_gen(c):
-    with c.cd("src"):
+def db_gen(c: Context):
+    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
         res = c.run("alembic-autogen-check", env={"PYTHONPATH": "."}, warn=True)
     # only generate revision if we're out of sync with models
-    if res.exited > 0:
+    if res and res.exited > 0:
         c.run('invoke alembic --args "revision --autogenerate -m unnamed"')
 
 
 @task
-def db_init_no_migration(c):
+def db_init_no_migration(c: Context):
     """[dev] create database schema from models, without migration. expects empty DB"""
-    with c.cd("src"):
+    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
         c.run(
             f"{sys.executable} -c 'import sqlalchemy\n"
             "from backend.models import BaseMeta;\n"
@@ -147,7 +150,7 @@ def db_init_no_migration(c):
 
 
 @task
-def report_qa_tools_versions(c):
+def report_qa_tools_versions(c: Context):
     print("black:")
     black_res = c.run(f"{sys.executable} -m black --version", warn=True)
     print()
@@ -157,17 +160,26 @@ def report_qa_tools_versions(c):
     print("isort:")
     isort_res = c.run(f"{sys.executable} -m isort --version", warn=True)
     print()
-    print("mypy:")
-    mypy_res = c.run(f"{sys.executable} -m mypy --version", warn=True)
+    print("pyright:")
+    pyright_res = c.run(f"{sys.executable} -m pyright --version", warn=True)
     print()
 
-    if black_res.exited or flake8_res.exited or isort_res.exited or mypy_res.exited:
+    if (
+        not black_res
+        or black_res.exited
+        or not flake8_res
+        or flake8_res.exited
+        or not isort_res
+        or isort_res.exited
+        or not pyright_res
+        or pyright_res.exited
+    ):
         sys.exit(1)
 
 
 @task
-def check_qa(c):
-    with c.cd("src"):
+def check_qa(c: Context):
+    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
         print("black:")
         black_res = c.run(f"{sys.executable} -m black --check backend", warn=True)
         print()
@@ -183,12 +195,19 @@ def check_qa(c):
             f"{sys.executable} -m isort --profile black --check backend", warn=True
         )
         print()
-        if black_res.exited or flake8_res.exited or isort_res.exited:
+        if (
+            not black_res
+            or black_res.exited
+            or not flake8_res
+            or flake8_res.exited
+            or not isort_res
+            or isort_res.exited
+        ):
             sys.exit(1)
 
-    print("mypy:")
-    mypy_res = c.run(f"{sys.executable} -m mypy --strict src tests", warn=True)
-    print("")  # clearing mypy's output (missing CRLF)
+    print("pyright:")
+    pyright_res = c.run(f"{sys.executable} -m pyright", warn=True)
+    print("")  # clearing pyright's output (missing CRLF)
 
-    if mypy_res.exited:
+    if not pyright_res or pyright_res.exited:
         sys.exit(1)
