@@ -1,15 +1,19 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy import DateTime, ForeignKey, UniqueConstraint, select
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     MappedAsDataclass,
+    Session,
     mapped_column,
     relationship,
 )
 from sqlalchemy.sql.schema import MetaData
+
+from backend.business.indicators import DimensionsValues
+from backend.business.indicators.period import Period
 
 
 class Base(MappedAsDataclass, DeclarativeBase):
@@ -46,6 +50,41 @@ class IndicatorPeriod(Base):
     weekday: Mapped[int]
     hour: Mapped[int]
 
+    __table_args__ = (UniqueConstraint("year", "month", "day", "hour"),)
+
+    @classmethod
+    def from_datetime(cls, dt: datetime) -> "IndicatorPeriod":
+        return cls.from_period(Period(dt))
+
+    @classmethod
+    def from_period(cls, period: Period) -> "IndicatorPeriod":
+        return cls(
+            year=period.year,
+            month=period.month,
+            day=period.day,
+            weekday=period.weekday,
+            hour=period.hour,
+        )
+
+    @classmethod
+    def get_from_db_or_none(
+        cls, period: Period, session: Session
+    ) -> "IndicatorPeriod | None":
+        return session.execute(
+            select(IndicatorPeriod)
+            .where(IndicatorPeriod.year == period.year)
+            .where(IndicatorPeriod.month == period.month)
+            .where(IndicatorPeriod.day == period.day)
+            .where(IndicatorPeriod.hour == period.hour)
+        ).scalar_one_or_none()
+
+    def to_period(self) -> Period:
+        return Period(
+            datetime.fromisoformat(
+                f"{self.year:04}-{self.month:02}-{self.day:02} {self.hour:02}:00:00"
+            )
+        )
+
 
 class IndicatorDimension(Base):
     __tablename__ = "indicator_dimension"
@@ -54,6 +93,16 @@ class IndicatorDimension(Base):
     value0: Mapped[Optional[str]]
     value1: Mapped[Optional[str]]
     value2: Mapped[Optional[str]]
+
+    def to_values(self) -> DimensionsValues:
+        if self.value0 and self.value1 and self.value2:
+            return (self.value0, self.value1, self.value2)
+        elif self.value0 and self.value1:
+            return (self.value0, self.value1)
+        elif self.value0:
+            return (self.value0,)
+        else:
+            return tuple()
 
 
 class IndicatorRecord(Base):
@@ -73,3 +122,26 @@ class IndicatorRecord(Base):
     )
 
     dimension: Mapped["IndicatorDimension"] = relationship(init=False)
+
+    __table_args__ = (UniqueConstraint("indicator_id", "period_id", "dimension_id"),)
+
+
+class IndicatorState(Base):
+    __tablename__ = "indicator_state"
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    indicator_id: Mapped[int] = mapped_column(index=True)
+    state: Mapped[str]
+
+    period_id: Mapped[int] = mapped_column(
+        ForeignKey("indicator_period.id"), init=False
+    )
+
+    period: Mapped["IndicatorPeriod"] = relationship(init=False)
+
+    dimension_id: Mapped[int] = mapped_column(
+        ForeignKey("indicator_dimension.id"), init=False
+    )
+
+    dimension: Mapped["IndicatorDimension"] = relationship(init=False)
+
+    __table_args__ = (UniqueConstraint("indicator_id", "period_id", "dimension_id"),)

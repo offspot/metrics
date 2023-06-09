@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import pytest
-import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from backend.business.indicators.processor import Processor
@@ -31,16 +30,14 @@ def test_periods(
 ) -> None:
     processor = Processor(datetime.fromisoformat(init_iso_datetime))
     init_period = processor.current_period
-    processor.process_tick(datetime.fromisoformat(next_iso_datetime), dbsession)
+    processor.process_tick(
+        datetime.fromisoformat(next_iso_datetime),
+        dbsession,
+        force_period_persistence=True,
+    )
     next_period = processor.current_period
     assert (init_period != next_period) == has_changed
-    dbPeriod = dbsession.execute(
-        sa.select(IndicatorPeriod)
-        .where(IndicatorPeriod.year == init_period.year)
-        .where(IndicatorPeriod.month == init_period.month)
-        .where(IndicatorPeriod.day == init_period.day)
-        .where(IndicatorPeriod.hour == init_period.hour)
-    ).scalar_one_or_none()
+    dbPeriod = IndicatorPeriod.get_from_db_or_none(init_period, dbsession)
     assert dbPeriod
     assert dbPeriod.year == expected_year
     assert dbPeriod.month == expected_month

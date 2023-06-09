@@ -119,15 +119,5 @@ def init_datetime() -> DatetimeGenerator:
 
 
 @pytest.fixture()
-def next_datetime_same_hour() -> DatetimeGenerator:
-    yield datetime.fromisoformat("2023-06-08 10:58:00")
-
-
-@pytest.fixture()
-def next_datetime_next_hour() -> DatetimeGenerator:
-    yield datetime.fromisoformat("2023-06-08 11:08:00")
-
-
-@pytest.fixture()
 def processor(init_datetime: datetime) -> ProcessorGenerator:
     yield Processor(init_datetime)

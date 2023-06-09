@@ -4,11 +4,17 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
+from backend.business.indicators.period import Period
 from backend.business.indicators.processor import Processor
 from backend.business.indicators.record import Record
 from backend.business.inputs.input import Input
 from backend.db import count_from_stmt
-from backend.db.models import IndicatorDimension, IndicatorPeriod, IndicatorRecord
+from backend.db.models import (
+    IndicatorDimension,
+    IndicatorPeriod,
+    IndicatorRecord,
+    IndicatorState,
+)
 
 
 def test_no_input(processor: Processor, total_indicator: Indicator) -> None:
@@ -103,22 +109,129 @@ def test_process_tick(
     input3: Input,
     another_input: Input,
     total_by_content_and_subfolder_indicator: Indicator,
-    next_datetime_next_hour: datetime,
+    init_datetime: datetime,
     dbsession: Session,
 ) -> None:
     processor.indicators = [total_by_content_and_subfolder_indicator]
+    processor.process_tick(init_datetime, dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 0
     processor.process_input(input1)
     processor.process_input(input1)
     processor.process_input(input2)
     processor.process_input(another_input)
     processor.process_input(input3)
-    processor.process_tick(next_datetime_next_hour, dbsession)
+    processor.process_tick(init_datetime + timedelta(minutes=1), dbsession)
+    # double tick to check that this is idempotent
+    processor.process_tick(init_datetime + timedelta(minutes=2), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+    processor.process_tick(init_datetime + timedelta(hours=1), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
     assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
     assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
     processor.process_input(input1)
     processor.process_input(input2)
-    processor.process_tick(next_datetime_next_hour + timedelta(hours=1), dbsession)
+    processor.process_tick(init_datetime + timedelta(hours=1, minutes=1), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 2
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2
+    processor.process_tick(init_datetime + timedelta(hours=2), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
     assert count_from_stmt(dbsession, select(IndicatorRecord)) == 5
     assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2
+
+
+def test_restore_from_db_current_period(
+    processor: Processor,
+    dbsession: Session,
+) -> None:
+    init_dt = "2020-06-01 13:00:00"
+    processor.restore_from_db(datetime.fromisoformat(init_dt), dbsession)
+    assert processor.current_period == Period(datetime.fromisoformat(init_dt))
+    datas = [
+        # indicator period in DB, now datetime       , expected current datetime
+        ("2021-06-01 13:00:00", "2021-06-01 13:10:00", "2021-06-01 13:00:00"),
+        ("2021-06-01 14:00:00", "2021-06-01 14:10:00", "2021-06-01 14:00:00"),
+        ("2021-06-02 13:00:00", "2021-06-02 13:10:00", "2021-06-02 13:00:00"),
+        ("2021-07-01 13:00:00", "2021-07-01 13:10:00", "2021-07-01 13:00:00"),
+        ("2022-06-01 13:00:00", "2022-06-01 13:10:00", "2022-06-01 13:00:00"),
+        ("2023-06-01 13:00:00", "2023-06-01 14:10:00", "2023-06-01 14:00:00"),
+    ]
+    for data in datas:
+        dbsession.add(IndicatorPeriod.from_datetime(datetime.fromisoformat(data[0])))
+        processor.restore_from_db(datetime.fromisoformat(data[1]), dbsession)
+        assert processor.current_period == Period(datetime.fromisoformat(data[2]))
+
+
+def test_restore_from_db_continue_same_period(
+    processor: Processor,
+    total_by_content_and_subfolder_indicator: Indicator,
+    input1: Input,
+    input2: Input,
+    input3: Input,
+    init_datetime: datetime,
+    dbsession: Session,
+) -> None:
+    processor.indicators = [total_by_content_and_subfolder_indicator]
+    processor.current_period
+    processor.process_input(input1)
+    processor.process_input(input1)
+    processor.process_input(input2)
+    processor.process_input(input3)
+
+    processor.process_tick(init_datetime + timedelta(minutes=10), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+    processor.restore_from_db(init_datetime + timedelta(minutes=12), dbsession)
+    assert len(total_by_content_and_subfolder_indicator.recorders) == 3
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+    processor.process_tick(init_datetime + timedelta(hours=1), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+
+def test_restore_from_db_start_new_period(
+    processor: Processor,
+    total_by_content_and_subfolder_indicator: Indicator,
+    input1: Input,
+    input2: Input,
+    input3: Input,
+    init_datetime: datetime,
+    dbsession: Session,
+) -> None:
+    processor.indicators = [total_by_content_and_subfolder_indicator]
+    processor.current_period
+    processor.process_input(input1)
+    processor.process_input(input1)
+    processor.process_input(input2)
+    processor.process_input(input3)
+
+    processor.process_tick(init_datetime + timedelta(minutes=10), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+    processor.restore_from_db(init_datetime + timedelta(days=1), dbsession)
+    assert len(total_by_content_and_subfolder_indicator.recorders) == 0
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1

@@ -2,7 +2,7 @@ import abc
 from typing import Dict, Generator
 
 from backend.business.indicators import DimensionsValues
-from backend.business.indicators.record import Record
+from backend.business.indicators.record import Record, State
 from backend.business.indicators.recorder import Recorder
 from backend.business.inputs.input import Input
 
@@ -49,8 +49,14 @@ class Indicator(abc.ABC):
         matching, or creates a new recorder with appropriate dimension values"""
         dimensions_values = self.get_dimensions_values(input)
         if dimensions_values not in self.recorders:
-            self.recorders[dimensions_values] = self.create_new_recorder()
+            self.add_recorder(dimensions_values, self.create_new_recorder())
         return self.recorders[dimensions_values]
+
+    def add_recorder(
+        self, dimensions_values: DimensionsValues, recorder: Recorder
+    ) -> None:
+        """Add a recorder for given dimension values"""
+        self.recorders[dimensions_values] = recorder
 
     def reset_state(self) -> None:
         """Reset the list of recorders.
@@ -62,8 +68,17 @@ class Indicator(abc.ABC):
         self,
     ) -> Generator[Record, None, None]:
         """Return all records (values with associated dimensions)."""
-        for dimensions_values, record in self.recorders.items():
-            yield Record(value=record.get_value(), dimensions=dimensions_values)
+        for dimensions_values, recorder in self.recorders.items():
+            yield Record(value=recorder.get_value(), dimensions=dimensions_values)
+
+    def get_states(
+        self,
+    ) -> Generator[State, None, None]:
+        """Return all states
+
+        (internal state representation for each associated dimensions)."""
+        for dimensions_values, recorder in self.recorders.items():
+            yield State(value=recorder.get_state(), dimensions=dimensions_values)
 
     def process_input(self, input: Input) -> None:
         """Process a given input event
