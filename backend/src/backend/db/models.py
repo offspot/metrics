@@ -13,7 +13,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.sql.schema import MetaData
 
 from backend.business.indicators import DimensionsValues
-from backend.business.indicators.period import Period
+from backend.business.period import Period
 
 
 class Base(MappedAsDataclass, DeclarativeBase):

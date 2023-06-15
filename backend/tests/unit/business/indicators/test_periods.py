@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from backend.business.indicators.processor import Processor
+from backend.business.period import Period
 from backend.db.models import IndicatorPeriod
 
 
@@ -31,7 +32,7 @@ def test_periods(
     processor = Processor(datetime.fromisoformat(init_iso_datetime))
     init_period = processor.current_period
     processor.process_tick(
-        datetime.fromisoformat(next_iso_datetime),
+        Period(datetime.fromisoformat(next_iso_datetime)),
         dbsession,
         force_period_persistence=True,
     )

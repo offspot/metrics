@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
-from backend.business.indicators.period import Period as PeriodBiz
+from backend.business.period import Period as PeriodBiz
 from backend.db.models import IndicatorDimension as DimensionDb
 from backend.db.models import IndicatorPeriod as PeriodDb
 from backend.db.models import IndicatorRecord as RecordDb

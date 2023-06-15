@@ -4,8 +4,8 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
-from backend.business.indicators.period import Period
 from backend.business.inputs.input import Input
+from backend.business.period import Period
 from backend.db.persister import Persister
 
 
@@ -33,17 +33,15 @@ class Processor:
         return False
 
     def process_tick(
-        self, now: datetime, session: Session, force_period_persistence: bool = False
+        self, now: Period, session: Session, force_period_persistence: bool = False
     ) -> None:
         """Process a clock tick"""
-
-        now_period = Period(now)
 
         # check if something has happened, otherwise we do nothing except update the
         # current period, no need to persist something if nothing happened
         if not force_period_persistence and not self.process_tick_has_something_to_do():
-            if self.current_period != now_period:
-                self.current_period = now_period
+            if self.current_period != now:
+                self.current_period = now
             return
 
         # persist the current period in DB
@@ -58,7 +56,7 @@ class Processor:
         Persister.clear_indicator_states(session)
 
         # check if we are still in the same period or not
-        if self.current_period == now_period:
+        if self.current_period == now:
             # if we are in the same period, simply persist new states
             Persister.persist_indicator_states(
                 period=dbPeriod, indicators=self.indicators, session=session
@@ -69,9 +67,9 @@ class Processor:
                 period=dbPeriod, indicators=self.indicators, session=session
             )
             self.reset_state()
-            self.current_period = now_period
+            self.current_period = now
 
-    def restore_from_db(self, now: datetime, session: Session) -> None:
+    def restore_from_db(self, now: Period, session: Session) -> None:
         """Restore data from database, typically after a process restart"""
 
         # reset all internal states, just in case
@@ -82,7 +80,7 @@ class Processor:
 
         # if there is no last period, nothing to do except set current period
         if not lastPeriod:
-            self.current_period = Period(now)
+            self.current_period = now
             return
 
         # set current period as the last one and restore state from DB
