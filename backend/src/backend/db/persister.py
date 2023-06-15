@@ -4,11 +4,13 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
+from backend.business.kpis.value import Value as KpiValueBiz
 from backend.business.period import Period as PeriodBiz
 from backend.db.models import IndicatorDimension as DimensionDb
 from backend.db.models import IndicatorPeriod as PeriodDb
 from backend.db.models import IndicatorRecord as RecordDb
 from backend.db.models import IndicatorState as StateDb
+from backend.db.models import KpiValue as KpiValueDb
 
 
 class TooManyDimensions(Exception):
@@ -92,7 +94,7 @@ class Persister:
                 session.add(dbState)
 
     @classmethod
-    def get_last_current_period(cls, session: Session) -> Optional[PeriodDb]:
+    def get_last_current_period(cls, session: Session) -> Optional[PeriodBiz]:
         dbPeriod = session.execute(
             sa.select(PeriodDb)
             .order_by(PeriodDb.year.desc())
@@ -101,15 +103,66 @@ class Persister:
             .order_by(PeriodDb.hour.desc())
             .limit(1)
         ).scalar_one_or_none()
-        return dbPeriod
+        if not dbPeriod:
+            return None
+        return dbPeriod.to_period()
 
     @classmethod
     def get_restore_data(
-        cls, period: PeriodDb, indicator_id: int, session: Session
+        cls, period: PeriodBiz, indicator_id: int, session: Session
     ) -> List[StateDb]:
-        dbPeriod = session.execute(
-            sa.select(StateDb)
-            .where(StateDb.indicator_id == indicator_id)
-            .where(StateDb.period_id == period.id)
-        ).scalars()
-        return list(dbPeriod)
+        return list(
+            session.execute(
+                sa.select(StateDb)
+                .where(StateDb.indicator_id == indicator_id)
+                .join(PeriodDb)
+                .where(PeriodDb.year == period.year)
+                .where(PeriodDb.month == period.month)
+                .where(PeriodDb.day == period.day)
+                .where(PeriodDb.hour == period.hour)
+            ).scalars()
+        )
+
+    @classmethod
+    def get_kpi_values(
+        cls, kpi_id: int, kind: str, session: Session
+    ) -> List[KpiValueBiz]:
+        return [
+            KpiValueBiz(period=dbValue.period, value=dbValue.value)
+            for dbValue in list(
+                session.execute(
+                    sa.select(KpiValueDb)
+                    .where(KpiValueDb.kpi_id == kpi_id)
+                    .where(KpiValueDb.kind == kind)
+                ).scalars()
+            )
+        ]
+
+    @classmethod
+    def delete_kpi_value(
+        cls, kpi_id: int, kind: str, period: str, session: Session
+    ) -> None:
+        session.execute(
+            sa.delete(KpiValueDb)
+            .where(KpiValueDb.kpi_id == kpi_id)
+            .where(KpiValueDb.kind == kind)
+            .where(KpiValueDb.period == period)
+        )
+
+    @classmethod
+    def update_kpi_value(
+        cls, kpi_id: int, kind: str, period: str, value: str, session: Session
+    ) -> None:
+        obj = session.execute(
+            sa.select(KpiValueDb)
+            .where(KpiValueDb.kpi_id == kpi_id)
+            .where(KpiValueDb.kind == kind)
+            .where(KpiValueDb.period == period)
+        ).scalar_one()
+        obj.value = value
+
+    @classmethod
+    def add_kpi_value(
+        cls, kpi_id: int, kind: str, period: str, value: str, session: Session
+    ) -> None:
+        session.add(KpiValueDb(kpi_id=kpi_id, kind=kind, period=period, value=value))

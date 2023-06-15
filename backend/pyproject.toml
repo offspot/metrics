@@ -9,7 +9,8 @@ runtime = [
     "alembic>=1.11,<1.12",
     "SQLAlchemy>=2.0,<2.1",
     "marshmallow-sqlalchemy>=0.29,<0.30",
-    "fastapi-pagination>=0.12,<0.13"
+    "fastapi-pagination>=0.12,<0.13",
+    "python-dateutil>=2.8,<2.9"
 ]
 test = [
     "pytest >=7.3,<7.4",

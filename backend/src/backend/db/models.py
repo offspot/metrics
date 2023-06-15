@@ -145,3 +145,14 @@ class IndicatorState(Base):
     dimension: Mapped["IndicatorDimension"] = relationship(init=False)
 
     __table_args__ = (UniqueConstraint("indicator_id", "period_id", "dimension_id"),)
+
+
+class KpiValue(Base):
+    __tablename__ = "kpi"
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    kpi_id: Mapped[int] = mapped_column(index=True)
+    kind: Mapped[str]
+    period: Mapped[str]
+    value: Mapped[str]
+
+    __table_args__ = (UniqueConstraint("kpi_id", "period"),)

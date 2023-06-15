@@ -84,7 +84,7 @@ class Processor:
             return
 
         # set current period as the last one and restore state from DB
-        self.current_period = lastPeriod.to_period()
+        self.current_period = lastPeriod
         for indicator in self.indicators:
             states = Persister.get_restore_data(
                 lastPeriod, indicator.unique_id, session
