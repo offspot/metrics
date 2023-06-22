@@ -105,6 +105,7 @@ class Processor:
                     kind=kind,
                     start_ts=timestamps.start,
                     stop_ts=timestamps.stop,
+                    session=session,
                 )
                 Persister.update_kpi_value(
                     kpi_id=kpi.unique_id,
@@ -121,6 +122,7 @@ class Processor:
                     kind=kind,
                     start_ts=timestamps.start,
                     stop_ts=timestamps.stop,
+                    session=session,
                 ),
             )
             Persister.add_kpi_value(

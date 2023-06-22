@@ -69,6 +69,8 @@ class Processor:
             self.reset_state()
             self.current_period = now
 
+        # TODO : purge indicators older than 1 year (!!! only after KPI computation !!!)
+
     def restore_from_db(self, now: Period, session: Session) -> None:
         """Restore data from database, typically after a process restart"""
 

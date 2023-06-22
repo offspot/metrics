@@ -49,6 +49,7 @@ class IndicatorPeriod(Base):
     day: Mapped[int]
     weekday: Mapped[int]
     hour: Mapped[int]
+    timestamp: Mapped[int]
 
     __table_args__ = (UniqueConstraint("year", "month", "day", "hour"),)
 
@@ -64,6 +65,7 @@ class IndicatorPeriod(Base):
             day=period.day,
             weekday=period.weekday,
             hour=period.hour,
+            timestamp=int(period.get_datetime().timestamp()),
         )
 
     @classmethod
