@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 import sqlalchemy as sa
+from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
 
 from backend.business.indicators.indicator import Indicator
@@ -166,3 +167,36 @@ class Persister:
         cls, kpi_id: int, kind: str, period: str, value: str, session: Session
     ) -> None:
         session.add(KpiValueDb(kpi_id=kpi_id, kind=kind, period=period, value=value))
+
+    @classmethod
+    def cleanup_old_stuff(cls, now: PeriodBiz, session: Session) -> None:
+        min_ts = (now.get_datetime() - relativedelta(years=1)).timestamp()
+
+        # delete records associated with old periods
+        session.execute(
+            sa.delete(RecordDb).where(
+                RecordDb.period_id.in_(
+                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < min_ts)
+                )
+            )
+        )
+
+        # just in case, delete old states associated with old periods (should never
+        # be needed, but will avoid DB integrity errors)
+        session.execute(
+            sa.delete(StateDb).where(
+                StateDb.period_id.in_(
+                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < min_ts)
+                )
+            )
+        )
+
+        # delete old periods
+        session.execute(sa.delete(PeriodDb).where(PeriodDb.timestamp < min_ts))
+
+        # delete indicator dimensions that are not used anymore
+        session.execute(
+            sa.delete(DimensionDb).where(
+                DimensionDb.id.not_in(sa.select(RecordDb.dimension_id).distinct())
+            )
+        )

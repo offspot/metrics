@@ -1,6 +1,6 @@
 from typing import Any, Callable
 
-from sqlalchemy import SelectBase, create_engine, func, select
+from sqlalchemy import SelectBase, create_engine, func, select, text
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 
@@ -19,6 +19,7 @@ def dbsession(func: Callable[..., Any]) -> Callable[..., Any]:
 
     def inner(*args: Any, **kwargs: Any) -> Any:
         with Session.begin() as session:
+            session.execute(text("PRAGMA foreign_keys = ON"))
             kwargs["session"] = session
             return func(*args, **kwargs)
 

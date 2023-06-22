@@ -69,8 +69,8 @@ class Processor:
             self.current_period = now
 
     def process_tick_after(self, now: Period, session: Session):
-        # TODO : purge indicators older than 1 year (!!! only after KPI computation !!!)
-        ...
+        """Process a clock tick - cleanup after KPIs have been computed"""
+        Persister.cleanup_old_stuff(now, session)
 
     def restore_from_db(self, now: Period, session: Session) -> None:
         """Restore data from database, typically after a process restart"""

@@ -37,7 +37,9 @@ class ContentPopularity(Kpi):
             .group_by("content")
         ).subquery("content_with_count")
 
-        query = select(subquery.c.content).order_by(desc(subquery.c.count))
+        query = select(subquery.c.content).order_by(
+            desc(subquery.c.count), subquery.c.content
+        )
 
         return dumps(list(session.execute(query).scalars()))
 
@@ -73,8 +75,18 @@ class ContentObjectPopularity(Kpi):
 
         query = (
             select(subquery.c.content, subquery.c.object)
-            .order_by(desc(subquery.c.count))
+            .order_by(desc(subquery.c.count), subquery.c.content, subquery.c.object)
             .limit(50)
         )
 
-        return dumps(list(session.execute(query).scalars()))
+        return dumps(
+            list(
+                map(
+                    lambda x: {
+                        "content": x.content,
+                        "object": x.object,
+                    },
+                    session.execute(query),
+                )
+            )
+        )

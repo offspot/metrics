@@ -25,12 +25,14 @@ class Processor:
         self.current_period = now
         self.current_day = now.get_truncated_value("D")
 
-    def process_tick(self, now: Period, session: Session) -> None:
-        """Process a clock tick"""
+    def process_tick(self, now: Period, session: Session) -> bool:
+        """Process a clock tick
+
+        Returns True if KPIs have been updated"""
 
         # if we are in the same period, nothing to do
         if self.current_period == now:
-            return
+            return False
 
         period_to_compute = self.current_period
         self.current_period = now
@@ -51,6 +53,8 @@ class Processor:
                     now=period_to_compute, kpi=kpi, kind="Y", session=session
                 )
             self.current_day = now_day
+
+        return True
 
     @classmethod
     def get_periods_to_keep(cls, kind: str, now: Period) -> List[str] | None:
@@ -177,8 +181,6 @@ class Processor:
 
         # create/update KPIs values for all aggregation period
         # which are updated once per hour
-        print(self.current_period)
-        print(lastPeriod)
         if lastPeriod != self.current_period:
             for kpi in self.kpis:
                 for kind in ["D", "W", "M"]:

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from ..db import dbsession
 from .indicators.content_visit import ContentHomeVisit, ContentObjectVisit
 from .indicators.processor import Processor as IndicatorProcessor
+from .inputs.input import Input
 from .kpis.content_popularity import ContentObjectPopularity, ContentPopularity
 from .kpis.processor import Processor as KpiProcessor
 from .period import Period
@@ -34,11 +35,16 @@ class Processor:
             now=now,
             session=session,
         )
-        self.kpi_processor.process_tick(
+        kpi_updated = self.kpi_processor.process_tick(
             now=now,
             session=session,
         )
-        self.indicator_processor.process_tick_after(
-            now=now,
-            session=session,
-        )
+        if kpi_updated:
+            self.indicator_processor.process_tick_after(
+                now=now,
+                session=session,
+            )
+
+    def process_input(self, input: Input):
+        """Process one input"""
+        self.indicator_processor.process_input(input)
