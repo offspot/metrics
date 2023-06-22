@@ -12,6 +12,21 @@ from backend.db import count_from_stmt
 from backend.db.models import IndicatorPeriod as PeriodDb
 from backend.db.models import KpiValue
 
+init_datetime_day_dummyvalue = "D - 1686182400 - 1686268800"
+init_datetime_day_minus_one_dummyvalue = "D - 1686096000 - 1686182400"
+init_datetime_day_plus_one_dummyvalue = "D - 1686268800 - 1686355200"
+init_datetime_day_plus_two_dummyvalue = "D - 1686355200 - 1686441600"
+init_datetime_day_plus_three_dummyvalue = "D - 1686787200 - 1686873600"
+init_datetime_week_dummyvalue = "W - 1685923200 - 1686528000"
+init_datetime_week_plus_one_dummyvalue = "W - 1686528000 - 1687132800"
+init_datetime_month_dummyvalue = "M - 1685577600 - 1688169600"
+init_datetime_year_dummyvalue = "Y - 1672531200 - 1704067200"
+
+previous_datetime_day_dummyvalue = "D - 1672704000 - 1672790400"
+previous_datetime_week_dummyvalue = "W - 1672617600 - 1673222400"
+previous_datetime_month_dummyvalue = "M - 1672531200 - 1675209600"
+previous_datetime_year_dummyvalue = "Y - 1672531200 - 1704067200"
+
 
 @pytest.mark.parametrize(
     "agg_kind, now, expected_start_ts, expected_end_ts",
@@ -101,9 +116,9 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686182400 - 1686268800",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
+            init_datetime_day_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
         ]
     )
     processor.process_tick(
@@ -114,9 +129,9 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686182400 - 1686268800",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
+            init_datetime_day_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
         ]
     )
     processor.process_tick(
@@ -127,10 +142,10 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686182400 - 1686268800",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
-            "Y - 1672531200 - 1704067200",
+            init_datetime_day_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
+            init_datetime_year_dummyvalue,
         ]
     )
     processor.process_tick(
@@ -142,11 +157,11 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686182400 - 1686268800",
-            "D - 1686268800 - 1686355200",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
-            "Y - 1672531200 - 1704067200",
+            init_datetime_day_dummyvalue,
+            init_datetime_day_plus_one_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
+            init_datetime_year_dummyvalue,
         ]
     )
     processor.process_tick(
@@ -157,11 +172,11 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686182400 - 1686268800",
-            "D - 1686268800 - 1686355200",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
-            "Y - 1672531200 - 1704067200",
+            init_datetime_day_dummyvalue,
+            init_datetime_day_plus_one_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
+            init_datetime_year_dummyvalue,
         ]
     )
     processor.process_tick(
@@ -173,12 +188,12 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686182400 - 1686268800",
-            "D - 1686268800 - 1686355200",
-            "D - 1686355200 - 1686441600",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
-            "Y - 1672531200 - 1704067200",
+            init_datetime_day_dummyvalue,
+            init_datetime_day_plus_one_dummyvalue,
+            init_datetime_day_plus_two_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
+            init_datetime_year_dummyvalue,
         ]
     )
     processor.process_tick(
@@ -189,12 +204,12 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686182400 - 1686268800",
-            "D - 1686268800 - 1686355200",
-            "D - 1686355200 - 1686441600",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
-            "Y - 1672531200 - 1704067200",
+            init_datetime_day_dummyvalue,
+            init_datetime_day_plus_one_dummyvalue,
+            init_datetime_day_plus_two_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
+            init_datetime_year_dummyvalue,
         ]
     )
     processor.process_tick(
@@ -206,13 +221,13 @@ def test_process_tick(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686268800 - 1686355200",
-            "D - 1686355200 - 1686441600",
-            "D - 1686787200 - 1686873600",
-            "W - 1685923200 - 1686528000",
-            "W - 1686528000 - 1687132800",
-            "M - 1685577600 - 1688169600",
-            "Y - 1672531200 - 1704067200",
+            init_datetime_day_plus_one_dummyvalue,
+            init_datetime_day_plus_two_dummyvalue,
+            init_datetime_day_plus_three_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_week_plus_one_dummyvalue,
+            init_datetime_month_dummyvalue,
+            init_datetime_year_dummyvalue,
         ]
     )
 
@@ -241,16 +256,19 @@ def test_restore_kpis_from_almost_empty_db(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1686096000 - 1686182400",
-            "W - 1685923200 - 1686528000",
-            "M - 1685577600 - 1688169600",
-            "Y - 1672531200 - 1704067200",
+            init_datetime_day_minus_one_dummyvalue,
+            init_datetime_week_dummyvalue,
+            init_datetime_month_dummyvalue,
+            init_datetime_year_dummyvalue,
         ]
     )
 
 
 def test_restore_kpis_from_filled_db(
-    processor: Processor, dummy_kpi: Kpi, init_datetime: datetime, dbsession: Session
+    processor: Processor,
+    dummy_kpi: Kpi,
+    previous_datetime: datetime,
+    dbsession: Session,
 ) -> None:
     processor.kpis = [dummy_kpi]
     dbsession.execute(delete(KpiValue))
@@ -290,7 +308,7 @@ def test_restore_kpis_from_filled_db(
         )
     )
 
-    dbsession.add(PeriodDb.from_datetime(datetime.fromisoformat("2023-01-03 10:58:00")))
+    dbsession.add(PeriodDb.from_datetime(previous_datetime))
 
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
@@ -298,9 +316,9 @@ def test_restore_kpis_from_filled_db(
         list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
     ) == sorted(
         [
-            "D - 1672704000 - 1672790400",
-            "W - 1672617600 - 1673222400",
-            "M - 1672531200 - 1675209600",
-            "Y - 1672531200 - 1704067200",
+            previous_datetime_day_dummyvalue,
+            previous_datetime_week_dummyvalue,
+            previous_datetime_month_dummyvalue,
+            previous_datetime_year_dummyvalue,
         ]
     )
