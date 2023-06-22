@@ -11,7 +11,7 @@ invoke install-deps --package dev db-upgrade serve
 
 ### Constants
 
-- Database is configured through `$DATABASE_URL` with fallback to `sqlite+aiosqlite:///dev.db`
+- Database is configured through `$DATABASE_URL` with fallback to `sqlite+pysqlite:///dev.db`
 
 See `constants.py`
 
