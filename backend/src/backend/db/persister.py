@@ -23,10 +23,12 @@ class TooManyDimensions(Exception):
 class Persister:
     @classmethod
     def clear_indicator_states(cls, session: Session) -> None:
+        """Delete all indicator states stored in DB"""
         session.execute(sa.delete(StateDb))
 
     @classmethod
     def persist_period(cls, period: PeriodBiz, session: Session) -> PeriodDb:
+        """Store one period in DB in DB if not already present"""
         dbPeriod = PeriodDb.get_from_db_or_none(period, session)
 
         if not dbPeriod:
@@ -39,6 +41,7 @@ class Persister:
     def persist_indicator_dimensions(
         cls, indicators: List[Indicator], session: Session
     ) -> None:
+        """Store all dimensions of all indicators in DB if not already present"""
         for indicator in indicators:
             for record in indicator.get_records():
                 nb_dimensions = len(record.dimensions)
@@ -64,6 +67,7 @@ class Persister:
     def persist_indicator_records(
         cls, period: PeriodDb, indicators: List[Indicator], session: Session
     ) -> None:
+        """Store all indicator records in DB"""
         for indicator in indicators:
             for record in indicator.get_records():
                 dbDimension = session.execute(
@@ -81,6 +85,7 @@ class Persister:
     def persist_indicator_states(
         cls, period: PeriodDb, indicators: List[Indicator], session: Session
     ) -> None:
+        """Store all indicators temporary state in DB"""
         for indicator in indicators:
             for state in indicator.get_states():
                 dbDimension = session.execute(
@@ -96,6 +101,7 @@ class Persister:
 
     @classmethod
     def get_last_current_period(cls, session: Session) -> Optional[PeriodBiz]:
+        """Return the last period stored in DB"""
         dbPeriod = session.execute(
             sa.select(PeriodDb)
             .order_by(PeriodDb.year.desc())
@@ -112,6 +118,7 @@ class Persister:
     def get_restore_data(
         cls, period: PeriodBiz, indicator_id: int, session: Session
     ) -> List[StateDb]:
+        """Return all state data to restore from DB to memory"""
         return list(
             session.execute(
                 sa.select(StateDb)
@@ -126,50 +133,76 @@ class Persister:
 
     @classmethod
     def get_kpi_values(
-        cls, kpi_id: int, kind: str, session: Session
+        cls, kpi_id: int, agg_kind: str, session: Session
     ) -> List[KpiValueBiz]:
+        """Return all KPI values for a given KPI and a given kind of period"""
         return [
-            KpiValueBiz(period=dbValue.period, value=dbValue.value)
+            KpiValueBiz(agg_value=dbValue.agg_value, kpi_value=dbValue.kpi_value)
             for dbValue in list(
                 session.execute(
                     sa.select(KpiValueDb)
                     .where(KpiValueDb.kpi_id == kpi_id)
-                    .where(KpiValueDb.kind == kind)
+                    .where(KpiValueDb.agg_kind == agg_kind)
                 ).scalars()
             )
         ]
 
     @classmethod
     def delete_kpi_value(
-        cls, kpi_id: int, kind: str, period: str, session: Session
+        cls, kpi_id: int, agg_kind: str, agg_value: str, session: Session
     ) -> None:
+        """Delete a KPI value for a given KPI, kind of period and period"""
         session.execute(
             sa.delete(KpiValueDb)
             .where(KpiValueDb.kpi_id == kpi_id)
-            .where(KpiValueDb.kind == kind)
-            .where(KpiValueDb.period == period)
+            .where(KpiValueDb.agg_kind == agg_kind)
+            .where(KpiValueDb.agg_value == agg_value)
         )
 
     @classmethod
     def update_kpi_value(
-        cls, kpi_id: int, kind: str, period: str, value: str, session: Session
+        cls,
+        kpi_id: int,
+        agg_kind: str,
+        agg_value: str,
+        kpi_value: str,
+        session: Session,
     ) -> None:
+        """Update a KPI value for a given KPI, kind of period and period"""
         obj = session.execute(
             sa.select(KpiValueDb)
             .where(KpiValueDb.kpi_id == kpi_id)
-            .where(KpiValueDb.kind == kind)
-            .where(KpiValueDb.period == period)
+            .where(KpiValueDb.agg_kind == agg_kind)
+            .where(KpiValueDb.agg_value == agg_value)
         ).scalar_one()
-        obj.value = value
+        obj.kpi_value = kpi_value
 
     @classmethod
     def add_kpi_value(
-        cls, kpi_id: int, kind: str, period: str, value: str, session: Session
+        cls,
+        kpi_id: int,
+        agg_kind: str,
+        agg_value: str,
+        kpi_value: str,
+        session: Session,
     ) -> None:
-        session.add(KpiValueDb(kpi_id=kpi_id, kind=kind, period=period, value=value))
+        """Add a KPI value for a given KPI, kind of period and period"""
+        session.add(
+            KpiValueDb(
+                kpi_id=kpi_id,
+                agg_kind=agg_kind,
+                agg_value=agg_value,
+                kpi_value=kpi_value,
+            )
+        )
 
     @classmethod
     def cleanup_old_stuff(cls, now: PeriodBiz, session: Session) -> None:
+        """Delete old stuff from DB
+
+        For now, olf stuff is indicators older than 1 year and associated data
+        """
+
         min_ts = (now.get_datetime() - relativedelta(years=1)).timestamp()
 
         # delete records associated with old periods

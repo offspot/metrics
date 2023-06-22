@@ -29,13 +29,13 @@ class Period:
     def get_shifted(self, delta: relativedelta) -> "Period":
         return Period(self.get_datetime() + delta)
 
-    def get_truncated_value(self, kind: str) -> str:
-        if kind == "D":
+    def get_truncated_value(self, agg_kind: str) -> str:
+        if agg_kind == "D":
             return f"{self.year:04}-{self.month:02}-{self.day:02}"
-        if kind == "W":
+        if agg_kind == "W":
             return f"{self.year:04} W{self.week:02}"
-        if kind == "M":
+        if agg_kind == "M":
             return f"{self.year:04}-{self.month:02}"
-        if kind == "Y":
+        if agg_kind == "Y":
             return f"{self.year:04}"
         raise AttributeError

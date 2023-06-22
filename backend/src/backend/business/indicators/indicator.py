@@ -2,7 +2,7 @@ import abc
 from typing import Dict, Generator
 
 from backend.business.indicators import DimensionsValues
-from backend.business.indicators.record import Record, State
+from backend.business.indicators.holder import Record, State
 from backend.business.indicators.recorder import Recorder
 from backend.business.inputs.input import Input
 

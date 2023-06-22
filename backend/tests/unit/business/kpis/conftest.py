@@ -24,11 +24,11 @@ class DummyKpi(Kpi):
     unique_id = -1  # this ID is unique to each kind of kpi
 
     def get_value(
-        self, kind: str, start_ts: int, stop_ts: int, session: Session
+        self, agg_kind: str, start_ts: int, stop_ts: int, session: Session
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
-        return f"{kind} - {start_ts} - {stop_ts}"
+        return f"{agg_kind} - {start_ts} - {stop_ts}"
 
 
 @pytest.fixture()

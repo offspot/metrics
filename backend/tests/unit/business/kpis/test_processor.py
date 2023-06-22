@@ -14,7 +14,7 @@ from backend.db.models import KpiValue
 
 
 @pytest.mark.parametrize(
-    "kind, now, expected_start_ts, expected_end_ts",
+    "agg_kind, now, expected_start_ts, expected_end_ts",
     [
         ("D", "2023-06-08 10:58:31", 1686182400, 1686268800),
         ("W", "2023-01-01 01:18:31", 1672012800, 1672617600),
@@ -23,13 +23,13 @@ from backend.db.models import KpiValue
     ],
 )
 def test_timestamps(
-    kind: str,
+    agg_kind: str,
     now: str,
     expected_start_ts: int,
     expected_end_ts: int,
 ) -> None:
     res = Processor.get_timestamps(
-        kind=kind, now=PeriodBiz(datetime.fromisoformat(now))
+        agg_kind=agg_kind, now=PeriodBiz(datetime.fromisoformat(now))
     )
     assert res.start == expected_start_ts
     assert res.stop == expected_end_ts
@@ -37,11 +37,11 @@ def test_timestamps(
 
 def test_timestamps_wrong_kind() -> None:
     with pytest.raises(AttributeError):
-        Processor.get_timestamps(kind="Q", now=PeriodBiz(datetime.now()))
+        Processor.get_timestamps(agg_kind="Q", now=PeriodBiz(datetime.now()))
 
 
 @pytest.mark.parametrize(
-    "kind, now, expected_periods",
+    "agg_kind, now, expected_periods",
     [
         (
             "D",
@@ -62,13 +62,13 @@ def test_timestamps_wrong_kind() -> None:
         ("Y", "2023-01-01 01:18:31", None),
     ],
 )
-def test_get_periods_to_keep(
-    kind: str,
+def test_get_aggregations_to_keep(
+    agg_kind: str,
     now: str,
     expected_periods: List[str] | None,
 ) -> None:
-    res = Processor.get_periods_to_keep(
-        kind=kind, now=PeriodBiz(datetime.fromisoformat(now))
+    res = Processor.get_aggregations_to_keep(
+        agg_kind=agg_kind, now=PeriodBiz(datetime.fromisoformat(now))
     )
     if not expected_periods:
         assert res is None
@@ -77,9 +77,9 @@ def test_get_periods_to_keep(
         assert sorted(res) == sorted(expected_periods)
 
 
-def test_get_periods_to_keep_wrong_kind() -> None:
+def test_get_aggregations_to_keep_wrong_kind() -> None:
     with pytest.raises(AttributeError):
-        Processor.get_periods_to_keep(kind="Q", now=PeriodBiz(datetime.now()))
+        Processor.get_aggregations_to_keep(agg_kind="Q", now=PeriodBiz(datetime.now()))
 
 
 def test_process_tick(
@@ -97,7 +97,9 @@ def test_process_tick(
         now=PeriodBiz(init_datetime + timedelta(hours=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686182400 - 1686268800",
             "W - 1685923200 - 1686528000",
@@ -108,7 +110,9 @@ def test_process_tick(
         now=PeriodBiz(init_datetime + timedelta(hours=4)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686182400 - 1686268800",
             "W - 1685923200 - 1686528000",
@@ -119,7 +123,9 @@ def test_process_tick(
         now=PeriodBiz(init_datetime + timedelta(days=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686182400 - 1686268800",
             "W - 1685923200 - 1686528000",
@@ -132,7 +138,9 @@ def test_process_tick(
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686182400 - 1686268800",
             "D - 1686268800 - 1686355200",
@@ -145,7 +153,9 @@ def test_process_tick(
         now=PeriodBiz(init_datetime + timedelta(days=2)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686182400 - 1686268800",
             "D - 1686268800 - 1686355200",
@@ -159,7 +169,9 @@ def test_process_tick(
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686182400 - 1686268800",
             "D - 1686268800 - 1686355200",
@@ -173,7 +185,9 @@ def test_process_tick(
         now=PeriodBiz(init_datetime + timedelta(days=7)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686182400 - 1686268800",
             "D - 1686268800 - 1686355200",
@@ -188,7 +202,9 @@ def test_process_tick(
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 7
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686268800 - 1686355200",
             "D - 1686355200 - 1686441600",
@@ -221,7 +237,9 @@ def test_restore_kpis_from_almost_empty_db(
     dbsession.add(minus_1_day)
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1686096000 - 1686182400",
             "W - 1685923200 - 1686528000",
@@ -239,22 +257,36 @@ def test_restore_kpis_from_filled_db(
     dbsession.execute(delete(PeriodDb))
 
     dbsession.add(
-        KpiValue(kpi_id=dummy_kpi.unique_id, kind="Y", period="2023", value="whatever")
+        KpiValue(
+            kpi_id=dummy_kpi.unique_id,
+            agg_kind="Y",
+            agg_value="2023",
+            kpi_value="whatever",
+        )
     )
 
     dbsession.add(
         KpiValue(
-            kpi_id=dummy_kpi.unique_id, kind="M", period="2023-01", value="whatever"
+            kpi_id=dummy_kpi.unique_id,
+            agg_kind="M",
+            agg_value="2023-01",
+            kpi_value="whatever",
         )
     )
     dbsession.add(
         KpiValue(
-            kpi_id=dummy_kpi.unique_id, kind="W", period="2023 W01", value="whatever"
+            kpi_id=dummy_kpi.unique_id,
+            agg_kind="W",
+            agg_value="2023 W01",
+            kpi_value="whatever",
         )
     )
     dbsession.add(
         KpiValue(
-            kpi_id=dummy_kpi.unique_id, kind="D", period="2023-01-03", value="whatever"
+            kpi_id=dummy_kpi.unique_id,
+            agg_kind="D",
+            agg_value="2023-01-03",
+            kpi_value="whatever",
         )
     )
 
@@ -262,7 +294,9 @@ def test_restore_kpis_from_filled_db(
 
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(list(dbsession.execute(select(KpiValue.value)).scalars())) == sorted(
+    assert sorted(
+        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
+    ) == sorted(
         [
             "D - 1672704000 - 1672790400",
             "W - 1672617600 - 1673222400",

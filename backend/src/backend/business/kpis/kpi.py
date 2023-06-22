@@ -10,7 +10,7 @@ class Kpi(abc.ABC):
 
     @abc.abstractmethod
     def get_value(
-        self, kind: str, start_ts: int, stop_ts: int, session: Session
+        self, agg_kind: str, start_ts: int, stop_ts: int, session: Session
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""

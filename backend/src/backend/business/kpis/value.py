@@ -3,5 +3,5 @@ from dataclasses import dataclass
 
 @dataclass
 class Value:
-    period: str
-    value: str
+    agg_value: str
+    kpi_value: str

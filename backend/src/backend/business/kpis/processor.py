@@ -39,9 +39,9 @@ class Processor:
         # create/update KPIs values for every kind of aggregation period
         # that are update hourly
         for kpi in self.kpis:
-            for kind in ["D", "W", "M"]:
-                Processor.compute_kpi_values_for_kind(
-                    now=period_to_compute, kpi=kpi, kind=kind, session=session
+            for agg_kind in ["D", "W", "M"]:
+                Processor.compute_kpi_values_for_aggregation_kind(
+                    now=period_to_compute, kpi=kpi, agg_kind=agg_kind, session=session
                 )
 
         # create/update KPIs values for yearly aggregation period
@@ -49,37 +49,43 @@ class Processor:
         now_day = now.get_truncated_value("D")
         if self.current_day != now_day:
             for kpi in self.kpis:
-                Processor.compute_kpi_values_for_kind(
-                    now=period_to_compute, kpi=kpi, kind="Y", session=session
+                Processor.compute_kpi_values_for_aggregation_kind(
+                    now=period_to_compute, kpi=kpi, agg_kind="Y", session=session
                 )
             self.current_day = now_day
 
         return True
 
     @classmethod
-    def get_periods_to_keep(cls, kind: str, now: Period) -> List[str] | None:
-        if kind == "D":
+    def get_aggregations_to_keep(cls, agg_kind: str, now: Period) -> List[str] | None:
+        if agg_kind == "D":
             return [
-                now.get_shifted(relativedelta(days=-delta)).get_truncated_value(kind)
+                now.get_shifted(relativedelta(days=-delta)).get_truncated_value(
+                    agg_kind
+                )
                 for delta in range(0, 7)
             ]
-        if kind == "W":
+        if agg_kind == "W":
             return [
-                now.get_shifted(relativedelta(weeks=-delta)).get_truncated_value(kind)
+                now.get_shifted(relativedelta(weeks=-delta)).get_truncated_value(
+                    agg_kind
+                )
                 for delta in range(0, 4)
             ]
-        if kind == "M":
+        if agg_kind == "M":
             return [
-                now.get_shifted(relativedelta(months=-delta)).get_truncated_value(kind)
+                now.get_shifted(relativedelta(months=-delta)).get_truncated_value(
+                    agg_kind
+                )
                 for delta in range(0, 12)
             ]
-        if kind == "Y":
+        if agg_kind == "Y":
             return None  # Special value meaning that all values are kept
         raise AttributeError
 
     @classmethod
-    def compute_kpi_values_for_kind(
-        cls, now: Period, kpi: Kpi, kind: str, session: Session
+    def compute_kpi_values_for_aggregation_kind(
+        cls, now: Period, kpi: Kpi, agg_kind: str, session: Session
     ) -> None:
         """Compute KPI values and update DB accordingly
 
@@ -87,43 +93,43 @@ class Processor:
         Existing KPI values are updated in DB. New ones are created.
         Old ones are deleted"""
         values: List[Value] = Persister.get_kpi_values(
-            kpi_id=kpi.unique_id, kind=kind, session=session
+            kpi_id=kpi.unique_id, agg_kind=agg_kind, session=session
         )
-        current_period = now.get_truncated_value(kind)
-        periods_to_keep = Processor.get_periods_to_keep(kind, now)
+        current_agg_value = now.get_truncated_value(agg_kind)
+        aggregations_to_keep = Processor.get_aggregations_to_keep(agg_kind, now)
         value_updated = False
-        timestamps = cls.get_timestamps(kind=kind, now=now)
+        timestamps = cls.get_timestamps(agg_kind=agg_kind, now=now)
         for value in values:
-            if periods_to_keep and value.period not in periods_to_keep:
+            if aggregations_to_keep and value.agg_value not in aggregations_to_keep:
                 # delete old KPI values
                 Persister.delete_kpi_value(
                     kpi_id=kpi.unique_id,
-                    kind=kind,
-                    period=value.period,
+                    agg_kind=agg_kind,
+                    agg_value=value.agg_value,
                     session=session,
                 )
-            if value.period == current_period:
+            if value.agg_value == current_agg_value:
                 # update the existing KPI value
                 value_updated = True
-                value.value = kpi.get_value(
-                    kind=kind,
+                value.kpi_value = kpi.get_value(
+                    agg_kind=agg_kind,
                     start_ts=timestamps.start,
                     stop_ts=timestamps.stop,
                     session=session,
                 )
                 Persister.update_kpi_value(
                     kpi_id=kpi.unique_id,
-                    kind=kind,
-                    period=value.period,
-                    value=value.value,
+                    agg_kind=agg_kind,
+                    agg_value=value.agg_value,
+                    kpi_value=value.kpi_value,
                     session=session,
                 )
         if not value_updated:
             # create a new KPI value since there is no existing one
             value = Value(
-                period=current_period,
-                value=kpi.get_value(
-                    kind=kind,
+                agg_value=current_agg_value,
+                kpi_value=kpi.get_value(
+                    agg_kind=agg_kind,
                     start_ts=timestamps.start,
                     stop_ts=timestamps.stop,
                     session=session,
@@ -131,21 +137,21 @@ class Processor:
             )
             Persister.add_kpi_value(
                 kpi_id=kpi.unique_id,
-                kind=kind,
-                period=value.period,
-                value=value.value,
+                agg_kind=agg_kind,
+                agg_value=value.agg_value,
+                kpi_value=value.kpi_value,
                 session=session,
             )
 
     @classmethod
-    def get_timestamps(cls, kind: str, now: Period) -> Timestamps:
-        if kind == "D":
+    def get_timestamps(cls, agg_kind: str, now: Period) -> Timestamps:
+        if agg_kind == "D":
             start = datetime(year=now.year, month=now.month, day=now.day)
             return Timestamps(
                 start=int(start.timestamp()),
                 stop=int((start + timedelta(days=1)).timestamp()),
             )
-        if kind == "W":
+        if agg_kind == "W":
             start = datetime(year=now.year, month=now.month, day=now.day) + timedelta(
                 days=1 - now.weekday
             )
@@ -153,14 +159,14 @@ class Processor:
                 start=int(start.timestamp()),
                 stop=int((start + timedelta(days=7)).timestamp()),
             )
-        if kind == "M":
+        if agg_kind == "M":
             start = datetime(year=now.year, month=now.month, day=1)
             stop = datetime(year=now.year, month=now.month + 1, day=1)
             return Timestamps(
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),
             )
-        if kind == "Y":
+        if agg_kind == "Y":
             start = datetime(year=now.year, month=1, day=1)
             stop = datetime(year=now.year + 1, month=1, day=1)
             return Timestamps(
@@ -179,20 +185,20 @@ class Processor:
         if not lastPeriod:
             return
 
-        # create/update KPIs values for all aggregation period
-        # which are updated once per hour
+        # create/update KPIs values for all aggregation kinds which are updated once
+        # per hour (D, W, M)
         if lastPeriod != self.current_period:
             for kpi in self.kpis:
-                for kind in ["D", "W", "M"]:
-                    Processor.compute_kpi_values_for_kind(
-                        now=lastPeriod, kpi=kpi, kind=kind, session=session
+                for agg_kind in ["D", "W", "M"]:
+                    Processor.compute_kpi_values_for_aggregation_kind(
+                        now=lastPeriod, kpi=kpi, agg_kind=agg_kind, session=session
                     )
 
-        # create/update KPIs values for yearly aggregation period
+        # create/update KPIs values for yearly aggregations
         # which are updated only once per day
         lastPeriod_day = lastPeriod.get_truncated_value("D")
         if self.current_day != lastPeriod_day:
             for kpi in self.kpis:
-                Processor.compute_kpi_values_for_kind(
-                    now=lastPeriod, kpi=kpi, kind="Y", session=session
+                Processor.compute_kpi_values_for_aggregation_kind(
+                    now=lastPeriod, kpi=kpi, agg_kind="Y", session=session
                 )
