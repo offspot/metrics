@@ -9,6 +9,7 @@ from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
 from backend.business.indicators.recorder import IntCounterRecorder, Recorder
 from backend.business.inputs.input import Input
+from backend.business.period import Period
 
 IndicatorGenerator: TypeAlias = Generator[Indicator, None, None]
 InputGenerator: TypeAlias = Generator[Input, None, None]
@@ -114,4 +115,4 @@ def total_by_content_and_subfolder_indicator() -> IndicatorGenerator:
 
 @pytest.fixture()
 def processor(init_datetime: datetime) -> ProcessorGenerator:
-    yield Processor(init_datetime)
+    yield Processor(Period(init_datetime))

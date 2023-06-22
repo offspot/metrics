@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 
 from sqlalchemy.orm import Session
@@ -12,9 +11,9 @@ from backend.db.persister import Persister
 class Processor:
     """A processor is responsible for transforming inputs into indicator records"""
 
-    def __init__(self, now: datetime) -> None:
+    def __init__(self, now: Period) -> None:
         self.indicators: List[Indicator] = []
-        self.current_period = Period(now)
+        self.current_period = now
 
     def process_input(self, input: Input) -> None:
         """Update all indicators for a given input"""
@@ -69,7 +68,9 @@ class Processor:
             self.reset_state()
             self.current_period = now
 
+    def process_tick_after(self, now: Period, session: Session):
         # TODO : purge indicators older than 1 year (!!! only after KPI computation !!!)
+        ...
 
     def restore_from_db(self, now: Period, session: Session) -> None:
         """Restore data from database, typically after a process restart"""

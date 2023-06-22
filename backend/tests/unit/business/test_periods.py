@@ -29,7 +29,7 @@ def test_periods(
     expected_weekday: int,
     dbsession: Session,
 ) -> None:
-    processor = Processor(datetime.fromisoformat(init_iso_datetime))
+    processor = Processor(Period(datetime.fromisoformat(init_iso_datetime)))
     init_period = processor.current_period
     processor.process_tick(
         Period(datetime.fromisoformat(next_iso_datetime)),
