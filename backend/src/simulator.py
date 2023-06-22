@@ -101,6 +101,52 @@ def clear_db():
             session.execute(delete(dbm.KpiValue))
 
 
+def rand_sim_update_now(now: datetime) -> datetime:
+    now = now + timedelta(seconds=random.randint(0, 5))
+    if random.randint(0, 3) == 3:
+        now = now + timedelta(minutes=random.randint(0, 5))
+        if random.randint(0, 3) == 3:
+            now = now + timedelta(hours=random.randint(0, 5))
+    return now
+
+
+def rand_sim_get_content() -> str:
+    return contents[random.randint(0, len(contents) - 1)]
+
+
+def rand_sim_get_object(content: str) -> str:
+    if random.randint(0, 3) == 3:
+        rnd = random.randint(0, 100)
+        if rnd < 10:
+            return "random_object_1"
+        elif rnd < 12:
+            return "random_object_2"
+        elif rnd < 18:
+            return "random_object_3"
+        elif rnd < 25:
+            return "random_object_4"
+        elif rnd < 40:
+            return "random_object_5"
+        elif rnd < 52:
+            return "random_object_6"
+        elif rnd < 66:
+            return "random_object_7"
+        elif rnd < 72:
+            return "random_object_8"
+        elif rnd < 84:
+            return "random_object_9"
+        elif rnd < 90:
+            return "random_object_10"
+        elif rnd < 94:
+            return "random_object_11"
+        elif rnd < 96:
+            return "random_object_12"
+        else:
+            return "random_object_11"
+    else:
+        return objects[content][random.randint(0, len(objects[content]) - 1)]
+
+
 def rand_sim():
     """This is a big simulation, inputing random stuff many times"""
     nbsteps = 10000
@@ -116,11 +162,7 @@ def rand_sim():
 
     while step < nbsteps:
         step += 1
-        now = now + timedelta(seconds=random.randint(0, 5))
-        if random.randint(0, 3) == 3:
-            now = now + timedelta(minutes=random.randint(0, 5))
-            if random.randint(0, 3) == 3:
-                now = now + timedelta(hours=random.randint(0, 5))
+        now = rand_sim_update_now(now)
 
         # randomly restart the processor (like if a shutdown occured)
         if random.randint(0, 5000) == 5000:
@@ -129,38 +171,9 @@ def rand_sim():
             processor.process_tick(now=Period(now))
             processor = restart_processor(now)
 
-        content = contents[random.randint(0, len(contents) - 1)]
+        content = rand_sim_get_content()
 
-        if random.randint(0, 3) == 3:
-            rnd = random.randint(0, 100)
-            if rnd < 10:
-                object = "random_object_1"
-            elif rnd < 12:
-                object = "random_object_2"
-            elif rnd < 18:
-                object = "random_object_3"
-            elif rnd < 25:
-                object = "random_object_4"
-            elif rnd < 40:
-                object = "random_object_5"
-            elif rnd < 52:
-                object = "random_object_6"
-            elif rnd < 66:
-                object = "random_object_7"
-            elif rnd < 72:
-                object = "random_object_8"
-            elif rnd < 84:
-                object = "random_object_9"
-            elif rnd < 90:
-                object = "random_object_10"
-            elif rnd < 94:
-                object = "random_object_11"
-            elif rnd < 96:
-                object = "random_object_12"
-            else:
-                object = "random_object_11"
-        else:
-            object = objects[content][random.randint(0, len(objects[content]) - 1)]
+        object = rand_sim_get_object(content)
 
         if random.randint(0, 10) == 10:
             processor.process_input(ContentHomeVisit(content))
