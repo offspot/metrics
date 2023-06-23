@@ -6,6 +6,8 @@ services:
       - ../backend/src/offspot_metrics_backend:/usr/local/lib/python3.11/site-packages/offspot_metrics_backend
       - reverse-proxy-srv:/reverse-proxy-logs
       - filebeat-data:/filebeat-data
+      - ../backend/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./packages.yml:/conf/packages.yml
     command:
       - uvicorn
       - offspot_metrics_backend.entrypoint:app
@@ -18,6 +20,8 @@ services:
       - /usr/local/lib/python3.11/site-packages/offspot_metrics_backend
     ports:
       - 8002:80
+    environment:
+      PACKAGE_CONF_FILE: /conf/packages.yml
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -29,7 +33,6 @@ services:
       - ../backend/tasks.py:/src/tasks.py
       - ../backend/tests:/src/tests
       - reverse-proxy-srv:/reverse-proxy-logs
-      - ../backend/filebeat.yml:/usr/share/filebeat/filebeat.yml
     environment:
       DATABASE_URL: sqlite+pysqlite://///src/src/offspot_metrics_backend/dev.db
       TEST_DATABASE_URL: sqlite+pysqlite://///src/tests/test.db
