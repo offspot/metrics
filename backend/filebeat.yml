@@ -1,0 +1,17 @@
+filebeat.inputs:
+- type: filestream
+  id: filestream1
+  enabled: true
+  paths:
+    - /reverse-proxy-logs/*.json
+
+output.console:
+  enabled: true
+
+logging.to_files: true
+logging.files:
+  rotateeverybytes: 1048576 # = 1MB
+  keepfiles: 2
+
+path.data: /filebeat-data/data
+path.logs: /filebeat-data/logs
