@@ -28,9 +28,28 @@ tests locally.
 
 This container hosts the frontend UI for end-users.
 
+### kiwix-serve
+
+This is a kiwix server, serving zim files placed in the `zims` folder.
+
+### reverse-proxy
+
+This is the reverse proxy, simulating what is used on the offspot to expose multiple contents.
+
+It is configured with a sample sets of contents :
+- `kiwix-serve` contents
+- a fake `nomad` content from `file-browser-data/nomad`
+- a fake `mathews` content from `file-browser-data/mathews`
+
 ## Instructions
 
-First start the Docker-Compose stack:
+Download the ZIMs you want to use for tests in the `zims` folder. 
+
+Caddy is configured to use these two zims:
+- https://download.kiwix.org/zim/stack_exchange/sqa.stackexchange.com_en_all_2023-05.zim
+- https://download.kiwix.org/zim/stack_exchange/devops.stackexchange.com_en_all_2023-05.zim
+
+Start the Docker-Compose stack:
 
 ```sh
 cd dev

@@ -4,8 +4,10 @@ services:
     container_name: om_backend
     volumes:
       - ../backend/src:/app/src
+      - reverse-proxy-srv:/reverse-proxy-logs
+      - filebeat-data:/filebeat-data
     ports:
-      - 8000:80
+      - 8002:80
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -15,6 +17,29 @@ services:
       - ../backend/src:/work/src
       - ../backend/tasks.py:/work/tasks.py
       - ../backend/tests:/work/tests
+      - reverse-proxy-srv:/reverse-proxy-logs
+      - ../backend/filebeat.yml:/usr/share/filebeat/filebeat.yml
     environment:
       DATABASE_URL: sqlite+pysqlite://///work/src/backend/dev.db
       TEST_DATABASE_URL: sqlite+pysqlite://///work/tests/test.db
+  kiwix-serve:
+    container_name: om_kiwix
+    image: ghcr.io/kiwix/kiwix-serve
+    volumes:
+      - ./zims:/data
+    command: '*.zim' 
+    ports:
+      - 8001:8080
+  reverse-proxy:
+    container_name: om_reverse-proxy
+    image: caddy:2.6.1-alpine
+    volumes:
+      - ./reverse-proxy/config/Caddyfile:/etc/caddy/Caddyfile
+      - ./reverse-proxy/data:/data
+      - ./file-browser-data:/file-browser-data
+      - reverse-proxy-srv:/srv
+    ports:
+      - 8000:80
+volumes:
+  reverse-proxy-srv:
+  filebeat-data:

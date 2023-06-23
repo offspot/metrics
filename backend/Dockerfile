@@ -1,6 +1,10 @@
 FROM python:3.11-slim
 LABEL org.opencontainers.image.source https://github.com/offspot/metrics
 
+# Choose right architecture
+# COPY --from=docker.elastic.co/beats/filebeat-oss:8.8.1-arm64 /usr/share/filebeat /usr/share/filebeat
+COPY --from=docker.elastic.co/beats/filebeat-oss:8.8.1 /usr/share/filebeat /usr/share/filebeat
+
 # to set to your clients' origins
 ENV ALLOWED_ORIGINS http://localhost
 ENV DATABASE_URL sqlite+pysqlite:///local.db
