@@ -6,8 +6,12 @@ services:
       - ../backend/src:/app/src
       - reverse-proxy-srv:/reverse-proxy-logs
       - filebeat-data:/filebeat-data
+      - ../backend/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./packages.yml:/conf/packages.yml
     ports:
       - 8002:80
+    environment:
+      PACKAGE_CONF_FILE: /conf/packages.yml
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -18,7 +22,6 @@ services:
       - ../backend/tasks.py:/work/tasks.py
       - ../backend/tests:/work/tests
       - reverse-proxy-srv:/reverse-proxy-logs
-      - ../backend/filebeat.yml:/usr/share/filebeat/filebeat.yml
     environment:
       DATABASE_URL: sqlite+pysqlite://///work/src/backend/dev.db
       TEST_DATABASE_URL: sqlite+pysqlite://///work/tests/test.db

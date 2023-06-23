@@ -2,15 +2,25 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
+import logging
+from asyncio import create_task
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from backend import __description__, __title__, __version__
+from backend.business.log_converter import LogConverter
 from backend.constants import BackendConf
+from backend.filebeat import FileBeatRunner
 from backend.routes import echo
 
 PREFIX = "/v1"
+
+# TODO: fix this, this is not the same log as uvicorn ...
+logging.basicConfig(
+    level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
+)
 
 
 def create_app() -> FastAPI:
@@ -19,6 +29,13 @@ def create_app() -> FastAPI:
         description=__description__,
         version=__version__,
     )
+
+    converter = LogConverter()
+    filebeat = FileBeatRunner(converter=converter)
+
+    @app.on_event("startup")
+    async def app_startup():  # pyright: ignore[reportUnusedFunction]
+        create_task(filebeat.run())
 
     @app.get("/")
     async def landing() -> RedirectResponse:  # pyright: ignore[reportUnusedFunction]
