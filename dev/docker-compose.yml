@@ -24,7 +24,7 @@ services:
       PACKAGE_CONF_FILE: /conf/packages.yml
   backend-tools:
     build:
-      dockerfile: ../dev/backend-tools-tests/Dockerfile
+      dockerfile: ../dev/backend-tools/Dockerfile
       context: ../backend
     container_name: om_backend-tools
     volumes:
