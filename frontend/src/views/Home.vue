@@ -12,6 +12,8 @@ import HelloWorld from '../components/HelloWorld.vue'
     </a>
   </div>
   <HelloWorld msg="Vite + Vue" />
+  <font-awesome-icon icon="fa-solid fa-user-secret" />&nbsp;
+  <font-awesome-icon icon="fa-solid fa-umbrella-beach" /><br/>
   <router-link to="/about">Go to About </router-link><br/>
   <router-link to="/about2">Go to About2 </router-link>
 </template>
