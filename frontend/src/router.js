@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Home from './views/Home.vue'
-import About from './views/About.vue'
-import About2 from './views/About2.vue'
+import Dashboard from './views/Dashboard.vue'
 
 const routes = [{
   path: '/',
@@ -10,19 +8,9 @@ const routes = [{
   redirect: { name: 'home' }
 },
 {
-  path: '/home',
-  name: 'home',
-  component: Home
-},
-{
-  path: '/about',
-  name: 'about',
-  component: About
-},
-{
-  path: '/about2',
-  name: 'about2',
-  component: About2
+  path: '/dashboard',
+  name: 'dashboard',
+  component: Dashboard
 },
 ]
 
