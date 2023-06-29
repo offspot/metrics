@@ -2,6 +2,10 @@ import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
 
+// Boostrap5
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap'
+
 // VueRouter
 import router from './router.js'
 

@@ -13,7 +13,7 @@ const main = useMainStore()
 <template>
   <h1>{{ msg }}</h1>
 
-  <div class="card">
+  <div class="mycard">
     <button type="button" @click="main.increment">count is {{ main.count }}</button>
     <p>
       Edit
