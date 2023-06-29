@@ -2,6 +2,13 @@ This is a docker-compose configuration to be used **only** for development purpo
 
 It is recommended to use it in combination with Mutagen to effeciently sync data from your machine to the Docker containers.
 
+## List of URLS
+
+- Reverse proxy ("fake"): http://localhost:8000
+- Kiwix-serve ("fake"): http://localhost:8001
+- Backend API: http://localhost:8002
+- Dev Frontend: http://localhost:8003
+
 ## List of containers
 
 ### backend
@@ -18,15 +25,11 @@ Context is setup with appropriate environment variables:
 - DATABASE_URL points to the database used by the backend
 - TEST_DATABASE_URL points to the test database
 
-### backend-tests
+### frontend-tools
 
-This container is simply a Python stack with all backend requirements but no web server. Context is
-setup with appropriate environment variables for tests (i.e. it uses the test DB). Usefull to run
-tests locally.
+This container hosts the development frontend UI (i.e. `yarn dev`). 
 
-### frontend-ui
-
-This container hosts the frontend UI for end-users.
+It is not the statically compiled version.
 
 ### kiwix-serve
 

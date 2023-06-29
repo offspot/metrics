@@ -36,6 +36,15 @@ services:
     environment:
       DATABASE_URL: sqlite+pysqlite://///src/src/offspot_metrics_backend/dev.db
       TEST_DATABASE_URL: sqlite+pysqlite://///src/tests/test.db
+  frontend-tools:
+    build:
+      dockerfile: ../dev/frontend-tools/Dockerfile
+      context: ../frontend
+    container_name: om_frontend-tools
+    volumes:
+      - ../frontend:/work
+    ports:
+      - 8003:5173
   kiwix-serve:
     container_name: om_kiwix
     image: ghcr.io/kiwix/kiwix-serve
