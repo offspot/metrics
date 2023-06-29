@@ -9,7 +9,7 @@ from offspot_metrics_backend import __about__
 from offspot_metrics_backend.business.log_converter import LogConverter
 from offspot_metrics_backend.constants import BackendConf
 from offspot_metrics_backend.filebeat import FileBeatRunner
-from offspot_metrics_backend.routes import echo
+from offspot_metrics_backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
 
@@ -68,7 +68,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    api.include_router(router=echo.router)
+    api.include_router(router=aggregations.router)
+    api.include_router(router=kpis.router)
 
     app.mount(f"/{__about__.__api_version__}", api)
 

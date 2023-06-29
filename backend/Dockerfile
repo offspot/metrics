@@ -15,7 +15,7 @@ COPY --from=docker.elastic.co/beats/filebeat-oss:8.8.1 /usr/share/filebeat /usr/
 
 # to set to your clients' origins
 ENV ALLOWED_ORIGINS http://localhost
-ENV DATABASE_URL sqlite+pysqlite:///local.db
+ENV DATABASE_URL sqlite+pysqlite:////app/src/backend/dev.db
 
 # Copy code + associated artifacts
 COPY src /src/src
