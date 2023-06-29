@@ -13,7 +13,7 @@ from backend import __description__, __title__, __version__
 from backend.business.log_converter import LogConverter
 from backend.constants import BackendConf
 from backend.filebeat import FileBeatRunner
-from backend.routes import echo
+from backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
 
@@ -72,7 +72,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    api.include_router(router=echo.router)
+    api.include_router(router=aggregations.router)
+    api.include_router(router=kpis.router)
 
     app.mount(PREFIX, api)
 
