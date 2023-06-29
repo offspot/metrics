@@ -15,8 +15,8 @@ import { createPinia } from 'pinia'
 // fontawesome
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faUserSecret, faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons'
-library.add(faUserSecret, faUmbrellaBeach)
+import { faChevronCircleRight, faChevronCircleLeft, faCircleInfo, faSpinner } from '@fortawesome/free-solid-svg-icons'
+library.add(faChevronCircleRight, faChevronCircleLeft, faCircleInfo, faSpinner)
 
 const app = createApp(App)
 app.component('font-awesome-icon', FontAwesomeIcon)

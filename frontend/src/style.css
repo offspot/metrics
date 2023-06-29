@@ -77,6 +77,8 @@ button:focus-visible {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  width: 100%;
+  margin-bottom: auto;
 }
 
 @media (prefers-color-scheme: light) {
