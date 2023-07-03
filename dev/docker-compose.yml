@@ -50,7 +50,7 @@ services:
     image: ghcr.io/kiwix/kiwix-serve
     volumes:
       - ./zims:/data
-    command: '*.zim' 
+    command: '*.zim'
     ports:
       - 8001:8080
   reverse-proxy:
