@@ -9,15 +9,12 @@ export const useMainStore = defineStore('main', {
     selected_kpi_id: null,
     value_for_selected_kpi_id: null,
     is_loading: false,
+    error: null,
   }),
-  getters: {
-    getAggregations: (state) => {
-      return (kind) => state.aggregations.filter(aggregation => aggregation.kind === kind)
-    },
-  },
+  getters: {},
   actions: {
     handle_agg_kind_updated() {
-      this.agg_values_for_selected_agg_kind = this.getAggregations(this.selected_agg_kind).map(agg => agg.value)  
+      this.agg_values_for_selected_agg_kind = this.aggregations.filter(aggregation => aggregation.kind === this.selected_agg_kind).map(agg => agg.value)
       this.selected_agg_value = this.agg_values_for_selected_agg_kind[this.agg_values_for_selected_agg_kind.length - 1]
       this.fetchKpi()
     },
@@ -30,7 +27,8 @@ export const useMainStore = defineStore('main', {
           this.selected_kpi_id = 2
           break;
         default:
-          console.log(`Unsupported KPI: '${value}'.`);
+          this.selected_kpi_id = null
+          this.error = `Unsupported KPI: '${value}'.`
           return
       }
       this.fetchKpi()
@@ -50,7 +48,8 @@ export const useMainStore = defineStore('main', {
           this.selected_agg_kind = 'Y'
           break;
         default:
-          console.log(`Unsupported aggregation kind: '${kind}'.`);
+          this.selected_agg_kind = null
+          this.error = `Unsupported aggregation kind: '${kind}'.`
           return
       }
       this.handle_agg_kind_updated()
@@ -61,28 +60,32 @@ export const useMainStore = defineStore('main', {
     },
     async fetchAggregations() {
       this.is_loading = true
+      this.error = null
       try {
-        const data = await axios.get('http://localhost:8002/v1/aggregations')
+        const data = await axios.get(import.meta.env.VITE_BACKEND_ROOT_API + '/aggregations')
         this.aggregations = data.data
         this.handle_agg_kind_updated()
       }
       catch (error) {
-        alert(error)
+        this.error = "Failed to load aggregations"
+        this.aggregations = []
         console.log(error)
       }
       this.is_loading = false
     },
     async fetchKpi() {
       this.is_loading = true
+      this.error = null
       if (!this.selected_kpi_id || !this.selected_agg_kind || !this.selected_agg_value) {
         return
       }
       try {
-        const data = await axios.get('http://localhost:8002/v1/kpis/' + this.selected_kpi_id + '?agg_kind=' + this.selected_agg_kind + '&agg_value=' + this.selected_agg_value )
+        const data = await axios.get(import.meta.env.VITE_BACKEND_ROOT_API + '/kpis/' + this.selected_kpi_id + '/values?agg_kind=' + this.selected_agg_kind + '&agg_value=' + this.selected_agg_value )
         this.value_for_selected_kpi_id = data.data.value
       }
       catch (error) {
-        alert(error)
+        this.error = "Failed to load KPI value"
+        this.value_for_selected_kpi_id = null
         console.log(error)
       }
       this.is_loading = false

@@ -14,7 +14,7 @@ RUN python -m pip install --no-cache-dir -U \
 COPY --from=docker.elastic.co/beats/filebeat-oss:8.8.1 /usr/share/filebeat /usr/share/filebeat
 
 # to set to your clients' origins
-ENV ALLOWED_ORIGINS http://localhost
+ENV ALLOWED_ORIGINS http://localhost:8003
 ENV DATABASE_URL sqlite+pysqlite:////app/src/backend/dev.db
 
 # Copy code + associated artifacts
