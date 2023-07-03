@@ -11,15 +11,19 @@ At some point in the future, the system is meant to centralize data in a Cloud f
 
 ![Technical architecture](architecture_technical.excalidraw.png)
 
-A Logstash server is used to process the various inputs easily (read rotating log files nicely, poll a webserver with some stats, ...) and forwards these events (via HTTP) to a backend server.
+Filebeat (from Elasticsearch) is used to process the various inputs easily (read rotating log files nicely, poll a webserver with some stats, ...) and forwards these events to he backend server.
 
-A custom backend server is responsible to process events sent by Logstash to compute indicator records. 
+Filebeat has been chosen because it is assumed to be lightweight, already capable to handle complex situation like keeping a pointer to last log data read in a file, or also detect and handle nicely log files rotation. The OSS edition is used (i.e. we do not depend on the Elastic Licence, but only Apache License version 2.0).
+
+The backend server is responsible to start Filebeat and watch events (in JSON) sent through the standard output STDOUT.
+
+The backend server is responsible to process these raw logs and transfrom them into inputs to compute indicator records. 
 
 On-the-fly, every indicator has a current state used to store intermediate computations that will be needed to create the final record value. This state is updated at each event.
 
 Indicator states are kept in memory. They are transfered to the SQLite database every minute (this is mandatory since it is quite common that the offspot is not shutdown properly).
 
-The backend is also capable to handle nicely SIGINT signals to shutdown Logstash properly and transfer all indicator state to the database.
+The backend is also capable to handle nicely SIGINT signals to shutdown Filebeat properly and transfer all indicator state to the database.
 
 When the backend starts, it first reload this state data from database.
 
@@ -27,7 +31,7 @@ Every hour, the backend server process automatically the indicator states to cre
 
 KPI aggregations do not rely on an in-memory state, they reuse as many indicator records as necessary every time.
 
-The custom backend is serving the KPI data via a REST API.
+The backend is serving the KPI data via a REST API.
 
 A Vue.JS application serves dashboards of the KPI data.
 
