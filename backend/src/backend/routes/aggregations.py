@@ -20,6 +20,11 @@ class Aggregation:
     value: str
 
 
+@dataclass
+class Aggregations:  # simply to not return an array as root JSON object
+    aggregations: List[Aggregation]
+
+
 @router.get(
     "",
     status_code=200,
@@ -29,17 +34,19 @@ class Aggregation:
         },
     },
 )
-async def aggregations() -> List[Aggregation]:
+async def aggregations() -> Aggregations:
     return aggregations_inner()
 
 
 @dbsession
-def aggregations_inner(session: Session) -> List[Aggregation]:
+def aggregations_inner(session: Session) -> Aggregations:
     query = select(KpiValue.agg_kind, KpiValue.agg_value).distinct()
 
-    return list(
-        map(
-            lambda x: Aggregation(kind=x.agg_kind, value=x.agg_value),
-            session.execute(query),
+    return Aggregations(
+        aggregations=list(
+            map(
+                lambda x: Aggregation(kind=x.agg_kind, value=x.agg_value),
+                session.execute(query),
+            )
         )
     )
