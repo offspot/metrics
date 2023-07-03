@@ -5,10 +5,21 @@ const main = useMainStore()
 
 <template>
   <div class="header d-flex align-items-center">
-    <div class="spinner" v-if="main.is_loading">
-      <font-awesome-icon icon="spinner" size="xl" spin />
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-2 col-md-1">
+          <div class="spinner" v-if="main.is_loading">
+            <font-awesome-icon icon="spinner" size="xl" spin />
+          </div>
+        </div>
+        <div class="col-10 col-md-3 title">
+          Offspot Metrics
+        </div>
+        <div class="col-12 col-md-8 error">
+          <div class="">{{ main.error }}</div>
+        </div>
+      </div>
     </div>
-    <div class="title">Offspot Metrics</div>
   </div>
   <div class="content">
     <router-view></router-view>
@@ -34,14 +45,14 @@ div.content {
   padding-right: 2em;
 }
 
-div.spinner {
-  position: absolute;
-  margin-left: 2em;
-}
-
 div.title {
-  margin-left: 8em;
   font-weight: bold;
   color: white;
+  text-align: left;
+}
+
+div.error {
+  color: red;
+  text-align: right;
 }
 </style>

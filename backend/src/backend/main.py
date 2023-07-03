@@ -17,7 +17,6 @@ from backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
 
-# TODO: fix this, this is not the same log as uvicorn ...
 logging.basicConfig(
     level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
