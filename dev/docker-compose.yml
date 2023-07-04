@@ -22,6 +22,7 @@ services:
       - 8002:80
     environment:
       PACKAGE_CONF_FILE: /conf/packages.yml
+      RUN_PROCESSING: "False"
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools/Dockerfile

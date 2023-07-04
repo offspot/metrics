@@ -1,4 +1,5 @@
 import logging
+import os
 from asyncio import create_task, sleep
 
 from fastapi import FastAPI
@@ -30,17 +31,29 @@ def create_app() -> FastAPI:
         version=__about__.__version__,
     )
 
-    converter = LogConverter()
-    converter.parse_package_configuration_from_file()
-    filebeat = FileBeatRunner(converter=converter)
-    processor = Processor()
-    processor.startup(current_period=Period.now())
+    # Boolean stoping background processing of logs + indicators / kpis update / cleanup
+    # Useful mostly for local development purpose when we do not want to generate new
+    # events regularly and hence do not want to cleanup DB from simulation results
+    # The environment variable must hence be explicitely set to False (case-insensitive)
+    # all other values will start the processing.
+    run_processing = not (os.getenv("RUN_PROCESSING", "True").lower() == "false")
+
+    if run_processing:
+        logger.info("Starting processing")
+        converter = LogConverter()
+        converter.parse_package_configuration_from_file()
+        filebeat = FileBeatRunner(converter=converter)
+        processor = Processor()
+        processor.startup(current_period=Period.now())
+    else:
+        logger.warn("Processing is disabled")
 
     @app.on_event("startup")
     async def app_startup():  # pyright: ignore[reportUnusedFunction]
         """Start background tasks"""
-        create_task(filebeat.run(processor))
-        create_task(ticker())
+        if run_processing:
+            create_task(filebeat.run(processor))
+            create_task(ticker())
 
     async def ticker():
         """Start a processor tick every minute"""
