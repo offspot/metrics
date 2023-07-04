@@ -13,6 +13,10 @@ The whole system is runing locally on the `offspot`. Dashboards are hence only p
 
 At some point in the future, the system is meant to centralize data in a Cloud for aggregating multiple offspots. An intermediate data format is hence present, between raw data and KPIs.
 
+## Glossary
+
+There is a [glossary](glossary.md) of business terms that are used in the `metrics` subsystem.
+
 ## Documentation
 
 We have documentation about the [data architecture](architecture_data.md), the [technical architecture](architecture_technical.md) and the [software architecture](architecture_software.md).
