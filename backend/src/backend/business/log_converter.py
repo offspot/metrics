@@ -21,12 +21,11 @@ class IncorrectConfiguration(Exception):
 class LogConverter:
     """Converts logs received from the reverse proxy into inputs to process"""
 
-    def parse_package_configuration_from_file(
-        self, file_location: str = "/conf/packages.yml"
-    ):
+    def parse_package_configuration_from_file(self, file_location: str | None = None):
         logger.info("Parsing PACKAGE_CONF_FILE")
 
-        file_location = os.getenv("PACKAGE_CONF_FILE", file_location)
+        if file_location is None:
+            file_location = os.getenv("PACKAGE_CONF_FILE", "/conf/packages.yml")
         with open(file_location, "r") as stream:
             conf_data = yaml.safe_load(stream)
             self.parse_package_configuration(conf_data=conf_data)
@@ -128,41 +127,45 @@ class LogConverter:
 
         host: str = message["request"]["host"]
         uri: str = message["request"]["uri"]
+        content_type: str | None = message.get("resp_headers", {}).get("Content-Type")
 
         if host == self.zim_host:
-            match = re.match(r"^/content/(.+?)(/.*)?$", uri)
-            if not match:
-                return []
-
-            zim = match.group(1)
-            object = match.group(2)
-
-            if zim not in self.zims:
-                return []
-
-            title = self.zims[zim]["title"]
-            if object is None or object == "/":
-                return [ContentHomeVisit(content=title)]
-            else:
-                content_type = message.get("resp_headers", {}).get("Content-Type")
-                if content_type is None:
-                    return []
-                content_type = str(content_type)
-
-                if (
-                    "html" in content_type
-                    or "epub" in content_type
-                    or "pdf" in content_type
-                ):
-                    return [ContentObjectVisit(content=title, object=object)]
-                else:
-                    return []
-
+            return self.process_zim(uri=uri, content_type=content_type)
         elif host in self.files:
-            title = self.files[host]["title"]
-            if uri == "/":
-                return [ContentHomeVisit(content=title)]
+            return self.process_file(uri=uri, host=host)
+        else:
+            return []
+
+    def process_zim(self, uri: str, content_type: str | None) -> List[Input]:
+        match = re.match(r"^/content/(.+?)(/.*)?$", uri)
+        if not match:
+            return []
+
+        zim = match.group(1)
+        object = match.group(2)
+
+        if zim not in self.zims:
+            return []
+
+        title = self.zims[zim]["title"]
+        if object is None or object == "/":
+            return [ContentHomeVisit(content=title)]
+        else:
+            if content_type is None:
+                return []
+            content_type = str(content_type)
+
+            if (
+                "html" in content_type
+                or "epub" in content_type
+                or "pdf" in content_type
+            ):
+                return [ContentObjectVisit(content=title, object=object)]
             else:
                 return []
+
+    def process_file(self, uri: str, host: str) -> List[Input]:
+        if uri == "/":
+            return [ContentHomeVisit(content=self.files[host]["title"])]
         else:
             return []
