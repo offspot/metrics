@@ -1,5 +1,5 @@
 import logging
-from asyncio import create_task
+from asyncio import create_task, sleep
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +7,8 @@ from fastapi.responses import RedirectResponse
 
 from offspot_metrics_backend import __about__
 from offspot_metrics_backend.business.log_converter import LogConverter
+from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.business.processor import Processor
 from offspot_metrics_backend.constants import BackendConf
 from offspot_metrics_backend.filebeat import FileBeatRunner
 from offspot_metrics_backend.routes import aggregations, kpis
@@ -18,6 +20,8 @@ logging.basicConfig(
     level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
 
+logger = logging.getLogger(__name__)
+
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -27,11 +31,23 @@ def create_app() -> FastAPI:
     )
 
     converter = LogConverter()
+    converter.parse_package_configuration_from_file()
     filebeat = FileBeatRunner(converter=converter)
+    processor = Processor()
+    processor.startup(current_period=Period.now())
 
     @app.on_event("startup")
     async def app_startup():  # pyright: ignore[reportUnusedFunction]
-        create_task(filebeat.run())
+        """Start background tasks"""
+        create_task(filebeat.run(processor))
+        create_task(ticker())
+
+    async def ticker():
+        """Start a processor tick every minute"""
+        while True:
+            await sleep(60)
+            logger.debug("Processing a clock tick")
+            processor.process_tick(tick_period=Period.now())
 
     @app.get("/")
     async def landing() -> RedirectResponse:  # pyright: ignore[reportUnusedFunction]

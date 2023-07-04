@@ -6,6 +6,7 @@ from subprocess import PIPE, Popen
 import psutil
 
 from backend.business.log_converter import LogConverter
+from backend.business.processor import Processor
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ class FileBeatRunner:
     def __init__(self, converter: LogConverter) -> None:
         self.converter = converter
 
-    async def run(self):
+    async def run(self, processor: Processor):
         # restart filebeat forever
         while True:
             # kill all already running filebeat processes
@@ -25,24 +26,26 @@ class FileBeatRunner:
 
             # start filebeat and capture stdout
             logger.info("Starting filebeat in background")
-            process = Popen(
+            filebeat = Popen(
                 "/usr/share/filebeat/filebeat", cwd="/usr/share/filebeat", stdout=PIPE
             )
 
-            # mainly for type hinter
-            if process.stdout is None:
+            # mainly for type hinter, not supposed to happen
+            if filebeat.stdout is None:
                 logger.error("Failed to catpure stdout, will retry in 10 secs")
                 await sleep(10)
                 continue
 
             # set stdout as non blocking
-            os.set_blocking(process.stdout.fileno(), False)
+            os.set_blocking(filebeat.stdout.fileno(), False)
 
             while True:
-                for line in iter(process.stdout.readline, b""):
-                    self.converter.process(line.decode().strip())
+                for line in iter(filebeat.stdout.readline, b""):
+                    inputs = self.converter.process(line.decode().strip())
+                    for input in inputs:
+                        processor.process_input(input=input)
 
-                if process.poll() is not None:
+                if filebeat.poll() is not None:
                     logger.error("Filebeat has exited, will restart in 10 secs")
                     # process has exited, let's restart the process after 10 secs
                     # to let the system recover

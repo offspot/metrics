@@ -63,7 +63,7 @@ export const useMainStore = defineStore('main', {
       this.error = null
       try {
         const data = await axios.get(import.meta.env.VITE_BACKEND_ROOT_API + '/aggregations')
-        this.aggregations = data.data
+        this.aggregations = data.data.aggregations
         this.handle_agg_kind_updated()
       }
       catch (error) {
