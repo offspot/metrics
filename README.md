@@ -14,9 +14,13 @@ At some point in the future, the system is meant to centralize data in a Cloud f
 
 This subsystem is designed to be part of Kiwix `offspot` system, but you are welcome to use this standalone, report bugs and request features!
 
+## Glossary
+
+There is a [glossary](glossary.md) of business terms that are used in the `metrics` subsystem.
+
 ## Architecture
 
-Architecture of the solution is documented in terms of [Data architecture](architecture_data.md), [Technical architecture](architecture_technical.md) and [Software architecture](architecture_software.md)
+Architecture of the `metrics` subsystem is documented in terms of [Data architecture](architecture_data.md), [Technical architecture](architecture_technical.md) and [Software architecture](architecture_software.md)
 
 ## Contributing
 
