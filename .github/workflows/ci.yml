@@ -37,7 +37,8 @@ jobs:
 
   unit-tests:
     runs-on: ubuntu-22.04
-
+    env:
+      PACKAGE_CONF_FILE: /tmp/packages.yml
     steps:
       - name: Retrieve source code
         uses: actions/checkout@v3
@@ -56,6 +57,7 @@ jobs:
 
       - name: Backend - Run tests
         run: |
+          cp dev/packages.yml /tmp/packages.yml
           cd backend
           invoke test
 

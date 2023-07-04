@@ -2,15 +2,29 @@
 # -*- coding: utf-8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 
+import logging
+import os
+from asyncio import create_task, sleep
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from backend import __description__, __title__, __version__
+from backend.business.log_converter import LogConverter
+from backend.business.period import Period
+from backend.business.processor import Processor
 from backend.constants import BackendConf
-from backend.routes import echo
+from backend.filebeat import FileBeatRunner
+from backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
+
+logging.basicConfig(
+    level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
@@ -20,8 +34,39 @@ def create_app() -> FastAPI:
         version=__version__,
     )
 
+    # Boolean stoping background processing of logs + indicators / kpis update / cleanup
+    # Useful mostly for local development purpose when we do not want to generate new
+    # events regularly and hence do not want to cleanup DB from simulation results
+    # The environment variable must hence be explicitely set to False (case-insensitive)
+    # all other values will start the processing.
+    run_processing = not (os.getenv("RUN_PROCESSING", "True").lower() == "false")
+
+    if run_processing:
+        logger.info("Starting processing")
+        converter = LogConverter()
+        converter.parse_package_configuration_from_file()
+        filebeat = FileBeatRunner(converter=converter)
+        processor = Processor()
+        processor.startup(now=Period.now())
+    else:
+        logger.warn("Processing is disabled")
+
+    @app.on_event("startup")
+    async def app_startup():  # pyright: ignore[reportUnusedFunction]
+        """Start background tasks"""
+        if run_processing:
+            create_task(filebeat.run(processor))
+            create_task(ticker())
+
+    async def ticker():
+        """Start a processor tick every minute"""
+        while True:
+            await sleep(60)
+            logger.debug("Processing a clock tick")
+            processor.process_tick(now=Period.now())
+
     @app.get("/")
-    async def landing() -> RedirectResponse:
+    async def landing() -> RedirectResponse:  # pyright: ignore[reportUnusedFunction]
         """Redirect to root of latest version of the API"""
         return RedirectResponse(f"{PREFIX}/", status_code=308)
 
@@ -55,7 +100,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    api.include_router(router=echo.router)
+    api.include_router(router=aggregations.router)
+    api.include_router(router=kpis.router)
 
     app.mount(PREFIX, api)
 
