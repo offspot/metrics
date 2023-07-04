@@ -24,6 +24,16 @@ class ContentPopularity(Kpi):
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
 
+        total_count = session.execute(
+            select(
+                func.sum(IndicatorRecord.value).label("count"),
+            )
+            .join(IndicatorPeriod)
+            .where(IndicatorRecord.indicator_id == CONTENT_HOME_VISIT_ID)
+            .where(IndicatorPeriod.timestamp >= start_ts)
+            .where(IndicatorPeriod.timestamp <= stop_ts)
+        ).scalar_one()
+
         subquery = (
             select(
                 IndicatorDimension.value0.label("content"),
@@ -37,11 +47,22 @@ class ContentPopularity(Kpi):
             .group_by("content")
         ).subquery("content_with_count")
 
-        query = select(subquery.c.content).order_by(
+        query = select(subquery.c.count, subquery.c.content).order_by(
             desc(subquery.c.count), subquery.c.content
         )
 
-        return dumps(list(session.execute(query).scalars()))
+        return dumps(
+            list(
+                map(
+                    lambda x: {
+                        "content": x.content,
+                        "count": x.count,
+                        "percentage": round(int(str(x.count)) * 100 / total_count, 2),
+                    },
+                    session.execute(query),
+                )
+            )
+        )
 
 
 class ContentObjectPopularity(Kpi):
@@ -59,6 +80,16 @@ class ContentObjectPopularity(Kpi):
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
 
+        total_count = session.execute(
+            select(
+                func.sum(IndicatorRecord.value).label("count"),
+            )
+            .join(IndicatorPeriod)
+            .where(IndicatorRecord.indicator_id == CONTENT_OBJECT_VISIT_ID)
+            .where(IndicatorPeriod.timestamp >= start_ts)
+            .where(IndicatorPeriod.timestamp <= stop_ts)
+        ).scalar_one()
+
         subquery = (
             select(
                 IndicatorDimension.value0.label("content"),
@@ -74,7 +105,7 @@ class ContentObjectPopularity(Kpi):
         ).subquery("content_with_count")
 
         query = (
-            select(subquery.c.content, subquery.c.object)
+            select(subquery.c.count, subquery.c.content, subquery.c.object)
             .order_by(desc(subquery.c.count), subquery.c.content, subquery.c.object)
             .limit(50)
         )
@@ -85,6 +116,8 @@ class ContentObjectPopularity(Kpi):
                     lambda x: {
                         "content": x.content,
                         "object": x.object,
+                        "count": x.count,
+                        "percentage": round(int(str(x.count)) * 100 / total_count, 2),
                     },
                     session.execute(query),
                 )
