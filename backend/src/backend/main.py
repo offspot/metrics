@@ -3,7 +3,7 @@
 # vim: ai ts=4 sts=4 et sw=4 nu
 
 import logging
-from asyncio import create_task
+from asyncio import create_task, sleep
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +11,8 @@ from fastapi.responses import RedirectResponse
 
 from backend import __description__, __title__, __version__
 from backend.business.log_converter import LogConverter
+from backend.business.period import Period
+from backend.business.processor import Processor
 from backend.constants import BackendConf
 from backend.filebeat import FileBeatRunner
 from backend.routes import aggregations, kpis
@@ -21,6 +23,8 @@ logging.basicConfig(
     level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
 
+logger = logging.getLogger(__name__)
+
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -30,11 +34,23 @@ def create_app() -> FastAPI:
     )
 
     converter = LogConverter()
+    converter.parse_package_configuration_from_file()
     filebeat = FileBeatRunner(converter=converter)
+    processor = Processor()
+    processor.startup(now=Period.now())
 
     @app.on_event("startup")
     async def app_startup():  # pyright: ignore[reportUnusedFunction]
-        create_task(filebeat.run())
+        """Start background tasks"""
+        create_task(filebeat.run(processor))
+        create_task(ticker())
+
+    async def ticker():
+        """Start a processor tick every minute"""
+        while True:
+            await sleep(60)
+            logger.debug("Processing a clock tick")
+            processor.process_tick(now=Period.now())
 
     @app.get("/")
     async def landing() -> RedirectResponse:  # pyright: ignore[reportUnusedFunction]

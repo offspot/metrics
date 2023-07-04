@@ -39,3 +39,7 @@ class Period:
         if agg_kind == "Y":
             return f"{self.year:04}"
         raise AttributeError
+
+    @classmethod
+    def now(cls) -> "Period":
+        return Period(datetime.now())
