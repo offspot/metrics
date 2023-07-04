@@ -29,7 +29,7 @@ defineProps({
       </thead>
       <tbody>
         <tr v-for="res in JSON.parse(value)">
-          <td>{{ res }}</td>
+          <td>{{ res.content }} ({{ res.count }} visits, {{ res.percentage }} %)</td>
         </tr>
       </tbody>
     </table>
