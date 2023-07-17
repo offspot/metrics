@@ -90,3 +90,16 @@ Or just one specific test function
 ```sh
 docker exec -it om_backend-tools invoke test --path "unit/business/indicators/test_indicators.py" --args "-k test_no_input"
 ```
+
+### backend database schema
+
+To generate DB schema documentation, you can run the following command once your 
+docker-compose setup is started (and supposing that your local DB is up-to-date):
+
+```sh
+cd dev
+wget -O /tmp/sqlite-jdbc-3.42.0.0.jar https://github.com/xerial/sqlite-jdbc/releases/download/3.42.0.0/sqlite-jdbc-3.42.0.0.jar
+docker run -v "/tmp/sqlite-jdbc-3.42.0.0.jar:/drivers/sqlite-jdbc-3.42.0.0.jar" -v "$(pwd)/schemaspy.properties:/schemaspy.properties" -v "$(pwd)/schemaspy:/output" -v "$(pwd)/../backend/src/backend/dev.db:/data/database.db" schemaspy/schemaspy:latest
+```
+
+Nota: of course you might update the Sqlite JDBC driver version 😉

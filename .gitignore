@@ -1,8 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,python,database,visualstudiocode,intellij
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,python,database,visualstudiocode,intellij
 
-# Slightly modified manually to not include anything from visualstudiocode settings : ignore the whole .vscode folder
-
 ### Database ###
 *.accdb
 *.db
@@ -347,7 +345,12 @@ poetry.toml
 pyrightconfig.json
 
 ### VisualStudioCode ###
-.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
 
 # Local History for Visual Studio Code
 .history/
@@ -361,3 +364,14 @@ pyrightconfig.json
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,macos,python,database,visualstudiocode,intellij
+
+## Custom ignore
+
+# Ignore all .vscode since this is not something maintained (for now at least)
+.vscode
+
+# Ignore zims
+*.zim
+
+# Do not store generated schemaspy
+dev/schemaspy
