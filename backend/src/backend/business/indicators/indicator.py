@@ -62,7 +62,7 @@ class Indicator(abc.ABC):
         """Reset the list of recorders.
 
         This is typically done at the start of a new processing period"""
-        self.recorders = {}
+        self.recorders.clear()
 
     def get_records(
         self,

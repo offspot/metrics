@@ -2,14 +2,13 @@ import logging
 import random
 from datetime import datetime, timedelta
 
-from sqlalchemy import create_engine, delete
-from sqlalchemy.orm import Session
-
 import backend.db.models as dbm
 from backend.business.inputs.content_visit import ContentHomeVisit, ContentObjectVisit
 from backend.business.period import Period
 from backend.business.processor import Processor
 from backend.constants import BackendConf
+from sqlalchemy import create_engine, delete
+from sqlalchemy.orm import Session
 
 # Some known contents (some are repeated many times to influence the distribution)
 contents = [
@@ -102,6 +101,13 @@ def clear_db():
 
 
 def rand_sim_update_now(now: datetime) -> datetime:
+    """Move 'now' variable to a random point in time in the future
+
+    'now' is increased by:
+    - a random number of seconds between 0 and 5 (included)
+    - with 25% chance, a random number of minutes between 0 and 5 (included)
+    - with 6.25% chance, a random bumber of hours between 0 and 5 (included)
+    """
     now = now + timedelta(seconds=random.randint(0, 5))
     if random.randint(0, 3) == 3:
         now = now + timedelta(minutes=random.randint(0, 5))
@@ -110,11 +116,11 @@ def rand_sim_update_now(now: datetime) -> datetime:
     return now
 
 
-def rand_sim_get_content() -> str:
+def get_random_content_from_sim() -> str:
     return contents[random.randint(0, len(contents) - 1)]
 
 
-def rand_sim_get_object(content: str) -> str:
+def get_random_object_from_sim(content: str) -> str:
     if random.randint(0, 3) == 3:
         rnd = random.randint(0, 100)
         if rnd < 10:
@@ -171,9 +177,9 @@ def rand_sim():
             processor.process_tick(now=Period(now))
             processor = restart_processor(now)
 
-        content = rand_sim_get_content()
+        content = get_random_content_from_sim()
 
-        object = rand_sim_get_object(content)
+        object = get_random_object_from_sim(content)
 
         if random.randint(0, 10) == 10:
             processor.process_input(ContentHomeVisit(content))
