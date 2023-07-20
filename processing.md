@@ -34,3 +34,21 @@ At startup, the processor needs to :
 ### Input processing
 
 Input processing is pretty straightforward: the input is simply fed to all indicators.
+
+## Implementing Indicators and KPIs
+
+Indicators and KPIs are managed in the core logic with abstract classes. They have to be implemented based on the various real use cases that we need to implement.
+
+### Indicators
+
+Real indicators implementations are a subclass of the[Indicator class](backend/src/backend/business/indicators/indicator.py)
+
+Each indicator implementation must have a unique id in the range 1001-1999.
+
+
+### KPIs
+
+Real KPIs implementations are a subclass of the[KPI class](backend/src/backend/business/kpis/kpi.py)
+
+Each KPI implementation must have a unique id in the range 2001-2999.
+

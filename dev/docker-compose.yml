@@ -12,9 +12,9 @@ services:
       context: ../backend
     container_name: om_backend-tools
     volumes:
-      - ../backend/src:/work/src
-      - ../backend/tasks.py:/work/tasks.py
-      - ../backend/tests:/work/tests
+      - ../backend/src:/app/src
+      - ../backend/tasks.py:/app/tasks.py
+      - ../backend/tests:/app/tests
     environment:
-      DATABASE_URL: sqlite+pysqlite://///work/src/backend/dev.db
-      TEST_DATABASE_URL: sqlite+pysqlite://///work/tests/test.db
+      DATABASE_URL: sqlite+pysqlite://///app/src/backend/dev.db
+      TEST_DATABASE_URL: sqlite+pysqlite://///app/tests/test.db

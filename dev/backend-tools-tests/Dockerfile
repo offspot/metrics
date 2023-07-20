@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
-WORKDIR /work
+WORKDIR /app
 RUN pip install --no-cache-dir --upgrade pip toml invoke
-COPY pyproject.toml README.md tasks.py /work/
+COPY pyproject.toml README.md tasks.py /app/
 RUN invoke install-deps --package qa
 CMD ["sleep", "Infinity"]
