@@ -3,7 +3,7 @@ from typing import cast
 from ..inputs.content_visit import ContentHomeVisit as ContentHomeVisitInput
 from ..inputs.content_visit import ContentObjectVisit as ContentObjectVisitInput
 from ..inputs.input import Input
-from . import DimensionsValues
+from .dimensions import DimensionsValues
 from .indicator import Indicator
 from .recorder import IntCounterRecorder, Recorder
 
@@ -24,7 +24,7 @@ class ContentHomeVisit(Indicator):
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
         input = cast(ContentHomeVisitInput, input)
-        return (input.content,)
+        return DimensionsValues(input.content, None, None)
 
 
 class ContentObjectVisit(Indicator):
@@ -40,7 +40,4 @@ class ContentObjectVisit(Indicator):
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
         input = cast(ContentObjectVisitInput, input)
-        return (
-            input.content,
-            input.object,
-        )
+        return DimensionsValues(input.content, input.object, None)

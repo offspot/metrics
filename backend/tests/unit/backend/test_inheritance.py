@@ -1,6 +1,6 @@
 import pytest
 
-from backend.business.indicators import DimensionsValues
+from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.recorder import IntCounterRecorder, Recorder
 from backend.business.inputs.input import Input
@@ -14,7 +14,7 @@ class SampleGenericIndicator(Indicator):
         return True
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        return ()
+        return DimensionsValues(None, None, None)
 
 
 @pytest.mark.parametrize(

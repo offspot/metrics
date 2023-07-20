@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.indicators.holder import Record
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
@@ -30,7 +31,7 @@ def test_one_input(
     processor.process_input(input1)
     records = list(total_indicator.get_records())
     expected_records = [
-        Record(value=1, dimensions=()),
+        Record(value=1, dimensions=DimensionsValues(None, None, None)),
     ]
     assert records == expected_records
 
@@ -43,7 +44,7 @@ def test_one_input_repeated(
     processor.process_input(input1)
     records = list(total_indicator.get_records())
     expected_records = [
-        Record(value=2, dimensions=()),
+        Record(value=2, dimensions=DimensionsValues(None, None, None)),
     ]
     assert records == expected_records
 
@@ -73,8 +74,8 @@ def test_total_by_content(
     processor.process_input(input3)
     records = list(total_by_content_indicator.get_records())
     expected_records = [
-        Record(value=3, dimensions=("content1",)),
-        Record(value=1, dimensions=("content2",)),
+        Record(value=3, dimensions=DimensionsValues("content1", None, None)),
+        Record(value=1, dimensions=DimensionsValues("content2", None, None)),
     ]
     assert records == expected_records
 
@@ -95,9 +96,9 @@ def test_total_by_content_and_subfolder(
     processor.process_input(input3)
     records = list(total_by_content_and_subfolder_indicator.get_records())
     expected_records = [
-        Record(value=2, dimensions=("content1", "subfolder1")),
-        Record(value=1, dimensions=("content1", "subfolder2")),
-        Record(value=1, dimensions=("content2", "subfolder1")),
+        Record(value=2, dimensions=DimensionsValues("content1", "subfolder1", None)),
+        Record(value=1, dimensions=DimensionsValues("content1", "subfolder2", None)),
+        Record(value=1, dimensions=DimensionsValues("content2", "subfolder1", None)),
     ]
     assert records == expected_records
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-from backend.business.indicators import DimensionsValues
+from backend.business.indicators.dimensions import DimensionsValues
 
 T = TypeVar("T")
 
@@ -12,9 +12,6 @@ class Holder(Generic[T]):
 
     value: T
     dimensions: DimensionsValues
-
-    def get_dimension_value(self, dimension: int) -> str | None:
-        return self.dimensions[dimension] if len(self.dimensions) > dimension else None
 
 
 @dataclass

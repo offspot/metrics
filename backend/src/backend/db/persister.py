@@ -14,12 +14,6 @@ from backend.db.models import IndicatorState as StateDb
 from backend.db.models import KpiValue as KpiValueDb
 
 
-class TooManyDimensions(Exception):
-    """Raised when an indicator has too many dimensions, not suppported in storage"""
-
-    pass
-
-
 class Persister:
     @classmethod
     def clear_indicator_states(cls, session: Session) -> None:
@@ -44,22 +38,18 @@ class Persister:
         """Store all dimensions of all indicators in DB if not already present"""
         for indicator in indicators:
             for record in indicator.get_records():
-                nb_dimensions = len(record.dimensions)
-                if nb_dimensions > 3:
-                    raise TooManyDimensions()
-
                 dbDimension = session.execute(
                     sa.select(DimensionDb)
-                    .where(DimensionDb.value0 == record.get_dimension_value(0))
-                    .where(DimensionDb.value1 == record.get_dimension_value(1))
-                    .where(DimensionDb.value2 == record.get_dimension_value(2))
+                    .where(DimensionDb.value0 == record.dimensions.value0)
+                    .where(DimensionDb.value1 == record.dimensions.value1)
+                    .where(DimensionDb.value2 == record.dimensions.value2)
                 ).scalar_one_or_none()
 
                 if not dbDimension:
                     dbDimension = DimensionDb(
-                        record.get_dimension_value(0),
-                        record.get_dimension_value(1),
-                        record.get_dimension_value(2),
+                        record.dimensions.value0,
+                        record.dimensions.value1,
+                        record.dimensions.value2,
                     )
                     session.add(dbDimension)
 
@@ -72,9 +62,9 @@ class Persister:
             for record in indicator.get_records():
                 dbDimension = session.execute(
                     sa.select(DimensionDb)
-                    .where(DimensionDb.value0 == record.get_dimension_value(0))
-                    .where(DimensionDb.value1 == record.get_dimension_value(1))
-                    .where(DimensionDb.value2 == record.get_dimension_value(2))
+                    .where(DimensionDb.value0 == record.dimensions.value0)
+                    .where(DimensionDb.value1 == record.dimensions.value1)
+                    .where(DimensionDb.value2 == record.dimensions.value2)
                 ).scalar_one()
                 dbRecord = RecordDb(indicator.unique_id, record.value)
                 dbRecord.dimension = dbDimension
@@ -90,9 +80,9 @@ class Persister:
             for state in indicator.get_states():
                 dbDimension = session.execute(
                     sa.select(DimensionDb)
-                    .where(DimensionDb.value0 == state.get_dimension_value(0))
-                    .where(DimensionDb.value1 == state.get_dimension_value(1))
-                    .where(DimensionDb.value2 == state.get_dimension_value(2))
+                    .where(DimensionDb.value0 == state.dimensions.value0)
+                    .where(DimensionDb.value1 == state.dimensions.value1)
+                    .where(DimensionDb.value2 == state.dimensions.value2)
                 ).scalar_one()
                 dbState = StateDb(indicator.unique_id, state.value)
                 dbState.dimension = dbDimension

@@ -4,7 +4,7 @@ from typing import Generator, TypeAlias, cast
 
 import pytest
 
-from backend.business.indicators import DimensionsValues
+from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
 from backend.business.indicators.recorder import IntCounterRecorder, Recorder
@@ -43,7 +43,7 @@ class TotalIndicator(Indicator):
         return IntCounterRecorder()
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        return tuple()
+        return DimensionsValues(None, None, None)
 
 
 class TotalByContentIndicator(Indicator):
@@ -59,7 +59,7 @@ class TotalByContentIndicator(Indicator):
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
         input = cast(TestInput, input)
-        return (input.content,)
+        return DimensionsValues(input.content, None, None)
 
 
 class TotalByContentAndSubfolderIndicator(Indicator):
@@ -75,7 +75,7 @@ class TotalByContentAndSubfolderIndicator(Indicator):
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
         input = cast(TestInput, input)
-        return (input.content, input.subfolder)
+        return DimensionsValues(input.content, input.subfolder, None)
 
 
 @pytest.fixture(scope="session")

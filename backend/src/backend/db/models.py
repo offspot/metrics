@@ -12,7 +12,7 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql.schema import MetaData
 
-from backend.business.indicators import DimensionsValues
+from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.period import Period
 
 
@@ -108,14 +108,7 @@ class IndicatorDimension(Base):
     value2: Mapped[Optional[str]]
 
     def to_values(self) -> DimensionsValues:
-        if self.value0 and self.value1 and self.value2:
-            return (self.value0, self.value1, self.value2)
-        elif self.value0 and self.value1:
-            return (self.value0, self.value1)
-        elif self.value0:
-            return (self.value0,)
-        else:
-            return tuple()
+        return DimensionsValues(self.value0, self.value1, self.value2)
 
 
 class IndicatorRecord(Base):
