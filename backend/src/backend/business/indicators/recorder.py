@@ -11,13 +11,15 @@ class Recorder(abc.ABC):
         """Process an input by updating recorder internal state"""
         ...  # pragma: nocover
 
+    @property
     @abc.abstractmethod
-    def get_value(self) -> int:
+    def value(self) -> int:
         """Return the final value of the recorder, based on internal state"""
         ...  # pragma: nocover
 
+    @property
     @abc.abstractmethod
-    def get_state(self) -> str:
+    def state(self) -> str:
         """Return a serialized representation of recorder internal state"""
         ...  # pragma: nocover
 
@@ -37,11 +39,13 @@ class IntCounterRecorder(Recorder):
         """Processing an input consists simply in updating the counter"""
         self.counter += 1
 
-    def get_value(self) -> int:
+    @property
+    def value(self) -> int:
         """Retrieving the value consists simply is getting the counter"""
         return self.counter
 
-    def get_state(self) -> str:
+    @property
+    def state(self) -> str:
         """Return a serialized representation of recorder internal state"""
         return f"{self.counter}"
 

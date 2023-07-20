@@ -13,35 +13,37 @@ class Processor:
     """A processor is responsible to manage underlying business logic processor"""
 
     @dbsession
-    def startup(self, now: Period, session: Session):
+    def startup(self, current_period: Period, session: Session):
         """Start the processing logic and restore data from DB to memory"""
 
         # Create underlying processors
-        self.indicator_processor = IndicatorProcessor(now=now)
-        self.kpi_processor = KpiProcessor(now=now)
+        self.indicator_processor = IndicatorProcessor(current_period=current_period)
+        self.kpi_processor = KpiProcessor(current_period=current_period)
 
         # Assign existing indicators and kpis
         self.indicator_processor.indicators = [ContentHomeVisit(), ContentObjectVisit()]
         self.kpi_processor.kpis = [ContentPopularity(), ContentObjectPopularity()]
 
         # Restore data from DB to memory
-        self.indicator_processor.restore_from_db(now=now, session=session)
+        self.indicator_processor.restore_from_db(
+            current_period=current_period, session=session
+        )
         self.kpi_processor.restore_from_db(session=session)
 
     @dbsession
-    def process_tick(self, now: Period, session: Session):
+    def process_tick(self, tick_period: Period, session: Session):
         """Process a tick (once per minute)"""
         self.indicator_processor.process_tick(
-            now=now,
+            tick_period=tick_period,
             session=session,
         )
         kpi_updated = self.kpi_processor.process_tick(
-            now=now,
+            tick_period=tick_period,
             session=session,
         )
         if kpi_updated:
             self.indicator_processor.process_tick_after(
-                now=now,
+                tick_period=tick_period,
                 session=session,
             )
 

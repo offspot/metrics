@@ -2,13 +2,14 @@ import logging
 import random
 from datetime import datetime, timedelta
 
+from sqlalchemy import create_engine, delete
+from sqlalchemy.orm import Session
+
 import backend.db.models as dbm
 from backend.business.inputs.content_visit import ContentHomeVisit, ContentObjectVisit
 from backend.business.period import Period
 from backend.business.processor import Processor
 from backend.constants import BackendConf
-from sqlalchemy import create_engine, delete
-from sqlalchemy.orm import Session
 
 # Some known contents (some are repeated many times to influence the distribution)
 contents = [
@@ -84,7 +85,7 @@ def restart_processor(now: datetime) -> Processor:
     """
     logger.info("(re-)Starting processor")
     processor = Processor()
-    processor.startup(now=Period(now))
+    processor.startup(current_period=Period(now))
     return processor
 
 
@@ -174,7 +175,7 @@ def rand_sim():
         if random.randint(0, 5000) == 5000:
             # process a tick first to save everything in state ; this does not happens
             # like this in reality but is mandatory to be able to compare results
-            processor.process_tick(now=Period(now))
+            processor.process_tick(current_period=Period(now))
             processor = restart_processor(now)
 
         content = get_random_content_from_sim()
@@ -187,7 +188,7 @@ def rand_sim():
             processor.process_input(ContentObjectVisit(content, object))
 
         if random.randint(0, 10) == 10:
-            processor.process_tick(now=Period(now))
+            processor.process_tick(current_period=Period(now))
 
         if step % 1000 == 999:
             logger.info(f"{step+1} steps executed")
@@ -214,7 +215,7 @@ def small_sim():
 
     now = now + timedelta(seconds=15)
 
-    processor.process_tick(now=Period(now))
+    processor.process_tick(current_period=Period(now))
 
     processor = restart_processor(now)
 
@@ -224,7 +225,7 @@ def small_sim():
 
     now = now + timedelta(minutes=1)
 
-    processor.process_tick(now=Period(now))
+    processor.process_tick(current_period=Period(now))
 
     now = now + timedelta(minutes=59)
 
@@ -236,7 +237,7 @@ def small_sim():
 
     now = now + timedelta(minutes=1)
 
-    processor.process_tick(now=Period(now))
+    processor.process_tick(current_period=Period(now))
 
 
 if __name__ == "__main__":

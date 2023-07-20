@@ -1,7 +1,13 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
+
+
+@dataclass
+class Interval:
+    start: int
+    stop: int
 
 
 @dataclass
@@ -38,4 +44,35 @@ class Period:
             return f"{self.year:04}-{self.month:02}"
         if agg_kind == "Y":
             return f"{self.year:04}"
+        raise AttributeError
+
+    def get_interval(self, agg_kind: str) -> Interval:
+        if agg_kind == "D":
+            start = datetime(year=self.year, month=self.month, day=self.day)
+            return Interval(
+                start=int(start.timestamp()),
+                stop=int((start + timedelta(days=1)).timestamp()),
+            )
+        if agg_kind == "W":
+            start = datetime(
+                year=self.year, month=self.month, day=self.day
+            ) + timedelta(days=1 - self.weekday)
+            return Interval(
+                start=int(start.timestamp()),
+                stop=int((start + timedelta(days=7)).timestamp()),
+            )
+        if agg_kind == "M":
+            start = datetime(year=self.year, month=self.month, day=1)
+            stop = datetime(year=self.year, month=self.month + 1, day=1)
+            return Interval(
+                start=int(start.timestamp()),
+                stop=int(stop.timestamp()),
+            )
+        if agg_kind == "Y":
+            start = datetime(year=self.year, month=1, day=1)
+            stop = datetime(year=self.year + 1, month=1, day=1)
+            return Interval(
+                start=int(start.timestamp()),
+                stop=int(stop.timestamp()),
+            )
         raise AttributeError

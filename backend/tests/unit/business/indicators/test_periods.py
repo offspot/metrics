@@ -1,11 +1,12 @@
 from datetime import datetime
 
 import pytest
-from sqlalchemy.orm import Session
-
+from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
+from backend.business.inputs.input import Input
 from backend.business.period import Period
 from backend.db.models import IndicatorPeriod
+from sqlalchemy.orm import Session
 
 
 @pytest.mark.parametrize(
@@ -27,14 +28,17 @@ def test_periods(
     expected_day: int,
     expected_hour: int,
     expected_weekday: int,
+    input1: Input,
+    total_indicator: Indicator,
     dbsession: Session,
 ) -> None:
     processor = Processor(Period(datetime.fromisoformat(init_iso_datetime)))
+    processor.indicators = [total_indicator]
+    processor.process_input(input1)
     init_period = processor.current_period
     processor.process_tick(
         Period(datetime.fromisoformat(next_iso_datetime)),
         dbsession,
-        force_period_persistence=True,
     )
     next_period = processor.current_period
     assert (init_period != next_period) == has_changed

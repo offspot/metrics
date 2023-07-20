@@ -197,13 +197,14 @@ class Persister:
         )
 
     @classmethod
-    def cleanup_old_stuff(cls, now: PeriodBiz, session: Session) -> None:
+    def cleanup_old_stuff(cls, current_period: PeriodBiz, session: Session) -> None:
         """Delete old stuff from DB
 
-        For now, olf stuff is indicators older than 1 year and associated data
+        For now, olf stuff is indicators older than 1 year compared to current_period.
+        Unused associated data (records, states, dimensions) are cleaned as well.
         """
 
-        min_ts = (now.get_datetime() - relativedelta(years=1)).timestamp()
+        min_ts = (current_period.get_datetime() - relativedelta(years=1)).timestamp()
 
         # delete records associated with old periods
         session.execute(

@@ -43,16 +43,14 @@ def test_timestamps(
     expected_start_ts: int,
     expected_end_ts: int,
 ) -> None:
-    res = Processor.get_timestamps(
-        agg_kind=agg_kind, now=PeriodBiz(datetime.fromisoformat(now))
-    )
+    res = PeriodBiz(datetime.fromisoformat(now)).get_interval(agg_kind=agg_kind)
     assert res.start == expected_start_ts
     assert res.stop == expected_end_ts
 
 
 def test_timestamps_wrong_kind() -> None:
     with pytest.raises(AttributeError):
-        Processor.get_timestamps(agg_kind="Q", now=PeriodBiz(datetime.now()))
+        PeriodBiz(datetime.now()).get_interval(agg_kind="Q")
 
 
 @pytest.mark.parametrize(
@@ -102,14 +100,15 @@ def test_process_tick(
 ) -> None:
     processor.kpis = [dummy_kpi]
     dbsession.execute(delete(KpiValue))
-    processor.process_tick(now=PeriodBiz(init_datetime), session=dbsession)
+    processor.process_tick(tick_period=PeriodBiz(init_datetime), session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 0
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(minutes=1)), session=dbsession
+        tick_period=PeriodBiz(init_datetime + timedelta(minutes=1)),
+        session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 0
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(hours=1)), session=dbsession
+        tick_period=PeriodBiz(init_datetime + timedelta(hours=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
     assert sorted(
@@ -122,7 +121,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(hours=4)), session=dbsession
+        tick_period=PeriodBiz(init_datetime + timedelta(hours=4)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
     assert sorted(
@@ -135,7 +134,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(days=1)), session=dbsession
+        tick_period=PeriodBiz(init_datetime + timedelta(days=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
     assert sorted(
@@ -149,7 +148,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(days=1) + timedelta(hours=1)),
+        tick_period=PeriodBiz(init_datetime + timedelta(days=1) + timedelta(hours=1)),
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
@@ -165,7 +164,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(days=2)), session=dbsession
+        tick_period=PeriodBiz(init_datetime + timedelta(days=2)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
     assert sorted(
@@ -180,7 +179,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(days=2) + timedelta(hours=1)),
+        tick_period=PeriodBiz(init_datetime + timedelta(days=2) + timedelta(hours=1)),
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
@@ -197,7 +196,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(days=7)), session=dbsession
+        tick_period=PeriodBiz(init_datetime + timedelta(days=7)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
     assert sorted(
@@ -213,7 +212,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        now=PeriodBiz(init_datetime + timedelta(days=7) + timedelta(hours=1)),
+        tick_period=PeriodBiz(init_datetime + timedelta(days=7) + timedelta(hours=1)),
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 7

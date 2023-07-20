@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 from typing import List
 
 from dateutil.relativedelta import relativedelta
@@ -11,31 +9,25 @@ from backend.business.period import Period
 from backend.db.persister import Persister
 
 
-@dataclass
-class Timestamps:
-    start: int
-    stop: int
-
-
 class Processor:
     """A processor is responsible for transforming indicator records into kpis"""
 
-    def __init__(self, now: Period) -> None:
+    def __init__(self, current_period: Period) -> None:
         self.kpis: List[Kpi] = []
-        self.current_period = now
-        self.current_day = now.get_truncated_value("D")
+        self.current_period = current_period
+        self.current_day = current_period.get_truncated_value("D")
 
-    def process_tick(self, now: Period, session: Session) -> bool:
+    def process_tick(self, tick_period: Period, session: Session) -> bool:
         """Process a clock tick
 
         Returns True if KPIs have been updated"""
 
         # if we are in the same period, nothing to do
-        if self.current_period == now:
+        if self.current_period == tick_period:
             return False
 
         period_to_compute = self.current_period
-        self.current_period = now
+        self.current_period = tick_period
         # create/update KPIs values for every kind of aggregation period
         # that are update hourly
         for kpi in self.kpis:
@@ -46,13 +38,13 @@ class Processor:
 
         # create/update KPIs values for yearly aggregation period
         # which are updated only once per day
-        now_day = now.get_truncated_value("D")
-        if self.current_day != now_day:
+        tick_day = tick_period.get_truncated_value("D")
+        if self.current_day != tick_day:
             for kpi in self.kpis:
                 Processor.compute_kpi_values_for_aggregation_kind(
                     now=period_to_compute, kpi=kpi, agg_kind="Y", session=session
                 )
-            self.current_day = now_day
+            self.current_day = tick_day
 
         return True
 
@@ -98,7 +90,7 @@ class Processor:
         current_agg_value = now.get_truncated_value(agg_kind)
         aggregations_to_keep = Processor.get_aggregations_to_keep(agg_kind, now)
         value_updated = False
-        timestamps = cls.get_timestamps(agg_kind=agg_kind, now=now)
+        timestamps = now.get_interval(agg_kind=agg_kind)
         for value in values:
             if aggregations_to_keep and value.agg_value not in aggregations_to_keep:
                 # delete old KPI values
@@ -142,38 +134,6 @@ class Processor:
                 kpi_value=value.kpi_value,
                 session=session,
             )
-
-    @classmethod
-    def get_timestamps(cls, agg_kind: str, now: Period) -> Timestamps:
-        if agg_kind == "D":
-            start = datetime(year=now.year, month=now.month, day=now.day)
-            return Timestamps(
-                start=int(start.timestamp()),
-                stop=int((start + timedelta(days=1)).timestamp()),
-            )
-        if agg_kind == "W":
-            start = datetime(year=now.year, month=now.month, day=now.day) + timedelta(
-                days=1 - now.weekday
-            )
-            return Timestamps(
-                start=int(start.timestamp()),
-                stop=int((start + timedelta(days=7)).timestamp()),
-            )
-        if agg_kind == "M":
-            start = datetime(year=now.year, month=now.month, day=1)
-            stop = datetime(year=now.year, month=now.month + 1, day=1)
-            return Timestamps(
-                start=int(start.timestamp()),
-                stop=int(stop.timestamp()),
-            )
-        if agg_kind == "Y":
-            start = datetime(year=now.year, month=1, day=1)
-            stop = datetime(year=now.year + 1, month=1, day=1)
-            return Timestamps(
-                start=int(start.timestamp()),
-                stop=int(stop.timestamp()),
-            )
-        raise AttributeError
 
     def restore_from_db(self, session: Session) -> None:
         """Restore data from database, typically after a process restart"""

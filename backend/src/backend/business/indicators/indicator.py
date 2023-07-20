@@ -69,7 +69,7 @@ class Indicator(abc.ABC):
     ) -> Generator[Record, None, None]:
         """Return all records (values with associated dimensions)."""
         for dimensions_values, recorder in self.recorders.items():
-            yield Record(value=recorder.get_value(), dimensions=dimensions_values)
+            yield Record(value=recorder.value, dimensions=dimensions_values)
 
     def get_states(
         self,
@@ -78,7 +78,7 @@ class Indicator(abc.ABC):
 
         (internal state representation for each associated dimensions)."""
         for dimensions_values, recorder in self.recorders.items():
-            yield State(value=recorder.get_state(), dimensions=dimensions_values)
+            yield State(value=recorder.state, dimensions=dimensions_values)
 
     def process_input(self, input: Input) -> None:
         """Process a given input event
