@@ -23,7 +23,7 @@ class Persister:
     @classmethod
     def persist_period(cls, period: PeriodBiz, session: Session) -> PeriodDb:
         """Store one period in DB in DB if not already present"""
-        dbPeriod = PeriodDb.get_from_db_or_none(period, session)
+        dbPeriod = PeriodDb.get_or_none(period, session)
 
         if not dbPeriod:
             dbPeriod = PeriodDb.from_period(period)

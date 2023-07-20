@@ -73,9 +73,7 @@ class IndicatorPeriod(Base):
         )
 
     @classmethod
-    def get_from_db_or_none(
-        cls, period: Period, session: Session
-    ) -> "IndicatorPeriod | None":
+    def get_or_none(cls, period: Period, session: Session) -> "IndicatorPeriod | None":
         """Search for a period in DB based on business object"""
         return session.execute(
             select(IndicatorPeriod)

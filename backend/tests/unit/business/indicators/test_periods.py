@@ -1,12 +1,13 @@
 from datetime import datetime
 
 import pytest
+from sqlalchemy.orm import Session
+
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
 from backend.business.inputs.input import Input
 from backend.business.period import Period
 from backend.db.models import IndicatorPeriod
-from sqlalchemy.orm import Session
 
 
 @pytest.mark.parametrize(
@@ -42,7 +43,7 @@ def test_periods(
     )
     next_period = processor.current_period
     assert (init_period != next_period) == has_changed
-    dbPeriod = IndicatorPeriod.get_from_db_or_none(init_period, dbsession)
+    dbPeriod = IndicatorPeriod.get_or_none(init_period, dbsession)
     assert dbPeriod
     assert dbPeriod.year == expected_year
     assert dbPeriod.month == expected_month
