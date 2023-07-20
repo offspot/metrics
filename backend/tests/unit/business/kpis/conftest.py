@@ -22,7 +22,7 @@ def processor(init_datetime: datetime) -> ProcessorGenerator:
 class DummyKpi(Kpi):
     """A dummy KPI which is not using indicators at all to simplify testing"""
 
-    unique_id = -1  # this ID is unique to each kind of kpi
+    unique_id = -2001  # this ID is unique to each kind of kpi
 
     def get_value(
         self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session

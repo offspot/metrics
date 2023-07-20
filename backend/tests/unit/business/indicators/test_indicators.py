@@ -20,8 +20,7 @@ from backend.db.models import (
 
 def test_no_input(processor: Processor, total_indicator: Indicator) -> None:
     processor.indicators.append(total_indicator)
-    records = list(total_indicator.get_records())
-    assert len(records) == 0
+    assert len(list(total_indicator.get_records())) == 0
 
 
 def test_one_input(
@@ -29,11 +28,9 @@ def test_one_input(
 ) -> None:
     processor.indicators = [total_indicator]
     processor.process_input(input1)
-    records = list(total_indicator.get_records())
-    expected_records = [
+    assert list(total_indicator.get_records()) == [
         Record(value=1, dimensions=DimensionsValues(None, None, None)),
     ]
-    assert records == expected_records
 
 
 def test_one_input_repeated(
@@ -42,11 +39,9 @@ def test_one_input_repeated(
     processor.indicators = [total_indicator]
     processor.process_input(input1)
     processor.process_input(input1)
-    records = list(total_indicator.get_records())
-    expected_records = [
+    assert list(total_indicator.get_records()) == [
         Record(value=2, dimensions=DimensionsValues(None, None, None)),
     ]
-    assert records == expected_records
 
 
 def test_another_input(
@@ -54,8 +49,7 @@ def test_another_input(
 ) -> None:
     processor.indicators = [total_indicator]
     processor.process_input(another_input)
-    records = list(total_indicator.get_records())
-    assert len(records) == 0
+    assert len(list(total_indicator.get_records())) == 0
 
 
 def test_total_by_content(
@@ -72,12 +66,10 @@ def test_total_by_content(
     processor.process_input(input2)
     processor.process_input(another_input)
     processor.process_input(input3)
-    records = list(total_by_content_indicator.get_records())
-    expected_records = [
+    assert list(total_by_content_indicator.get_records()) == [
         Record(value=3, dimensions=DimensionsValues("content1", None, None)),
         Record(value=1, dimensions=DimensionsValues("content2", None, None)),
     ]
-    assert records == expected_records
 
 
 def test_total_by_content_and_subfolder(
@@ -94,13 +86,11 @@ def test_total_by_content_and_subfolder(
     processor.process_input(input2)
     processor.process_input(another_input)
     processor.process_input(input3)
-    records = list(total_by_content_and_subfolder_indicator.get_records())
-    expected_records = [
+    assert list(total_by_content_and_subfolder_indicator.get_records()) == [
         Record(value=2, dimensions=DimensionsValues("content1", "subfolder1", None)),
         Record(value=1, dimensions=DimensionsValues("content1", "subfolder2", None)),
         Record(value=1, dimensions=DimensionsValues("content2", "subfolder1", None)),
     ]
-    assert records == expected_records
 
 
 def test_process_tick(
@@ -168,10 +158,18 @@ def test_restore_from_db_current_period(
         ("2022-06-01 13:00:00", "2022-06-01 13:10:00", "2022-06-01 13:00:00"),
         ("2023-06-01 13:00:00", "2023-06-01 14:10:00", "2023-06-01 14:00:00"),
     ]
-    for data in datas:
-        dbsession.add(IndicatorPeriod.from_datetime(datetime.fromisoformat(data[0])))
-        processor.restore_from_db(Period(datetime.fromisoformat(data[1])), dbsession)
-        assert processor.current_period == Period(datetime.fromisoformat(data[2]))
+    for indicator_period_in_db, now_datetime, expected_current_datetime in datas:
+        dbsession.add(
+            IndicatorPeriod.from_datetime(
+                datetime.fromisoformat(indicator_period_in_db)
+            )
+        )
+        processor.restore_from_db(
+            Period(datetime.fromisoformat(now_datetime)), dbsession
+        )
+        assert processor.current_period == Period(
+            datetime.fromisoformat(expected_current_datetime)
+        )
 
 
 def test_restore_from_db_continue_same_period(

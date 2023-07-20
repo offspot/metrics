@@ -8,7 +8,7 @@ from ..agg_kind import AggKind
 class Kpi(abc.ABC):
     """A generic KPI interface"""
 
-    unique_id = 0  # this ID is unique to each kind of kpi
+    unique_id = 2000  # this ID is unique to each kind of kpi
 
     @abc.abstractmethod
     def get_value(

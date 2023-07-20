@@ -157,7 +157,6 @@ def get_random_object_from_sim(content: str) -> str:
 def rand_sim():
     """This is a big simulation, inputing random stuff many times"""
     nbsteps = 10000
-    step = 0
 
     clear_db()
 
@@ -167,8 +166,7 @@ def rand_sim():
     # seed with a constant value to have reproducible sims (123456 is just random)
     random.seed(a=123456)
 
-    while step < nbsteps:
-        step += 1
+    for step in range(nbsteps + 1):
         now = rand_sim_update_now(now)
 
         # randomly restart the processor (like if a shutdown occured)

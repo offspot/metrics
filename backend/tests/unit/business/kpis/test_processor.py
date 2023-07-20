@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from backend.business.agg_kind import AggKind
 from backend.business.kpis.kpi import Kpi
 from backend.business.kpis.processor import Processor
-from backend.business.period import Period as PeriodBiz
+from backend.business.period import Period as Period
 from backend.db import count_from_stmt
 from backend.db.models import IndicatorPeriod as PeriodDb
 from backend.db.models import KpiValue
@@ -44,7 +44,7 @@ def test_timestamps(
     expected_start_ts: int,
     expected_end_ts: int,
 ) -> None:
-    res = PeriodBiz(datetime.fromisoformat(now)).get_interval(agg_kind=agg_kind)
+    res = Period(datetime.fromisoformat(now)).get_interval(agg_kind=agg_kind)
     assert res.start == expected_start_ts
     assert res.stop == expected_end_ts
 
@@ -77,7 +77,7 @@ def test_get_aggregations_to_keep(
     expected_periods: List[str] | None,
 ) -> None:
     res = Processor.get_aggregations_to_keep(
-        agg_kind=agg_kind, now=PeriodBiz(datetime.fromisoformat(now))
+        agg_kind=agg_kind, now=Period(datetime.fromisoformat(now))
     )
     if not expected_periods:
         assert res is None
@@ -91,15 +91,15 @@ def test_process_tick(
 ) -> None:
     processor.kpis = [dummy_kpi]
     dbsession.execute(delete(KpiValue))
-    processor.process_tick(tick_period=PeriodBiz(init_datetime), session=dbsession)
+    processor.process_tick(tick_period=Period(init_datetime), session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 0
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(minutes=1)),
+        tick_period=Period(init_datetime + timedelta(minutes=1)),
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 0
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(hours=1)), session=dbsession
+        tick_period=Period(init_datetime + timedelta(hours=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
     assert sorted(
@@ -112,7 +112,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(hours=4)), session=dbsession
+        tick_period=Period(init_datetime + timedelta(hours=4)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
     assert sorted(
@@ -125,7 +125,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(days=1)), session=dbsession
+        tick_period=Period(init_datetime + timedelta(days=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
     assert sorted(
@@ -139,7 +139,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(days=1) + timedelta(hours=1)),
+        tick_period=Period(init_datetime + timedelta(days=1) + timedelta(hours=1)),
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
@@ -155,7 +155,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(days=2)), session=dbsession
+        tick_period=Period(init_datetime + timedelta(days=2)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
     assert sorted(
@@ -170,7 +170,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(days=2) + timedelta(hours=1)),
+        tick_period=Period(init_datetime + timedelta(days=2) + timedelta(hours=1)),
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
@@ -187,7 +187,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(days=7)), session=dbsession
+        tick_period=Period(init_datetime + timedelta(days=7)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
     assert sorted(
@@ -203,7 +203,7 @@ def test_process_tick(
         ]
     )
     processor.process_tick(
-        tick_period=PeriodBiz(init_datetime + timedelta(days=7) + timedelta(hours=1)),
+        tick_period=Period(init_datetime + timedelta(days=7) + timedelta(hours=1)),
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 7

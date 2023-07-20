@@ -17,7 +17,7 @@ class Indicator(abc.ABC):
     a given processing period.
     """
 
-    unique_id = 0  # this ID is unique to each kind of indicator
+    unique_id = 1000  # this ID is unique to each kind of indicator
 
     def __init__(self) -> None:
         super().__init__()
@@ -35,8 +35,8 @@ class Indicator(abc.ABC):
         ...  # pragma: nocover
 
     @abc.abstractmethod
-    def create_new_recorder(self) -> Recorder:
-        """Creates a new recorder of appropriate type.
+    def get_new_recorder(self) -> Recorder:
+        """Gets a new recorder of appropriate type.
 
         Appropriate record type depends on the indicator implementation.
         """
@@ -49,7 +49,7 @@ class Indicator(abc.ABC):
         matching, or creates a new recorder with appropriate dimension values"""
         dimensions_values = self.get_dimensions_values(input)
         if dimensions_values not in self.recorders:
-            self.add_recorder(dimensions_values, self.create_new_recorder())
+            self.add_recorder(dimensions_values, self.get_new_recorder())
         return self.recorders[dimensions_values]
 
     def add_recorder(

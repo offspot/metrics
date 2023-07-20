@@ -142,7 +142,7 @@ class Processor:
         """Restore data from database, typically after a process restart"""
 
         # retrieve last known period from DB
-        lastPeriod = Persister.get_last_current_period(session)
+        lastPeriod = Persister.get_last_period(session)
 
         # if there is no last period, nothing to do
         if not lastPeriod:

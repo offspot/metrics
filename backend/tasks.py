@@ -98,9 +98,9 @@ def alembic(c: Context, args: str = "", test_db: bool = False):
         c.run(
             f"{sys.executable} -m alembic {args}",
             env={
-                "DATABASE_URL": os.environ["TEST_DATABASE_URL"]
+                "DATABASE_URL": os.getenv("TEST_DATABASE_URL")
                 if test_db
-                else os.environ["DATABASE_URL"]
+                else os.getenv("DATABASE_URL")
             },
         )
 
@@ -110,9 +110,9 @@ def db_upgrade(c: Context, rev: str = "head", test_db: bool = False):
     c.run(
         f'invoke alembic --args "upgrade {rev}"',
         env={
-            "DATABASE_URL": os.environ["TEST_DATABASE_URL"]
+            "DATABASE_URL": os.getenv("TEST_DATABASE_URL")
             if test_db
-            else os.environ["DATABASE_URL"]
+            else os.getenv("DATABASE_URL")
         },
     )
 
@@ -161,7 +161,7 @@ def report_qa_tools_versions(c: Context):
     isort_res = c.run(f"{sys.executable} -m isort --version", warn=True)
     print()
     print("pyright:")
-    pyright_res = c.run(f"{sys.executable} -m pyright --version", warn=True)
+    pyright_res = c.run("pyright --version", warn=True)
     print()
 
     if (
@@ -206,7 +206,7 @@ def check_qa(c: Context):
             sys.exit(1)
 
     print("pyright:")
-    pyright_res = c.run(f"{sys.executable} -m pyright", warn=True)
+    pyright_res = c.run("pyright", warn=True)
     print("")  # clearing pyright's output (missing CRLF)
 
     if not pyright_res or pyright_res.exited:

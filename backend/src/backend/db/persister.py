@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from ..business.agg_kind import AggKind
 from ..business.indicators.indicator import Indicator
-from ..business.kpis.value import Value as KpiValueBiz
-from ..business.period import Period as PeriodBiz
+from ..business.kpis.value import Value
+from ..business.period import Period
 from ..db.models import IndicatorDimension as DimensionDb
 from ..db.models import IndicatorPeriod as PeriodDb
 from ..db.models import IndicatorRecord as RecordDb
@@ -22,7 +22,7 @@ class Persister:
         session.execute(sa.delete(StateDb))
 
     @classmethod
-    def persist_period(cls, period: PeriodBiz, session: Session) -> PeriodDb:
+    def persist_period(cls, period: Period, session: Session) -> PeriodDb:
         """Store one period in DB in DB if not already present"""
         dbPeriod = PeriodDb.get_or_none(period, session)
 
@@ -91,7 +91,7 @@ class Persister:
                 session.add(dbState)
 
     @classmethod
-    def get_last_current_period(cls, session: Session) -> Optional[PeriodBiz]:
+    def get_last_period(cls, session: Session) -> Optional[Period]:
         """Return the last period stored in DB"""
         dbPeriod = session.execute(
             sa.select(PeriodDb)
@@ -107,7 +107,7 @@ class Persister:
 
     @classmethod
     def get_restore_data(
-        cls, period: PeriodBiz, indicator_id: int, session: Session
+        cls, period: Period, indicator_id: int, session: Session
     ) -> List[StateDb]:
         """Return all state data to restore from DB to memory"""
         return list(
@@ -125,17 +125,15 @@ class Persister:
     @classmethod
     def get_kpi_values(
         cls, kpi_id: int, agg_kind: AggKind, session: Session
-    ) -> List[KpiValueBiz]:
+    ) -> List[Value]:
         """Return all KPI values for a given KPI and a given kind of period"""
         return [
-            KpiValueBiz(agg_value=dbValue.agg_value, kpi_value=dbValue.kpi_value)
-            for dbValue in list(
-                session.execute(
-                    sa.select(KpiValueDb)
-                    .where(KpiValueDb.kpi_id == kpi_id)
-                    .where(KpiValueDb.agg_kind == agg_kind)
-                ).scalars()
-            )
+            Value(agg_value=dbValue.agg_value, kpi_value=dbValue.kpi_value)
+            for dbValue in session.execute(
+                sa.select(KpiValueDb)
+                .where(KpiValueDb.kpi_id == kpi_id)
+                .where(KpiValueDb.agg_kind == agg_kind)
+            ).scalars()
         ]
 
     @classmethod
@@ -188,20 +186,21 @@ class Persister:
         )
 
     @classmethod
-    def cleanup_old_stuff(cls, current_period: PeriodBiz, session: Session) -> None:
-        """Delete old stuff from DB
+    def cleanup_obsolete_data(cls, current_period: Period, session: Session) -> None:
+        """Delete obsolete data from DB
 
-        For now, olf stuff is indicators older than 1 year compared to current_period.
-        Unused associated data (records, states, dimensions) are cleaned as well.
+        For now, obsolete data is indicators older than 1 year compared to current
+        period. Associated unused data (records, states, dimensions) is cleaned as
+        well.
         """
 
-        min_ts = current_period.get_shifted(relativedelta(years=-1)).timestamp
+        oldest_valid_ts = current_period.get_shifted(relativedelta(years=-1)).timestamp
 
         # delete records associated with old periods
         session.execute(
             sa.delete(RecordDb).where(
                 RecordDb.period_id.in_(
-                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < min_ts)
+                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < oldest_valid_ts)
                 )
             )
         )
@@ -211,13 +210,13 @@ class Persister:
         session.execute(
             sa.delete(StateDb).where(
                 StateDb.period_id.in_(
-                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < min_ts)
+                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < oldest_valid_ts)
                 )
             )
         )
 
         # delete old periods
-        session.execute(sa.delete(PeriodDb).where(PeriodDb.timestamp < min_ts))
+        session.execute(sa.delete(PeriodDb).where(PeriodDb.timestamp < oldest_valid_ts))
 
         # delete indicator dimensions that are not used anymore
         session.execute(

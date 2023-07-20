@@ -14,9 +14,9 @@ class ContentObjectVisit(Input):
     # name of the content (e.g. ZIM package name)
     content: str
 
-    # name of the object (e.g. title of Wikipedia article or URL of Stack Overflow
+    # name of the item (e.g. title of Wikipedia article or URL of Stack Overflow
     # question)
-    object: str
+    item: str
 
 
 @dataclass

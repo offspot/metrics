@@ -10,7 +10,7 @@ from .period import Period
 
 
 class Processor:
-    """A processor is responsible to manage underlying business logic processor"""
+    """A processor is responsible for managing underlying business logic processor"""
 
     @dbsession
     def startup(self, current_period: Period, session: Session):
@@ -42,7 +42,7 @@ class Processor:
             session=session,
         )
         if kpi_updated:
-            self.indicator_processor.process_tick_after(
+            self.indicator_processor.post_process_tick(
                 tick_period=tick_period,
                 session=session,
             )

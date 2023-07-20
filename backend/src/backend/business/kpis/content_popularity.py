@@ -7,7 +7,7 @@ from backend.business.kpis.kpi import Kpi
 
 from ...db.models import IndicatorDimension, IndicatorPeriod, IndicatorRecord
 from ..agg_kind import AggKind
-from ..indicators.content_visit import CONTENT_HOME_VISIT_ID, CONTENT_OBJECT_VISIT_ID
+from ..indicators.content_visit import ContentHomeVisit, ContentObjectVisit
 
 
 class ContentPopularity(Kpi):
@@ -17,7 +17,7 @@ class ContentPopularity(Kpi):
      content
     """
 
-    unique_id = 1
+    unique_id = 2001
 
     def get_value(
         self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
@@ -32,7 +32,7 @@ class ContentPopularity(Kpi):
             )
             .join(IndicatorRecord)
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == CONTENT_HOME_VISIT_ID)
+            .where(IndicatorRecord.indicator_id == ContentHomeVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
             .group_by("content")
@@ -52,7 +52,7 @@ class ContentObjectPopularity(Kpi):
     of visits
     """
 
-    unique_id = 2
+    unique_id = 2002
 
     def get_value(
         self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
@@ -68,7 +68,7 @@ class ContentObjectPopularity(Kpi):
             )
             .join(IndicatorRecord)
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == CONTENT_OBJECT_VISIT_ID)
+            .where(IndicatorRecord.indicator_id == ContentObjectVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
             .group_by("content", "object")
@@ -83,9 +83,9 @@ class ContentObjectPopularity(Kpi):
         return dumps(
             list(
                 map(
-                    lambda x: {
-                        "content": x.content,
-                        "object": x.object,
+                    lambda record: {
+                        "content": record.content,
+                        "object": record.object,
                     },
                     session.execute(query),
                 )

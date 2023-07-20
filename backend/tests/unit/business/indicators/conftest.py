@@ -34,12 +34,12 @@ class AnotherTestInput(Input):
 class TotalIndicator(Indicator):
     """An indicator counting number of inputs, without any grouping"""
 
-    unique_id = -1
+    unique_id = -1001
 
     def can_process_input(self, input: Input) -> bool:
         return isinstance(input, TestInput)
 
-    def create_new_recorder(self) -> Recorder:
+    def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
@@ -49,33 +49,33 @@ class TotalIndicator(Indicator):
 class TotalByContentIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content"""
 
-    unique_id = -2
+    unique_id = -1002
 
     def can_process_input(self, input: Input) -> bool:
         return isinstance(input, TestInput)
 
-    def create_new_recorder(self) -> Recorder:
+    def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        input = cast(TestInput, input)
-        return DimensionsValues(input.content, None, None)
+        input_ = cast(TestInput, input)
+        return DimensionsValues(input_.content, None, None)
 
 
 class TotalByContentAndSubfolderIndicator(Indicator):
     """An indicator counting number of test inputs, grouped by content and subfolder"""
 
-    unique_id = -3
+    unique_id = -1003
 
     def can_process_input(self, input: Input) -> bool:
         return isinstance(input, TestInput)
 
-    def create_new_recorder(self) -> Recorder:
+    def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
     def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        input = cast(TestInput, input)
-        return DimensionsValues(input.content, input.subfolder, None)
+        input_ = cast(TestInput, input)
+        return DimensionsValues(input_.content, input_.subfolder, None)
 
 
 @pytest.fixture(scope="session")

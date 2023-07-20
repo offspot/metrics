@@ -42,8 +42,7 @@ def test_periods(
         Period(datetime.fromisoformat(next_iso_datetime)),
         dbsession,
     )
-    next_period = processor.current_period
-    assert (init_period != next_period) == has_changed
+    assert (init_period != processor.current_period) == has_changed
     dbPeriod = IndicatorPeriod.get_or_none(init_period, dbsession)
     assert dbPeriod
     assert dbPeriod.year == expected_year

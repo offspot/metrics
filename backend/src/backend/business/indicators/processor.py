@@ -67,9 +67,9 @@ class Processor:
             self.reset_state()
             self.current_period = tick_period
 
-    def process_tick_after(self, tick_period: Period, session: Session):
+    def post_process_tick(self, tick_period: Period, session: Session):
         """Process a clock tick - cleanup after KPIs have been computed"""
-        Persister.cleanup_old_stuff(tick_period, session)
+        Persister.cleanup_obsolete_data(tick_period, session)
 
     def restore_from_db(self, current_period: Period, session: Session) -> None:
         """Restore data from database, typically after a process restart"""
@@ -78,7 +78,7 @@ class Processor:
         self.reset_state()
 
         # retrieve last known period from DB
-        lastPeriod = Persister.get_last_current_period(session)
+        lastPeriod = Persister.get_last_period(session)
 
         # if there is no last period, nothing to do except set current period
         if not lastPeriod:
@@ -92,7 +92,7 @@ class Processor:
                 lastPeriod, indicator.unique_id, session
             )
             for state in states:
-                recorder = indicator.create_new_recorder()
+                recorder = indicator.get_new_recorder()
                 recorder.restore_state(state.state)
                 indicator.add_recorder(state.dimension.to_values(), recorder)
 
