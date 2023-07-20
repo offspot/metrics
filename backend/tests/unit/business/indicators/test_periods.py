@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy.orm import Session
 
+from backend.business.agg_kind import AggKind
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
 from backend.business.inputs.input import Input
@@ -55,16 +56,11 @@ def test_periods(
 @pytest.mark.parametrize(
     "curdate,kind,expected",
     [
-        ("2023-06-08 10:18:12", "Y", "2023"),
-        ("2023-06-08 10:18:12", "M", "2023-06"),
-        ("2023-06-08 10:18:12", "W", "2023 W23"),
-        ("2023-06-08 10:18:12", "D", "2023-06-08"),
+        ("2023-06-08 10:18:12", AggKind.Y, "2023"),
+        ("2023-06-08 10:18:12", AggKind.M, "2023-06"),
+        ("2023-06-08 10:18:12", AggKind.W, "2023 W23"),
+        ("2023-06-08 10:18:12", AggKind.D, "2023-06-08"),
     ],
 )
-def test_truncated_value(curdate: str, kind: str, expected: str) -> None:
+def test_truncated_value(curdate: str, kind: AggKind, expected: str) -> None:
     assert Period(datetime.fromisoformat(curdate)).get_truncated_value(kind) == expected
-
-
-def test_truncated_value_wrong_kind() -> None:
-    with pytest.raises(AttributeError):
-        Period(datetime.now()).get_truncated_value("Q")

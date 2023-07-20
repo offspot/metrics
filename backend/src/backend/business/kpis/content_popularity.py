@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from backend.business.kpis.kpi import Kpi
 
 from ...db.models import IndicatorDimension, IndicatorPeriod, IndicatorRecord
+from ..agg_kind import AggKind
 from ..indicators.content_visit import CONTENT_HOME_VISIT_ID, CONTENT_OBJECT_VISIT_ID
 
 
@@ -19,7 +20,7 @@ class ContentPopularity(Kpi):
     unique_id = 1
 
     def get_value(
-        self, agg_kind: str, start_ts: int, stop_ts: int, session: Session
+        self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
@@ -54,7 +55,7 @@ class ContentObjectPopularity(Kpi):
     unique_id = 2
 
     def get_value(
-        self, agg_kind: str, start_ts: int, stop_ts: int, session: Session
+        self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""

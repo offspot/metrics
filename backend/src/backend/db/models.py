@@ -12,8 +12,9 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql.schema import MetaData
 
-from backend.business.indicators.dimensions import DimensionsValues
-from backend.business.period import Period
+from ..business.agg_kind import AggKind
+from ..business.indicators.dimensions import DimensionsValues
+from ..business.period import Period
 
 
 class Base(MappedAsDataclass, DeclarativeBase):
@@ -170,7 +171,7 @@ class KpiValue(Base):
     __tablename__ = "kpi"
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     kpi_id: Mapped[int] = mapped_column(index=True)
-    agg_kind: Mapped[str]
+    agg_kind: Mapped[AggKind]
     agg_value: Mapped[str]
     kpi_value: Mapped[str]
 

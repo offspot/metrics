@@ -4,6 +4,7 @@ from typing import Generator, TypeAlias
 import pytest
 from sqlalchemy.orm import Session
 
+from backend.business.agg_kind import AggKind
 from backend.business.kpis.kpi import Kpi
 from backend.business.kpis.processor import Processor
 from backend.business.period import Period
@@ -24,11 +25,11 @@ class DummyKpi(Kpi):
     unique_id = -1  # this ID is unique to each kind of kpi
 
     def get_value(
-        self, agg_kind: str, start_ts: int, stop_ts: int, session: Session
+        self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
-        return f"{agg_kind} - {start_ts} - {stop_ts}"
+        return f"{agg_kind.value} - {start_ts} - {stop_ts}"
 
 
 @pytest.fixture()

@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 
+from .agg_kind import AggKind
+
 
 @dataclass
 class Interval:
@@ -48,25 +50,25 @@ class Period:
     def get_shifted(self, delta: relativedelta) -> "Period":
         return Period(self.dt + delta)
 
-    def get_truncated_value(self, agg_kind: str) -> str:
-        if agg_kind == "D":
+    def get_truncated_value(self, agg_kind: AggKind) -> str:
+        if agg_kind == AggKind.D:
             return f"{self.dt.year:04}-{self.month:02}-{self.day:02}"
-        if agg_kind == "W":
+        if agg_kind == AggKind.W:
             return f"{self.dt.year:04} W{self.week:02}"
-        if agg_kind == "M":
+        if agg_kind == AggKind.M:
             return f"{self.dt.year:04}-{self.month:02}"
-        if agg_kind == "Y":
+        if agg_kind == AggKind.Y:
             return f"{self.year:04}"
         raise AttributeError
 
-    def get_interval(self, agg_kind: str) -> Interval:
-        if agg_kind == "D":
+    def get_interval(self, agg_kind: AggKind) -> Interval:
+        if agg_kind == AggKind.D:
             start = datetime(year=self.year, month=self.month, day=self.day)
             return Interval(
                 start=int(start.timestamp()),
                 stop=int((start + timedelta(days=1)).timestamp()),
             )
-        if agg_kind == "W":
+        if agg_kind == AggKind.W:
             start = datetime(
                 year=self.year, month=self.month, day=self.day
             ) + timedelta(days=1 - self.weekday)
@@ -74,14 +76,14 @@ class Period:
                 start=int(start.timestamp()),
                 stop=int((start + timedelta(days=7)).timestamp()),
             )
-        if agg_kind == "M":
+        if agg_kind == AggKind.M:
             start = datetime(year=self.year, month=self.month, day=1)
             stop = datetime(year=self.year, month=self.month + 1, day=1)
             return Interval(
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),
             )
-        if agg_kind == "Y":
+        if agg_kind == AggKind.Y:
             start = datetime(year=self.year, month=1, day=1)
             stop = datetime(year=self.year + 1, month=1, day=1)
             return Interval(

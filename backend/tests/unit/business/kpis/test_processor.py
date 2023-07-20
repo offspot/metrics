@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from backend.business.agg_kind import AggKind
 from backend.business.kpis.kpi import Kpi
 from backend.business.kpis.processor import Processor
 from backend.business.period import Period as PeriodBiz
@@ -31,14 +32,14 @@ previous_datetime_year_dummyvalue = "Y - 1672531200 - 1704067200"
 @pytest.mark.parametrize(
     "agg_kind, now, expected_start_ts, expected_end_ts",
     [
-        ("D", "2023-06-08 10:58:31", 1686182400, 1686268800),
-        ("W", "2023-01-01 01:18:31", 1672012800, 1672617600),
-        ("M", "2023-01-01 01:18:31", 1672531200, 1675209600),
-        ("Y", "2023-01-01 01:18:31", 1672531200, 1704067200),
+        (AggKind.D, "2023-06-08 10:58:31", 1686182400, 1686268800),
+        (AggKind.W, "2023-01-01 01:18:31", 1672012800, 1672617600),
+        (AggKind.M, "2023-01-01 01:18:31", 1672531200, 1675209600),
+        (AggKind.Y, "2023-01-01 01:18:31", 1672531200, 1704067200),
     ],
 )
 def test_timestamps(
-    agg_kind: str,
+    agg_kind: AggKind,
     now: str,
     expected_start_ts: int,
     expected_end_ts: int,
@@ -48,35 +49,30 @@ def test_timestamps(
     assert res.stop == expected_end_ts
 
 
-def test_timestamps_wrong_kind() -> None:
-    with pytest.raises(AttributeError):
-        PeriodBiz(datetime.now()).get_interval(agg_kind="Q")
-
-
 @pytest.mark.parametrize(
     "agg_kind, now, expected_periods",
     [
         (
-            "D",
+            AggKind.D,
             "2023-01-03 10:58:31",
             [f"2022-12-{i:02}" for i in range(28, 32)]
             + [f"2023-01-{i:02}" for i in range(1, 4)],
         ),
         (
-            "W",
+            AggKind.W,
             "2023-01-03 01:18:31",
             [f"2022 W{i:02}" for i in range(50, 53)] + ["2023 W01"],
         ),
         (
-            "M",
+            AggKind.M,
             "2023-01-03 01:18:31",
             [f"2022-{i:02}" for i in range(2, 13)] + ["2023-01"],
         ),
-        ("Y", "2023-01-01 01:18:31", None),
+        (AggKind.Y, "2023-01-01 01:18:31", None),
     ],
 )
 def test_get_aggregations_to_keep(
-    agg_kind: str,
+    agg_kind: AggKind,
     now: str,
     expected_periods: List[str] | None,
 ) -> None:
@@ -88,11 +84,6 @@ def test_get_aggregations_to_keep(
     else:
         assert res is not None
         assert sorted(res) == sorted(expected_periods)
-
-
-def test_get_aggregations_to_keep_wrong_kind() -> None:
-    with pytest.raises(AttributeError):
-        Processor.get_aggregations_to_keep(agg_kind="Q", now=PeriodBiz(datetime.now()))
 
 
 def test_process_tick(
@@ -276,7 +267,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind="Y",
+            agg_kind=AggKind.Y,
             agg_value="2023",
             kpi_value="whatever",
         )
@@ -285,7 +276,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind="M",
+            agg_kind=AggKind.M,
             agg_value="2023-01",
             kpi_value="whatever",
         )
@@ -293,7 +284,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind="W",
+            agg_kind=AggKind.W,
             agg_value="2023 W01",
             kpi_value="whatever",
         )
@@ -301,7 +292,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind="D",
+            agg_kind=AggKind.D,
             agg_value="2023-01-03",
             kpi_value="whatever",
         )

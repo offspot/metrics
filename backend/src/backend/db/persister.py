@@ -4,14 +4,15 @@ import sqlalchemy as sa
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
 
-from backend.business.indicators.indicator import Indicator
-from backend.business.kpis.value import Value as KpiValueBiz
-from backend.business.period import Period as PeriodBiz
-from backend.db.models import IndicatorDimension as DimensionDb
-from backend.db.models import IndicatorPeriod as PeriodDb
-from backend.db.models import IndicatorRecord as RecordDb
-from backend.db.models import IndicatorState as StateDb
-from backend.db.models import KpiValue as KpiValueDb
+from ..business.agg_kind import AggKind
+from ..business.indicators.indicator import Indicator
+from ..business.kpis.value import Value as KpiValueBiz
+from ..business.period import Period as PeriodBiz
+from ..db.models import IndicatorDimension as DimensionDb
+from ..db.models import IndicatorPeriod as PeriodDb
+from ..db.models import IndicatorRecord as RecordDb
+from ..db.models import IndicatorState as StateDb
+from ..db.models import KpiValue as KpiValueDb
 
 
 class Persister:
@@ -123,7 +124,7 @@ class Persister:
 
     @classmethod
     def get_kpi_values(
-        cls, kpi_id: int, agg_kind: str, session: Session
+        cls, kpi_id: int, agg_kind: AggKind, session: Session
     ) -> List[KpiValueBiz]:
         """Return all KPI values for a given KPI and a given kind of period"""
         return [
@@ -139,7 +140,7 @@ class Persister:
 
     @classmethod
     def delete_kpi_value(
-        cls, kpi_id: int, agg_kind: str, agg_value: str, session: Session
+        cls, kpi_id: int, agg_kind: AggKind, agg_value: str, session: Session
     ) -> None:
         """Delete a KPI value for a given KPI, kind of period and period"""
         session.execute(
@@ -153,7 +154,7 @@ class Persister:
     def update_kpi_value(
         cls,
         kpi_id: int,
-        agg_kind: str,
+        agg_kind: AggKind,
         agg_value: str,
         kpi_value: str,
         session: Session,
@@ -171,7 +172,7 @@ class Persister:
     def add_kpi_value(
         cls,
         kpi_id: int,
-        agg_kind: str,
+        agg_kind: AggKind,
         agg_value: str,
         kpi_value: str,
         session: Session,
