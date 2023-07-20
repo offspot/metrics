@@ -69,7 +69,7 @@ class IndicatorPeriod(Base):
             day=period.day,
             weekday=period.weekday,
             hour=period.hour,
-            timestamp=int(period.get_datetime().timestamp()),
+            timestamp=period.timestamp,
         )
 
     @classmethod

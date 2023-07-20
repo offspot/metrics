@@ -12,36 +12,49 @@ class Interval:
 
 @dataclass
 class Period:
-    year: int
-    month: int
-    day: int
-    weekday: int
-    week: int
-    hour: int
+    dt: datetime
 
     def __init__(self, dt: datetime) -> None:
-        self.year = dt.year
-        self.month = dt.month
-        self.day = dt.day
-        self.weekday = dt.isoweekday()
-        self.week = dt.isocalendar().week
-        self.hour = dt.hour
+        self.dt = datetime(year=dt.year, month=dt.month, day=dt.day, hour=dt.hour)
 
-    def get_datetime(self) -> datetime:
-        return datetime.fromisoformat(
-            f"{self.year:04}-{self.month:02}-{self.day:02} {self.hour:02}:00:00"
-        )
+    @property
+    def year(self) -> int:
+        return self.dt.year
+
+    @property
+    def month(self) -> int:
+        return self.dt.month
+
+    @property
+    def day(self) -> int:
+        return self.dt.day
+
+    @property
+    def hour(self) -> int:
+        return self.dt.hour
+
+    @property
+    def week(self) -> int:
+        return self.dt.isocalendar().week
+
+    @property
+    def weekday(self) -> int:
+        return self.dt.isoweekday()
+
+    @property
+    def timestamp(self) -> int:
+        return int(self.dt.timestamp())
 
     def get_shifted(self, delta: relativedelta) -> "Period":
-        return Period(self.get_datetime() + delta)
+        return Period(self.dt + delta)
 
     def get_truncated_value(self, agg_kind: str) -> str:
         if agg_kind == "D":
-            return f"{self.year:04}-{self.month:02}-{self.day:02}"
+            return f"{self.dt.year:04}-{self.month:02}-{self.day:02}"
         if agg_kind == "W":
-            return f"{self.year:04} W{self.week:02}"
+            return f"{self.dt.year:04} W{self.week:02}"
         if agg_kind == "M":
-            return f"{self.year:04}-{self.month:02}"
+            return f"{self.dt.year:04}-{self.month:02}"
         if agg_kind == "Y":
             return f"{self.year:04}"
         raise AttributeError

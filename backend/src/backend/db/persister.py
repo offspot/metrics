@@ -204,7 +204,7 @@ class Persister:
         Unused associated data (records, states, dimensions) are cleaned as well.
         """
 
-        min_ts = (current_period.get_datetime() - relativedelta(years=1)).timestamp()
+        min_ts = current_period.get_shifted(relativedelta(years=-1)).timestamp
 
         # delete records associated with old periods
         session.execute(
