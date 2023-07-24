@@ -45,11 +45,6 @@ class IndicatorPeriod(Base):
     """An indicator period, i.e. a given hour on a given day"""
 
     __tablename__ = "indicator_period"
-    year: Mapped[int] = mapped_column(index=True)
-    month: Mapped[int] = mapped_column(index=True)
-    day: Mapped[int] = mapped_column(index=True)
-    weekday: Mapped[int] = mapped_column(index=True)
-    hour: Mapped[int] = mapped_column(index=True)
     timestamp: Mapped[int] = mapped_column(primary_key=True)
 
     @classmethod
@@ -61,11 +56,6 @@ class IndicatorPeriod(Base):
     def from_period(cls, period: Period) -> "IndicatorPeriod":
         """Transform business period object to DB object"""
         return cls(
-            year=period.year,
-            month=period.month,
-            day=period.day,
-            weekday=period.weekday,
-            hour=period.hour,
             timestamp=period.timestamp,
         )
 

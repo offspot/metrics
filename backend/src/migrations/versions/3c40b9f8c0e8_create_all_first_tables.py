@@ -1,8 +1,8 @@
 """Create all first tables
 
 Revision ID: 3c40b9f8c0e8
-Revises:
-Create Date: 2023-07-24 09:45:30.535889
+Revises: 
+Create Date: 2023-07-24 09:52:15.031073
 
 """
 import sqlalchemy as sa
@@ -33,31 +33,8 @@ def upgrade() -> None:
     )
     op.create_table(
         "indicator_period",
-        sa.Column("year", sa.Integer(), nullable=False),
-        sa.Column("month", sa.Integer(), nullable=False),
-        sa.Column("day", sa.Integer(), nullable=False),
-        sa.Column("weekday", sa.Integer(), nullable=False),
-        sa.Column("hour", sa.Integer(), nullable=False),
         sa.Column("timestamp", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("timestamp", name=op.f("pk_indicator_period")),
-    )
-    op.create_index(
-        op.f("ix_indicator_period_day"), "indicator_period", ["day"], unique=False
-    )
-    op.create_index(
-        op.f("ix_indicator_period_hour"), "indicator_period", ["hour"], unique=False
-    )
-    op.create_index(
-        op.f("ix_indicator_period_month"), "indicator_period", ["month"], unique=False
-    )
-    op.create_index(
-        op.f("ix_indicator_period_weekday"),
-        "indicator_period",
-        ["weekday"],
-        unique=False,
-    )
-    op.create_index(
-        op.f("ix_indicator_period_year"), "indicator_period", ["year"], unique=False
     )
     op.create_table(
         "kpi",
@@ -154,11 +131,6 @@ def downgrade() -> None:
     op.drop_index("kpi_id", table_name="kpi")
     op.drop_index(op.f("ix_kpi_kpi_id"), table_name="kpi")
     op.drop_table("kpi")
-    op.drop_index(op.f("ix_indicator_period_year"), table_name="indicator_period")
-    op.drop_index(op.f("ix_indicator_period_weekday"), table_name="indicator_period")
-    op.drop_index(op.f("ix_indicator_period_month"), table_name="indicator_period")
-    op.drop_index(op.f("ix_indicator_period_hour"), table_name="indicator_period")
-    op.drop_index(op.f("ix_indicator_period_day"), table_name="indicator_period")
     op.drop_table("indicator_period")
     op.drop_index(
         op.f("ix_indicator_dimension_value0"), table_name="indicator_dimension"

@@ -24,7 +24,7 @@ The primary goal is to store the epoch timestamp of the period, since this is su
 
 Storing the timestamp in a distinct period table is efficient for queries probably because it will be a unique index, while placing the information directly in Indicator record and Indicator state tables will be a regular index, plus we will need two of them.
 
-Since we have a distinct table and might need more information about the period for some queries to compute some kind of indicators, we also store the year, month, day, hour, and weekday with an index on each of them.
+For now we do not need more information about the period for some queries to compute some kind of indicators, so we do not extra information in this table (could be the year, month, day, hour, and weekday, with an index on each of them, but is is not used so we avoid the useless extra).
 
 ## Indicator dimensions
 
