@@ -1,19 +1,17 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Index, UniqueConstraint, select
+from sqlalchemy import DateTime, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     MappedAsDataclass,
-    Session,
     mapped_column,
     relationship,
 )
 from sqlalchemy.sql.schema import MetaData
 
 from ..business.indicators.dimensions import DimensionsValues
-from ..business.period import Period
 
 
 class Base(MappedAsDataclass, DeclarativeBase):
@@ -39,47 +37,6 @@ class Base(MappedAsDataclass, DeclarativeBase):
         }
     )
     pass
-
-
-class IndicatorPeriod(Base):
-    """An indicator period, i.e. a given hour on a given day"""
-
-    __tablename__ = "indicator_period"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    year: Mapped[int] = mapped_column(index=True)
-    month: Mapped[int] = mapped_column(index=True)
-    day: Mapped[int] = mapped_column(index=True)
-    weekday: Mapped[int] = mapped_column(index=True)
-    hour: Mapped[int] = mapped_column(index=True)
-    timestamp: Mapped[int] = mapped_column(unique=True, index=True)
-
-    @classmethod
-    def from_datetime(cls, dt: datetime) -> "IndicatorPeriod":
-        """Transform datetime to DB object"""
-        return cls.from_period(Period(dt))
-
-    @classmethod
-    def from_period(cls, period: Period) -> "IndicatorPeriod":
-        """Transform business period object to DB object"""
-        return cls(
-            year=period.year,
-            month=period.month,
-            day=period.day,
-            weekday=period.weekday,
-            hour=period.hour,
-            timestamp=period.timestamp,
-        )
-
-    @classmethod
-    def get_or_none(cls, period: Period, session: Session) -> "IndicatorPeriod | None":
-        """Search for a period in DB based on business object"""
-        return session.execute(
-            select(IndicatorPeriod).where(IndicatorPeriod.timestamp == period.timestamp)
-        ).scalar_one_or_none()
-
-    def to_period(self) -> Period:
-        """Transform this DB object into business object"""
-        return Period.from_timestamp(self.timestamp)
 
 
 class IndicatorDimension(Base):
@@ -109,12 +66,7 @@ class IndicatorRecord(Base):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     indicator_id: Mapped[int] = mapped_column(index=True)
     value: Mapped[int]
-
-    period_id: Mapped[int] = mapped_column(
-        ForeignKey("indicator_period.id"), init=False, index=True
-    )
-
-    period: Mapped["IndicatorPeriod"] = relationship(init=False)
+    timestamp: Mapped[int] = mapped_column(index=True)
 
     dimension_id: Mapped[int] = mapped_column(
         ForeignKey("indicator_dimension.id"), init=False
@@ -122,7 +74,7 @@ class IndicatorRecord(Base):
 
     dimension: Mapped["IndicatorDimension"] = relationship(init=False)
 
-    __table_args__ = (UniqueConstraint("indicator_id", "period_id", "dimension_id"),)
+    __table_args__ = (UniqueConstraint("indicator_id", "dimension_id", "timestamp"),)
 
 
 class IndicatorState(Base):
@@ -136,12 +88,7 @@ class IndicatorState(Base):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     indicator_id: Mapped[int] = mapped_column(index=True)
     state: Mapped[str]
-
-    period_id: Mapped[int] = mapped_column(
-        ForeignKey("indicator_period.id"), init=False
-    )
-
-    period: Mapped["IndicatorPeriod"] = relationship(init=False)
+    timestamp: Mapped[int] = mapped_column(index=True)
 
     dimension_id: Mapped[int] = mapped_column(
         ForeignKey("indicator_dimension.id"), init=False
@@ -149,7 +96,7 @@ class IndicatorState(Base):
 
     dimension: Mapped["IndicatorDimension"] = relationship(init=False)
 
-    __table_args__ = (UniqueConstraint("indicator_id", "period_id", "dimension_id"),)
+    __table_args__ = (UniqueConstraint("indicator_id", "dimension_id", "timestamp"),)
 
 
 class KpiValue(Base):

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from backend.business.kpis.kpi import Kpi
 
-from ...db.models import IndicatorDimension, IndicatorPeriod, IndicatorRecord
+from ...db.models import IndicatorDimension, IndicatorRecord
 from ..agg_kind import AggKind
 from ..indicators.content_visit import ContentHomeVisit, ContentObjectVisit
 
@@ -31,10 +31,9 @@ class ContentPopularity(Kpi):
                 func.sum(IndicatorRecord.value).label("count"),
             )
             .join(IndicatorRecord)
-            .join(IndicatorPeriod)
             .where(IndicatorRecord.indicator_id == ContentHomeVisit.unique_id)
-            .where(IndicatorPeriod.timestamp >= start_ts)
-            .where(IndicatorPeriod.timestamp <= stop_ts)
+            .where(IndicatorRecord.timestamp >= start_ts)
+            .where(IndicatorRecord.timestamp <= stop_ts)
             .group_by("content")
         ).subquery("content_with_count")
 
@@ -67,10 +66,9 @@ class ContentObjectPopularity(Kpi):
                 func.sum(IndicatorRecord.value).label("count"),
             )
             .join(IndicatorRecord)
-            .join(IndicatorPeriod)
             .where(IndicatorRecord.indicator_id == ContentObjectVisit.unique_id)
-            .where(IndicatorPeriod.timestamp >= start_ts)
-            .where(IndicatorPeriod.timestamp <= stop_ts)
+            .where(IndicatorRecord.timestamp >= start_ts)
+            .where(IndicatorRecord.timestamp <= stop_ts)
             .group_by("content", "object")
         ).subquery("content_with_count")
 

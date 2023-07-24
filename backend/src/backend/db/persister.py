@@ -9,7 +9,6 @@ from ..business.indicators.indicator import Indicator
 from ..business.kpis.value import Value
 from ..business.period import Period
 from ..db.models import IndicatorDimension as DimensionDb
-from ..db.models import IndicatorPeriod as PeriodDb
 from ..db.models import IndicatorRecord as RecordDb
 from ..db.models import IndicatorState as StateDb
 from ..db.models import KpiValue as KpiValueDb
@@ -20,17 +19,6 @@ class Persister:
     def clear_indicator_states(cls, session: Session) -> None:
         """Delete all indicator states stored in DB"""
         session.execute(sa.delete(StateDb))
-
-    @classmethod
-    def persist_period(cls, period: Period, session: Session) -> PeriodDb:
-        """Store one period in DB in DB if not already present"""
-        dbPeriod = PeriodDb.get_or_none(period, session)
-
-        if not dbPeriod:
-            dbPeriod = PeriodDb.from_period(period)
-            session.add(dbPeriod)
-
-        return dbPeriod
 
     @classmethod
     def persist_indicator_dimensions(
@@ -56,7 +44,7 @@ class Persister:
 
     @classmethod
     def persist_indicator_records(
-        cls, period: PeriodDb, indicators: List[Indicator], session: Session
+        cls, period: Period, indicators: List[Indicator], session: Session
     ) -> None:
         """Store all indicator records in DB"""
         for indicator in indicators:
@@ -67,14 +55,17 @@ class Persister:
                     .where(DimensionDb.value1 == record.dimensions.value1)
                     .where(DimensionDb.value2 == record.dimensions.value2)
                 ).scalar_one()
-                dbRecord = RecordDb(indicator.unique_id, record.value)
+                dbRecord = RecordDb(
+                    indicator_id=indicator.unique_id,
+                    value=record.value,
+                    timestamp=period.timestamp,
+                )
                 dbRecord.dimension = dbDimension
-                dbRecord.period = period
                 session.add(dbRecord)
 
     @classmethod
     def persist_indicator_states(
-        cls, period: PeriodDb, indicators: List[Indicator], session: Session
+        cls, period: Period, indicators: List[Indicator], session: Session
     ) -> None:
         """Store all indicators temporary state in DB"""
         for indicator in indicators:
@@ -85,20 +76,33 @@ class Persister:
                     .where(DimensionDb.value1 == state.dimensions.value1)
                     .where(DimensionDb.value2 == state.dimensions.value2)
                 ).scalar_one()
-                dbState = StateDb(indicator.unique_id, state.value)
+                dbState = StateDb(
+                    indicator_id=indicator.unique_id,
+                    state=state.value,
+                    timestamp=period.timestamp,
+                )
                 dbState.dimension = dbDimension
-                dbState.period = period
                 session.add(dbState)
 
     @classmethod
     def get_last_period(cls, session: Session) -> Optional[Period]:
         """Return the last period stored in DB"""
-        dbPeriod = session.execute(
-            sa.select(PeriodDb).order_by(PeriodDb.timestamp.desc()).limit(1)
+        stateTimestamp = session.execute(
+            sa.select(StateDb.timestamp).order_by(StateDb.timestamp.desc()).limit(1)
         ).scalar_one_or_none()
-        if not dbPeriod:
-            return None
-        return dbPeriod.to_period()
+        recordTimestamp = session.execute(
+            sa.select(RecordDb.timestamp).order_by(RecordDb.timestamp.desc()).limit(1)
+        ).scalar_one_or_none()
+        if stateTimestamp is None:
+            if recordTimestamp is None:
+                return None
+            else:
+                return Period.from_timestamp(recordTimestamp)
+        else:
+            if recordTimestamp is None:
+                return Period.from_timestamp(stateTimestamp)
+            else:
+                return Period.from_timestamp(min(stateTimestamp, recordTimestamp))
 
     @classmethod
     def get_restore_data(
@@ -109,8 +113,7 @@ class Persister:
             session.execute(
                 sa.select(StateDb)
                 .where(StateDb.indicator_id == indicator_id)
-                .join(PeriodDb)
-                .where(PeriodDb.timestamp == period.timestamp)
+                .where(StateDb.timestamp == period.timestamp)
             ).scalars()
         )
 
@@ -189,26 +192,11 @@ class Persister:
         oldest_valid_ts = current_period.get_shifted(relativedelta(years=-1)).timestamp
 
         # delete records associated with old periods
-        session.execute(
-            sa.delete(RecordDb).where(
-                RecordDb.period_id.in_(
-                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < oldest_valid_ts)
-                )
-            )
-        )
+        session.execute(sa.delete(RecordDb).where(RecordDb.timestamp < oldest_valid_ts))
 
         # just in case, delete old states associated with old periods (should never
         # be needed, but will avoid DB integrity errors)
-        session.execute(
-            sa.delete(StateDb).where(
-                StateDb.period_id.in_(
-                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < oldest_valid_ts)
-                )
-            )
-        )
-
-        # delete old periods
-        session.execute(sa.delete(PeriodDb).where(PeriodDb.timestamp < oldest_valid_ts))
+        session.execute(sa.delete(StateDb).where(StateDb.timestamp < oldest_valid_ts))
 
         # delete indicator dimensions that are not used anymore
         session.execute(

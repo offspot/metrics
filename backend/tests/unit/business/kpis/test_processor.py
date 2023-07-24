@@ -10,8 +10,7 @@ from backend.business.kpis.kpi import Kpi
 from backend.business.kpis.processor import Processor
 from backend.business.period import Period as Period
 from backend.db import count_from_stmt
-from backend.db.models import IndicatorPeriod as PeriodDb
-from backend.db.models import KpiValue
+from backend.db.models import IndicatorDimension, IndicatorState, KpiValue
 
 init_datetime_day_dummyvalue = "D - 1686182400 - 1686268800"
 init_datetime_day_minus_one_dummyvalue = "D - 1686096000 - 1686182400"
@@ -227,18 +226,26 @@ def test_restore_kpis_from_almost_empty_db(
 ) -> None:
     processor.kpis = [dummy_kpi]
     dbsession.execute(delete(KpiValue))
-    dbsession.execute(delete(PeriodDb))
 
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 0
 
-    minus_1_hour = PeriodDb.from_datetime(init_datetime - timedelta(hours=1))
+    fake_dimension = IndicatorDimension(None, None, None)
+    dbsession.add(fake_dimension)
+
+    minus_1_hour = IndicatorState(
+        -1, "", Period(init_datetime - timedelta(hours=1)).timestamp
+    )
+    minus_1_hour.dimension = fake_dimension
     dbsession.add(minus_1_hour)
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
     dbsession.delete(minus_1_hour)
 
-    minus_1_day = PeriodDb.from_datetime(init_datetime - timedelta(days=1))
+    minus_1_day = IndicatorState(
+        -1, "", Period(init_datetime - timedelta(days=1)).timestamp
+    )
+    minus_1_day.dimension = fake_dimension
     dbsession.add(minus_1_day)
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
@@ -262,7 +269,6 @@ def test_restore_kpis_from_filled_db(
 ) -> None:
     processor.kpis = [dummy_kpi]
     dbsession.execute(delete(KpiValue))
-    dbsession.execute(delete(PeriodDb))
 
     dbsession.add(
         KpiValue(
@@ -298,7 +304,11 @@ def test_restore_kpis_from_filled_db(
         )
     )
 
-    dbsession.add(PeriodDb.from_datetime(previous_datetime))
+    fake_dimension = IndicatorDimension(None, None, None)
+    dbsession.add(fake_dimension)
+    fake_state = IndicatorState(-1, "", Period(previous_datetime).timestamp)
+    fake_state.dimension = fake_dimension
+    dbsession.add(fake_state)
 
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 4

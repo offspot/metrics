@@ -2,14 +2,13 @@ import logging
 import random
 from datetime import datetime, timedelta
 
-from sqlalchemy import create_engine, delete
-from sqlalchemy.orm import Session
-
 import backend.db.models as dbm
 from backend.business.inputs.content_visit import ContentHomeVisit, ContentObjectVisit
 from backend.business.period import Period
 from backend.business.processor import Processor
 from backend.constants import BackendConf
+from sqlalchemy import create_engine, delete
+from sqlalchemy.orm import Session
 
 # Some known contents (some are repeated many times to influence the distribution)
 contents = [
@@ -97,7 +96,6 @@ def clear_db():
             session.execute(delete(dbm.IndicatorRecord))
             session.execute(delete(dbm.IndicatorState))
             session.execute(delete(dbm.IndicatorDimension))
-            session.execute(delete(dbm.IndicatorPeriod))
             session.execute(delete(dbm.KpiValue))
 
 

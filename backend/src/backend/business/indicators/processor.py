@@ -42,9 +42,6 @@ class Processor:
                 self.current_period = tick_period
             return
 
-        # persist the current period in DB
-        dbPeriod = Persister.persist_period(period=self.current_period, session=session)
-
         # persist all indicators dimensions
         Persister.persist_indicator_dimensions(
             indicators=self.indicators, session=session
@@ -57,12 +54,16 @@ class Processor:
         if self.current_period == tick_period:
             # if we are in the same period, simply persist new states
             Persister.persist_indicator_states(
-                period=dbPeriod, indicators=self.indicators, session=session
+                period=self.current_period,
+                indicators=self.indicators,
+                session=session,
             )
         else:
             # otherwise, persist records and clear in-memory states
             Persister.persist_indicator_records(
-                period=dbPeriod, indicators=self.indicators, session=session
+                period=self.current_period,
+                indicators=self.indicators,
+                session=session,
             )
             self.reset_state()
             self.current_period = tick_period
