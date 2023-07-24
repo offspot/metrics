@@ -55,10 +55,10 @@ def test_periods(
 @pytest.mark.parametrize(
     "curdate,kind,expected",
     [
-        ("2023-06-08 10:18:12", AggKind.Y, "2023"),
-        ("2023-06-08 10:18:12", AggKind.M, "2023-06"),
-        ("2023-06-08 10:18:12", AggKind.W, "2023 W23"),
-        ("2023-06-08 10:18:12", AggKind.D, "2023-06-08"),
+        ("2023-06-08 10:18:12", AggKind.YEAR, "2023"),
+        ("2023-06-08 10:18:12", AggKind.MONTH, "2023-06"),
+        ("2023-06-08 10:18:12", AggKind.WEEK, "2023 W23"),
+        ("2023-06-08 10:18:12", AggKind.DAY, "2023-06-08"),
     ],
 )
 def test_truncated_value(curdate: str, kind: AggKind, expected: str) -> None:

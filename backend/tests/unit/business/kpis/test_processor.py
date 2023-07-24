@@ -32,10 +32,10 @@ previous_datetime_year_dummyvalue = "Y - 1672531200 - 1704067200"
 @pytest.mark.parametrize(
     "agg_kind, now, expected_start_ts, expected_end_ts",
     [
-        (AggKind.D, "2023-06-08 10:58:31", 1686182400, 1686268800),
-        (AggKind.W, "2023-01-01 01:18:31", 1672012800, 1672617600),
-        (AggKind.M, "2023-01-01 01:18:31", 1672531200, 1675209600),
-        (AggKind.Y, "2023-01-01 01:18:31", 1672531200, 1704067200),
+        (AggKind.DAY, "2023-06-08 10:58:31", 1686182400, 1686268800),
+        (AggKind.WEEK, "2023-01-01 01:18:31", 1672012800, 1672617600),
+        (AggKind.MONTH, "2023-01-01 01:18:31", 1672531200, 1675209600),
+        (AggKind.YEAR, "2023-01-01 01:18:31", 1672531200, 1704067200),
     ],
 )
 def test_timestamps(
@@ -53,22 +53,22 @@ def test_timestamps(
     "agg_kind, now, expected_periods",
     [
         (
-            AggKind.D,
+            AggKind.DAY,
             "2023-01-03 10:58:31",
             [f"2022-12-{i:02}" for i in range(28, 32)]
             + [f"2023-01-{i:02}" for i in range(1, 4)],
         ),
         (
-            AggKind.W,
+            AggKind.WEEK,
             "2023-01-03 01:18:31",
             [f"2022 W{i:02}" for i in range(50, 53)] + ["2023 W01"],
         ),
         (
-            AggKind.M,
+            AggKind.MONTH,
             "2023-01-03 01:18:31",
             [f"2022-{i:02}" for i in range(2, 13)] + ["2023-01"],
         ),
-        (AggKind.Y, "2023-01-01 01:18:31", None),
+        (AggKind.YEAR, "2023-01-01 01:18:31", None),
     ],
 )
 def test_get_aggregations_to_keep(
@@ -267,7 +267,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.Y,
+            agg_kind=AggKind.YEAR,
             agg_value="2023",
             kpi_value="whatever",
         )
@@ -276,7 +276,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.M,
+            agg_kind=AggKind.MONTH,
             agg_value="2023-01",
             kpi_value="whatever",
         )
@@ -284,7 +284,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.W,
+            agg_kind=AggKind.WEEK,
             agg_value="2023 W01",
             kpi_value="whatever",
         )
@@ -292,7 +292,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.D,
+            agg_kind=AggKind.DAY,
             agg_value="2023-01-03",
             kpi_value="whatever",
         )

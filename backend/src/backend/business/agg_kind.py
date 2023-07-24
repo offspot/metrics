@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class AggKind(Enum):
-    D = "D"
-    W = "W"
-    M = "M"
-    Y = "Y"
+    DAY = "D"
+    WEEK = "W"
+    MONTH = "M"
+    YEAR = "Y"
