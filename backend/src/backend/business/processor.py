@@ -10,7 +10,14 @@ from .period import Period
 
 
 class Processor:
-    """A processor is responsible for managing underlying business logic processor"""
+    """A processor is responsible for managing underlying business logic processor
+
+    DB session are created high level in this class methods to commit all modifications
+    (record creation, deletion, update) at once, and only when they are all in success.
+    It makes no sense to commit only few inconsistent data. It makes no sense to make
+    some inconsistent data visible to a another reader (e.g. API) which could come at
+    the same time. Pending modifications are  in any case visible to the running code
+    which is inside the same DB session."""
 
     @dbsession
     def startup(self, current_period: Period, session: Session):
