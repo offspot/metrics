@@ -1,20 +1,20 @@
 import pytest
 
-from backend.business.indicators import DimensionsValues
+from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.recorder import IntCounterRecorder, Recorder
 from backend.business.inputs.input import Input
 
 
 class SampleGenericIndicator(Indicator):
-    def create_new_recorder(self) -> Recorder:
+    def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def can_process_input(self, input: Input) -> bool:
+    def can_process_input(self, input_: Input) -> bool:
         return True
 
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        return ()
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+        return DimensionsValues(None, None, None)
 
 
 @pytest.mark.parametrize(

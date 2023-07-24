@@ -7,10 +7,9 @@ The whole system is runing locally on the offspot. Dashboards are hence only pre
 
 At some point in the future, the system is meant to centralize data in a Cloud for aggregating multiple offspots. An intermediate data format is hence present, between raw data and KPIs.
 
-## Architecture
-### [Data](architecture_data.md)
+## Documentation
 
-### [Technical](architecture_technical.md)
+We have documentation about the [data architecture](architecture_data.md), the [technical architecture](architecture_technical.md) and the [software architecture](architecture_software.md).
 
-### [Software](architecture_software.md)
+There are also details about the [database structure](database.md) and the [processing logic](processing.md).
 

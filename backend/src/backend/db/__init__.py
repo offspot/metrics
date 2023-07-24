@@ -1,12 +1,26 @@
 from typing import Any, Callable
 
-from sqlalchemy import SelectBase, create_engine, func, select
+from sqlalchemy import SelectBase, create_engine, event, func, select
+from sqlalchemy.engine import Engine
+from sqlalchemy.engine.interfaces import DBAPIConnection
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import ConnectionPoolEntry
 
 from backend.constants import BackendConf
 
 Session = sessionmaker(bind=create_engine(url=BackendConf.database_url, echo=False))
+
+
+# Enable foreign_keys management on all connections
+# See https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(
+    dbapi_connection: DBAPIConnection, connection_record: ConnectionPoolEntry
+):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 def dbsession(func: Callable[..., Any]) -> Callable[..., Any]:

@@ -3,7 +3,7 @@ LABEL org.opencontainers.image.source https://github.com/offspot/metrics
 
 # to set to your clients' origins
 ENV ALLOWED_ORIGINS http://localhost
-ENV DATABASE_URL sqlite+aiosqlite:///local.db
+ENV DATABASE_URL sqlite+pysqlite:///local.db
 
 WORKDIR /app
 RUN pip install --no-cache-dir --upgrade pip invoke

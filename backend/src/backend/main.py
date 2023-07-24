@@ -21,7 +21,7 @@ def create_app() -> FastAPI:
     )
 
     @app.get("/")
-    async def landing() -> RedirectResponse:
+    async def landing() -> RedirectResponse:  # pyright: ignore[reportUnusedFunction]
         """Redirect to root of latest version of the API"""
         return RedirectResponse(f"{PREFIX}/", status_code=308)
 
