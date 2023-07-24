@@ -94,12 +94,7 @@ class Persister:
     def get_last_period(cls, session: Session) -> Optional[Period]:
         """Return the last period stored in DB"""
         dbPeriod = session.execute(
-            sa.select(PeriodDb)
-            .order_by(PeriodDb.year.desc())
-            .order_by(PeriodDb.month.desc())
-            .order_by(PeriodDb.day.desc())
-            .order_by(PeriodDb.hour.desc())
-            .limit(1)
+            sa.select(PeriodDb).order_by(PeriodDb.timestamp.desc()).limit(1)
         ).scalar_one_or_none()
         if not dbPeriod:
             return None
@@ -115,10 +110,7 @@ class Persister:
                 sa.select(StateDb)
                 .where(StateDb.indicator_id == indicator_id)
                 .join(PeriodDb)
-                .where(PeriodDb.year == period.year)
-                .where(PeriodDb.month == period.month)
-                .where(PeriodDb.day == period.day)
-                .where(PeriodDb.hour == period.hour)
+                .where(PeriodDb.timestamp == period.timestamp)
             ).scalars()
         )
 

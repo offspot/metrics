@@ -47,14 +47,12 @@ class IndicatorPeriod(Base):
 
     __tablename__ = "indicator_period"
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    year: Mapped[int]
-    month: Mapped[int]
-    day: Mapped[int]
-    weekday: Mapped[int]
-    hour: Mapped[int]
-    timestamp: Mapped[int]
-
-    __table_args__ = (UniqueConstraint("year", "month", "day", "hour"),)
+    year: Mapped[int] = mapped_column(index=True)
+    month: Mapped[int] = mapped_column(index=True)
+    day: Mapped[int] = mapped_column(index=True)
+    weekday: Mapped[int] = mapped_column(index=True)
+    hour: Mapped[int] = mapped_column(index=True)
+    timestamp: Mapped[int] = mapped_column(unique=True, index=True)
 
     @classmethod
     def from_datetime(cls, dt: datetime) -> "IndicatorPeriod":
@@ -77,20 +75,12 @@ class IndicatorPeriod(Base):
     def get_or_none(cls, period: Period, session: Session) -> "IndicatorPeriod | None":
         """Search for a period in DB based on business object"""
         return session.execute(
-            select(IndicatorPeriod)
-            .where(IndicatorPeriod.year == period.year)
-            .where(IndicatorPeriod.month == period.month)
-            .where(IndicatorPeriod.day == period.day)
-            .where(IndicatorPeriod.hour == period.hour)
+            select(IndicatorPeriod).where(IndicatorPeriod.timestamp == period.timestamp)
         ).scalar_one_or_none()
 
     def to_period(self) -> Period:
         """Transform this DB object into business object"""
-        return Period(
-            datetime.fromisoformat(
-                f"{self.year:04}-{self.month:02}-{self.day:02} {self.hour:02}:00:00"
-            )
-        )
+        return Period.from_timestamp(self.timestamp)
 
 
 class IndicatorDimension(Base):

@@ -45,11 +45,12 @@ def test_periods(
     assert (init_period != processor.current_period) == has_changed
     dbPeriod = IndicatorPeriod.get_or_none(init_period, dbsession)
     assert dbPeriod
-    assert dbPeriod.year == expected_year
-    assert dbPeriod.month == expected_month
-    assert dbPeriod.day == expected_day
-    assert dbPeriod.hour == expected_hour
-    assert dbPeriod.weekday == expected_weekday
+    period = Period.from_timestamp(dbPeriod.timestamp)
+    assert period.year == expected_year
+    assert period.month == expected_month
+    assert period.day == expected_day
+    assert period.hour == expected_hour
+    assert period.weekday == expected_weekday
 
 
 @pytest.mark.parametrize(

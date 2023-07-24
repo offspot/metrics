@@ -19,6 +19,10 @@ class Period:
     def __init__(self, dt: datetime) -> None:
         self.dt = datetime(year=dt.year, month=dt.month, day=dt.day, hour=dt.hour)
 
+    @classmethod
+    def from_timestamp(cls, ts: int) -> "Period":
+        return Period(datetime.fromtimestamp(ts))
+
     @property
     def year(self) -> int:
         return self.dt.year
