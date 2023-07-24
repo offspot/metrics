@@ -124,7 +124,7 @@ class Persister:
             for dbValue in session.execute(
                 sa.select(KpiValueDb)
                 .where(KpiValueDb.kpi_id == kpi_id)
-                .where(KpiValueDb.agg_kind == agg_kind)
+                .where(KpiValueDb.agg_kind == agg_kind.value)
             ).scalars()
         ]
 
@@ -136,7 +136,7 @@ class Persister:
         session.execute(
             sa.delete(KpiValueDb)
             .where(KpiValueDb.kpi_id == kpi_id)
-            .where(KpiValueDb.agg_kind == agg_kind)
+            .where(KpiValueDb.agg_kind == agg_kind.value)
             .where(KpiValueDb.agg_value == agg_value)
         )
 
@@ -153,7 +153,7 @@ class Persister:
         obj = session.execute(
             sa.select(KpiValueDb)
             .where(KpiValueDb.kpi_id == kpi_id)
-            .where(KpiValueDb.agg_kind == agg_kind)
+            .where(KpiValueDb.agg_kind == agg_kind.value)
             .where(KpiValueDb.agg_value == agg_value)
         ).scalar_one()
         obj.kpi_value = kpi_value
@@ -171,7 +171,7 @@ class Persister:
         session.add(
             KpiValueDb(
                 kpi_id=kpi_id,
-                agg_kind=agg_kind,
+                agg_kind=agg_kind.value,
                 agg_value=agg_value,
                 kpi_value=kpi_value,
             )

@@ -267,7 +267,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.YEAR,
+            agg_kind=AggKind.YEAR.value,
             agg_value="2023",
             kpi_value="whatever",
         )
@@ -276,7 +276,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.MONTH,
+            agg_kind=AggKind.MONTH.value,
             agg_value="2023-01",
             kpi_value="whatever",
         )
@@ -284,7 +284,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.WEEK,
+            agg_kind=AggKind.WEEK.value,
             agg_value="2023 W01",
             kpi_value="whatever",
         )
@@ -292,7 +292,7 @@ def test_restore_kpis_from_filled_db(
     dbsession.add(
         KpiValue(
             kpi_id=dummy_kpi.unique_id,
-            agg_kind=AggKind.DAY,
+            agg_kind=AggKind.DAY.value,
             agg_value="2023-01-03",
             kpi_value="whatever",
         )
