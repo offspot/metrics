@@ -189,20 +189,28 @@ class Persister:
         oldest_valid_ts = current_period.get_shifted(relativedelta(years=-1)).timestamp
 
         # delete records associated with old periods
+        # we use the PeriodDb table to use its index for efficient query, even if the
+        # information is already present in RecordDb
         session.execute(
             sa.delete(RecordDb).where(
                 RecordDb.period_id.in_(
-                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < oldest_valid_ts)
+                    sa.select(PeriodDb.timestamp).where(
+                        PeriodDb.timestamp < oldest_valid_ts
+                    )
                 )
             )
         )
 
         # just in case, delete old states associated with old periods (should never
         # be needed, but will avoid DB integrity errors)
+        # we use the PeriodDb table to use its index for efficient query, even if the
+        # information is already present in StateDb
         session.execute(
             sa.delete(StateDb).where(
                 StateDb.period_id.in_(
-                    sa.select(PeriodDb.id).where(PeriodDb.timestamp < oldest_valid_ts)
+                    sa.select(PeriodDb.timestamp).where(
+                        PeriodDb.timestamp < oldest_valid_ts
+                    )
                 )
             )
         )

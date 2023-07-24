@@ -20,7 +20,7 @@ Indicator values are simple string to allow to store any complex indicator value
 
 Periods are a given hour on a given calendar day. They are stored in the `indicator_period` table.
 
-The primary goal is to store the epoch timestamp of the period, since this is sufficient to store the information needed + this make queries for a time range (which we almost always need) performant. 
+The primary goal is to store the epoch timestamp of the period, since this is sufficient to store the information needed + this make queries for a time range (which we almost always need) performant. This column is directly used as a Primary Key since it is already a unique column.
 
 Storing the timestamp in a distinct period table is efficient for queries probably because it will be a unique index, while placing the information directly in Indicator record and Indicator state tables will be a regular index, plus we will need two of them.
 

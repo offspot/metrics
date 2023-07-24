@@ -45,13 +45,12 @@ class IndicatorPeriod(Base):
     """An indicator period, i.e. a given hour on a given day"""
 
     __tablename__ = "indicator_period"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     year: Mapped[int] = mapped_column(index=True)
     month: Mapped[int] = mapped_column(index=True)
     day: Mapped[int] = mapped_column(index=True)
     weekday: Mapped[int] = mapped_column(index=True)
     hour: Mapped[int] = mapped_column(index=True)
-    timestamp: Mapped[int] = mapped_column(unique=True, index=True)
+    timestamp: Mapped[int] = mapped_column(primary_key=True)
 
     @classmethod
     def from_datetime(cls, dt: datetime) -> "IndicatorPeriod":
@@ -111,7 +110,7 @@ class IndicatorRecord(Base):
     value: Mapped[int]
 
     period_id: Mapped[int] = mapped_column(
-        ForeignKey("indicator_period.id"), init=False, index=True
+        ForeignKey("indicator_period.timestamp"), init=False, index=True
     )
 
     period: Mapped["IndicatorPeriod"] = relationship(init=False)
@@ -138,7 +137,7 @@ class IndicatorState(Base):
     state: Mapped[str]
 
     period_id: Mapped[int] = mapped_column(
-        ForeignKey("indicator_period.id"), init=False
+        ForeignKey("indicator_period.timestamp"), init=False
     )
 
     period: Mapped["IndicatorPeriod"] = relationship(init=False)

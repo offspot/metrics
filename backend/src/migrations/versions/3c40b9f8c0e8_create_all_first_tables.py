@@ -2,7 +2,7 @@
 
 Revision ID: 3c40b9f8c0e8
 Revises:
-Create Date: 2023-07-24 08:56:39.172923
+Create Date: 2023-07-24 09:45:30.535889
 
 """
 import sqlalchemy as sa
@@ -33,14 +33,13 @@ def upgrade() -> None:
     )
     op.create_table(
         "indicator_period",
-        sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("year", sa.Integer(), nullable=False),
         sa.Column("month", sa.Integer(), nullable=False),
         sa.Column("day", sa.Integer(), nullable=False),
         sa.Column("weekday", sa.Integer(), nullable=False),
         sa.Column("hour", sa.Integer(), nullable=False),
         sa.Column("timestamp", sa.Integer(), nullable=False),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_indicator_period")),
+        sa.PrimaryKeyConstraint("timestamp", name=op.f("pk_indicator_period")),
     )
     op.create_index(
         op.f("ix_indicator_period_day"), "indicator_period", ["day"], unique=False
@@ -50,12 +49,6 @@ def upgrade() -> None:
     )
     op.create_index(
         op.f("ix_indicator_period_month"), "indicator_period", ["month"], unique=False
-    )
-    op.create_index(
-        op.f("ix_indicator_period_timestamp"),
-        "indicator_period",
-        ["timestamp"],
-        unique=True,
     )
     op.create_index(
         op.f("ix_indicator_period_weekday"),
@@ -92,7 +85,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(
             ["period_id"],
-            ["indicator_period.id"],
+            ["indicator_period.timestamp"],
             name=op.f("fk_indicator_record_period_id_indicator_period"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_indicator_record")),
@@ -129,7 +122,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(
             ["period_id"],
-            ["indicator_period.id"],
+            ["indicator_period.timestamp"],
             name=op.f("fk_indicator_state_period_id_indicator_period"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_indicator_state")),
@@ -163,7 +156,6 @@ def downgrade() -> None:
     op.drop_table("kpi")
     op.drop_index(op.f("ix_indicator_period_year"), table_name="indicator_period")
     op.drop_index(op.f("ix_indicator_period_weekday"), table_name="indicator_period")
-    op.drop_index(op.f("ix_indicator_period_timestamp"), table_name="indicator_period")
     op.drop_index(op.f("ix_indicator_period_month"), table_name="indicator_period")
     op.drop_index(op.f("ix_indicator_period_hour"), table_name="indicator_period")
     op.drop_index(op.f("ix_indicator_period_day"), table_name="indicator_period")
