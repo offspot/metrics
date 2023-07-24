@@ -13,14 +13,14 @@ class ContentHomeVisit(Indicator):
 
     unique_id = 1001
 
-    def can_process_input(self, input: Input) -> bool:
-        return isinstance(input, ContentHomeVisitInput)
+    def can_process_input(self, input_: Input) -> bool:
+        return isinstance(input_, ContentHomeVisitInput)
 
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        input_ = cast(ContentHomeVisitInput, input)
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+        input_ = cast(ContentHomeVisitInput, input_)
         return DimensionsValues(input_.content, None, None)
 
 
@@ -29,12 +29,12 @@ class ContentObjectVisit(Indicator):
 
     unique_id = 1002
 
-    def can_process_input(self, input: Input) -> bool:
-        return isinstance(input, ContentObjectVisitInput)
+    def can_process_input(self, input_: Input) -> bool:
+        return isinstance(input_, ContentObjectVisitInput)
 
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        input_ = cast(ContentObjectVisitInput, input)
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+        input_ = cast(ContentObjectVisitInput, input_)
         return DimensionsValues(input_.content, input_.item, None)

@@ -24,12 +24,12 @@ class Indicator(abc.ABC):
         self.recorders: Dict[DimensionsValues, Recorder] = {}
 
     @abc.abstractmethod
-    def can_process_input(self, input: Input) -> bool:
+    def can_process_input(self, input_: Input) -> bool:
         """Indicates if this indicator can process a given kind of input"""
         ...  # pragma: nocover
 
     @abc.abstractmethod
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
         """For a given input (which can be processed), returns the values of each
         indicator dimensions as a tuple (or an empty tuple)."""
         ...  # pragma: nocover
@@ -42,12 +42,12 @@ class Indicator(abc.ABC):
         """
         ...  # pragma: nocover
 
-    def get_or_create_recorder(self, input: Input) -> Recorder:
+    def get_or_create_recorder(self, input_: Input) -> Recorder:
         """Get or create a recorder whose dimensions are matching the given input.
 
         Either return the already existing recorder whose dimensions values are
         matching, or creates a new recorder with appropriate dimension values"""
-        dimensions_values = self.get_dimensions_values(input)
+        dimensions_values = self.get_dimensions_values(input_)
         if dimensions_values not in self.recorders:
             self.add_recorder(dimensions_values, self.get_new_recorder())
         return self.recorders[dimensions_values]
@@ -80,14 +80,14 @@ class Indicator(abc.ABC):
         for dimensions_values, recorder in self.recorders.items():
             yield State(value=recorder.state, dimensions=dimensions_values)
 
-    def process_input(self, input: Input) -> None:
+    def process_input(self, input_: Input) -> None:
         """Process a given input event
 
         First, check that the input can be processed by indicator
         Second, retrieve the recorder matching the input
         Third, update the recorder internal state
         """
-        if not self.can_process_input(input):
+        if not self.can_process_input(input_):
             return
-        record = self.get_or_create_recorder(input)
-        record.process_input(input)
+        record = self.get_or_create_recorder(input_)
+        record.process_input(input_)

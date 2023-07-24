@@ -15,10 +15,10 @@ class Processor:
         self.indicators: List[Indicator] = []
         self.current_period = current_period
 
-    def process_input(self, input: Input) -> None:
+    def process_input(self, input_: Input) -> None:
         """Update all indicators for a given input"""
         for indicator in self.indicators:
-            indicator.process_input(input=input)
+            indicator.process_input(input_=input_)
 
     def reset_state(self) -> None:
         """Reset all indicators"""

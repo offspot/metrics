@@ -7,7 +7,7 @@ class Recorder(abc.ABC):
     """Generic interface to recorder types"""
 
     @abc.abstractmethod
-    def process_input(self, input: Input) -> None:
+    def process_input(self, input_: Input) -> None:
         """Process an input by updating recorder internal state"""
         ...  # pragma: nocover
 
@@ -35,7 +35,7 @@ class IntCounterRecorder(Recorder):
     def __init__(self) -> None:
         self.counter: int = 0
 
-    def process_input(self, input: Input) -> None:
+    def process_input(self, input_: Input) -> None:
         """Processing an input consists simply in updating the counter"""
         self.counter += 1
 

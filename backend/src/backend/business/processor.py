@@ -54,6 +54,6 @@ class Processor:
                 session=session,
             )
 
-    def process_input(self, input: Input):
+    def process_input(self, input_: Input):
         """Process one input"""
-        self.indicator_processor.process_input(input)
+        self.indicator_processor.process_input(input_)

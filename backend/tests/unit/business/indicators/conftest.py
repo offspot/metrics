@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Generator, TypeAlias, cast
 
 import pytest
-
 from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
@@ -36,13 +35,13 @@ class TotalIndicator(Indicator):
 
     unique_id = -1001
 
-    def can_process_input(self, input: Input) -> bool:
-        return isinstance(input, TestInput)
+    def can_process_input(self, input_: Input) -> bool:
+        return isinstance(input_, TestInput)
 
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
         return DimensionsValues(None, None, None)
 
 
@@ -51,14 +50,14 @@ class TotalByContentIndicator(Indicator):
 
     unique_id = -1002
 
-    def can_process_input(self, input: Input) -> bool:
-        return isinstance(input, TestInput)
+    def can_process_input(self, input_: Input) -> bool:
+        return isinstance(input_, TestInput)
 
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        input_ = cast(TestInput, input)
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+        input_ = cast(TestInput, input_)
         return DimensionsValues(input_.content, None, None)
 
 
@@ -67,14 +66,14 @@ class TotalByContentAndSubfolderIndicator(Indicator):
 
     unique_id = -1003
 
-    def can_process_input(self, input: Input) -> bool:
-        return isinstance(input, TestInput)
+    def can_process_input(self, input_: Input) -> bool:
+        return isinstance(input_, TestInput)
 
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
-        input_ = cast(TestInput, input)
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+        input_ = cast(TestInput, input_)
         return DimensionsValues(input_.content, input_.subfolder, None)
 
 

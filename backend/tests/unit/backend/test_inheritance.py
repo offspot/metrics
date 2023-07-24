@@ -1,4 +1,5 @@
 import pytest
+
 from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.recorder import IntCounterRecorder, Recorder
@@ -9,10 +10,10 @@ class SampleGenericIndicator(Indicator):
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def can_process_input(self, input: Input) -> bool:
+    def can_process_input(self, input_: Input) -> bool:
         return True
 
-    def get_dimensions_values(self, input: Input) -> DimensionsValues:
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
         return DimensionsValues(None, None, None)
 
 
