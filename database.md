@@ -20,7 +20,11 @@ Indicator values are simple string to allow to store any complex indicator value
 
 Periods are a given hour on a given calendar day. They are stored in the `indicator_period` table.
 
-In addition to year, month, day, hour, we store also the epoch timestamp since this make queries for a time range (which we almost always need) more performant. We also store the weekday, should we need it in some queries.
+The primary goal is to store the epoch timestamp of the period, since this is sufficient to store the information needed + this make queries for a time range (which we almost always need) performant. 
+
+Storing the timestamp in a distinct period table is efficient for queries probably because it will be a unique index, while placing the information directly in Indicator record and Indicator state tables will be a regular index, plus we will need two of them.
+
+Since we have a distinct table and might need more information about the period for some queries to compute some kind of indicators, we also store the year, month, day, hour, and weekday with an index on each of them.
 
 ## Indicator dimensions
 
