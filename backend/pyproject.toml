@@ -4,30 +4,30 @@ build-backend = "setuptools.build_meta"
 
 [dependencies]
 runtime = [
-    "fastapi[all] >=0.95,<0.96",
-    "marshmallow>=3.19,<3.20",
-    "alembic>=1.11,<1.12",
-    "SQLAlchemy>=2.0,<2.1",
-    "marshmallow-sqlalchemy>=0.29,<0.30",
-    "fastapi-pagination>=0.12,<0.13",
-    "python-dateutil>=2.8,<2.9"
+    "alembic == 1.11.1",
+    "fastapi[all] == 0.95.2",
+    "fastapi-pagination == 0.12.4",
+    "marshmallow == 3.19.0",
+    "marshmallow-sqlalchemy == 0.29.0",
+    "python-dateutil == 2.8.2",
+    "SQLAlchemy == 2.0.15"
 ]
 test = [
-    "pytest >=7.3,<7.4",
-    "pytest-asyncio >=0.21,<0.22",
-    "pytest-cov >=4.1,<4.2",
-    "coverage >=7.2,<7.3",
-    "httpx >=0.24,<0.25"
+    "coverage == 7.2.7",
+    "httpx == 0.24.1",
+    "pytest == 7.3.1",
+    "pytest-asyncio == 0.21.0",
+    "pytest-cov == 4.1.0"
 ]
 qa =  [
-    "black >=23.3,<23.4",
-    "isort >=5.12,<5.13",
-    "flake8 >=6.0,<6.1",
+    "black == 23.3.0",
+    "flake8 == 6.0.0",
+    "isort == 5.12.0",
     "pyright == 1.1.317"
 ]
 dev = [
-    "pre-commit >=3.3,<3.4",
-    "ipykernel >=6.23,<6.24",
+    "ipykernel == 6.23.2",
+    "pre-commit == 3.3.2",
 ]
 
 [tool.isort]
