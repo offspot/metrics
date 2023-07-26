@@ -1,5 +1,3 @@
-from typing import List
-
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
 
@@ -145,26 +143,26 @@ class Processor:
         """Restore data from database, typically after a process restart"""
 
         # retrieve last known period from DB
-        lastPeriod = Persister.get_last_period(session)
+        last_period = Persister.get_last_period(session)
 
         # if there is no last period, nothing to do
-        if not lastPeriod:
+        if not last_period:
             return
 
         # create/update KPIs values for all aggregation kinds which are updated once
         # per hour (D, W, M)
-        if lastPeriod != self.current_period:
+        if last_period != self.current_period:
             for kpi in self.kpis:
                 for agg_kind in [AggKind.DAY, AggKind.WEEK, AggKind.MONTH]:
                     Processor.compute_kpi_values_for_aggregation_kind(
-                        now=lastPeriod, kpi=kpi, agg_kind=agg_kind, session=session
+                        now=last_period, kpi=kpi, agg_kind=agg_kind, session=session
                     )
 
         # create/update KPIs values for yearly aggregations
         # which are updated only once per day
-        lastPeriod_day = lastPeriod.get_truncated_value(AggKind.DAY)
-        if self.current_day != lastPeriod_day:
+        last_period_day = last_period.get_truncated_value(AggKind.DAY)
+        if self.current_day != last_period_day:
             for kpi in self.kpis:
                 Processor.compute_kpi_values_for_aggregation_kind(
-                    now=lastPeriod, kpi=kpi, agg_kind=AggKind.YEAR, session=session
+                    now=last_period, kpi=kpi, agg_kind=AggKind.YEAR, session=session
                 )

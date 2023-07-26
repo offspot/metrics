@@ -46,7 +46,7 @@ class TotalIndicator(Indicator):
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:  # noqa: ARG002
         return DimensionsValues(None, None, None)
 
 

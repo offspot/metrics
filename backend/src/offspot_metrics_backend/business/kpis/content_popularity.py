@@ -26,7 +26,11 @@ class ContentPopularity(Kpi):
     unique_id = 2001
 
     def get_value(
-        self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
+        self,
+        agg_kind: AggKind,  # noqa: ARG002
+        start_ts: int,
+        stop_ts: int,
+        session: Session,
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
@@ -61,7 +65,11 @@ class ContentObjectPopularity(Kpi):
     unique_id = 2002
 
     def get_value(
-        self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
+        self,
+        agg_kind: AggKind,  # noqa: ARG002
+        start_ts: int,
+        stop_ts: int,
+        session: Session,
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""

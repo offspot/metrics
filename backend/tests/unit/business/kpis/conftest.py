@@ -26,7 +26,11 @@ class DummyKpi(Kpi):
     unique_id = -2001  # this ID is unique to each kind of kpi
 
     def get_value(
-        self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
+        self,
+        agg_kind: AggKind,
+        start_ts: int,
+        stop_ts: int,
+        session: Session,  # noqa: ARG002
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""

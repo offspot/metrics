@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List
 
 import pytest
 from sqlalchemy import delete, select
