@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: backend/pyproject.toml
+          architecture: x64
+
+      - name: Install dependencies (and project)
+        working-directory: backend
+        run: |
+          pip install -U pip
+          pip install -e .[test,scripts]
+
+      - name: Run the tests
+        working-directory: backend
+        run: inv coverage --no-html --args "-vvv"
+
+      - name: Upload coverage report to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          directory: backend/src
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  build_docker:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Ensure we can build the Docker image
+        working-directory: backend
+        run: |
+          docker build -t offspot_metrics_backend .
+
+      - name: Ensure we can start the Docker image
+        run: |
+          docker run -d --rm --name test_container offspot_metrics_backend
+          sleep 5
+          docker ps | grep test_container
