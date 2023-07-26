@@ -1,11 +1,18 @@
 from typing import cast
 
-from ..inputs.content_visit import ContentHomeVisit as ContentHomeVisitInput
-from ..inputs.content_visit import ContentObjectVisit as ContentObjectVisitInput
-from ..inputs.input import Input
-from .dimensions import DimensionsValues
-from .indicator import Indicator
-from .recorder import IntCounterRecorder, Recorder
+from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
+from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.recorder import (
+    IntCounterRecorder,
+    Recorder,
+)
+from offspot_metrics_backend.business.inputs.content_visit import (
+    ContentHomeVisit as ContentHomeVisitInput,
+)
+from offspot_metrics_backend.business.inputs.content_visit import (
+    ContentObjectVisit as ContentObjectVisitInput,
+)
+from offspot_metrics_backend.business.inputs.input import Input
 
 
 class ContentHomeVisit(Indicator):

@@ -12,8 +12,8 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql.schema import MetaData
 
-from ..business.indicators.dimensions import DimensionsValues
-from ..business.period import Period
+from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
+from offspot_metrics_backend.business.period import Period
 
 
 class Base(MappedAsDataclass, DeclarativeBase):
@@ -80,9 +80,9 @@ class IndicatorDimension(Base):
     __tablename__ = "indicator_dimension"
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     # only 3 dimension values are supported for now, this is supposed to be way enough
-    value0: Mapped[Optional[str]] = mapped_column(index=True)
-    value1: Mapped[Optional[str]]
-    value2: Mapped[Optional[str]]
+    value0: Mapped[str | None] = mapped_column(index=True)
+    value1: Mapped[str | None]
+    value2: Mapped[str | None]
 
     def to_values(self) -> DimensionsValues:
         return DimensionsValues(self.value0, self.value1, self.value2)

@@ -3,11 +3,17 @@ from json import dumps
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
+from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.indicators.content_visit import (
+    ContentHomeVisit,
+    ContentObjectVisit,
+)
 from offspot_metrics_backend.business.kpis.kpi import Kpi
-
-from ...db.models import IndicatorDimension, IndicatorPeriod, IndicatorRecord
-from ..agg_kind import AggKind
-from ..indicators.content_visit import ContentHomeVisit, ContentObjectVisit
+from offspot_metrics_backend.db.models import (
+    IndicatorDimension,
+    IndicatorPeriod,
+    IndicatorRecord,
+)
 
 
 class ContentPopularity(Kpi):
@@ -81,13 +87,11 @@ class ContentObjectPopularity(Kpi):
         )
 
         return dumps(
-            list(
-                map(
-                    lambda record: {
-                        "content": record.content,
-                        "object": record.object,
-                    },
-                    session.execute(query),
-                )
-            )
+            [
+                {
+                    "content": record.content,
+                    "object": record.object,
+                }
+                for record in session.execute(query)
+            ]
         )

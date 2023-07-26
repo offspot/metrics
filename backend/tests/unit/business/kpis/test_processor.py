@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.business.kpis.kpi import Kpi
 from offspot_metrics_backend.business.kpis.processor import Processor
-from offspot_metrics_backend.business.period import Period as Period
+from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.db import count_from_stmt
 from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
 from offspot_metrics_backend.db.models import KpiValue
@@ -74,7 +74,7 @@ def test_timestamps(
 def test_get_aggregations_to_keep(
     agg_kind: AggKind,
     now: str,
-    expected_periods: List[str] | None,
+    expected_periods: list[str] | None,
 ) -> None:
     res = Processor.get_aggregations_to_keep(
         agg_kind=agg_kind, now=Period(datetime.fromisoformat(now))
@@ -102,9 +102,7 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(hours=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -115,9 +113,7 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(hours=4)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 3
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -128,9 +124,7 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(days=1)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -143,9 +137,7 @@ def test_process_tick(
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -158,9 +150,7 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(days=2)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 5
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -174,9 +164,7 @@ def test_process_tick(
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -190,9 +178,7 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(days=7)), session=dbsession
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 6
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -207,9 +193,7 @@ def test_process_tick(
         session=dbsession,
     )
     assert count_from_stmt(dbsession, select(KpiValue)) == 7
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_plus_one_dummyvalue,
             init_datetime_day_plus_two_dummyvalue,
@@ -242,9 +226,7 @@ def test_restore_kpis_from_almost_empty_db(
     dbsession.add(minus_1_day)
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_minus_one_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -302,9 +284,7 @@ def test_restore_kpis_from_filled_db(
 
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(
-        list(dbsession.execute(select(KpiValue.kpi_value)).scalars())
-    ) == sorted(
+    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
         [
             previous_datetime_day_dummyvalue,
             previous_datetime_week_dummyvalue,
