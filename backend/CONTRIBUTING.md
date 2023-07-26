@@ -1,8 +1,10 @@
 # Contributing
 
+Metrics adheres to openZIM's [Contribution Guidelines](https://github.com/openzim/overview/wiki/Contributing)
+
 ## Configure your environment
 
-Development environment is meant to be managed by `hatch`. 
+Development environment is meant to be managed by `hatch`.
 
 If not already installed on your machine, install it in your global environment:
 ```
