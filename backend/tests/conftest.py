@@ -22,3 +22,4 @@ def dbsession() -> Generator[Session, None, None]:
         session.begin()
         yield session
         session.rollback()
+        session.rollback()

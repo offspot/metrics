@@ -1,102 +1,96 @@
-import io
+# pyright: strict, reportUntypedFunctionDecorator=false
 import os
-import pathlib
-import sys
-import tempfile
-from typing import List
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
-import tomllib
 from invoke.context import Context
-from invoke.tasks import task  # pyright: ignore[reportUnknownVariableType]
+from invoke.tasks import task  # pyright: ignore [reportUnknownVariableType]
 
-deps_options = ("runtime", "test", "qa", "dev")
+use_pty = not os.getenv("CI", "")
 
 
-@task
-def install_deps(c: Context, package: str = deps_options[0], no_previous: bool = False):
-    """install dependencies for runtime (default) or extra packages
+def setup_db_and_test(ctx: Context, cmd: str, args: str, path: str):
+    """Setup the test DB and run the tests
 
-    packages:
-        - runtime: default, to run the backend
-        - test: to run the test suite
-        - qa: to check code quality
-        - dev: specific packages for development machine"""
-    if package not in deps_options:
-        print(
-            f"Invalid deps package `{package}`. Choose from: {','.join(deps_options)}"
-        )
-        sys.exit(1)
-
-    packages: List[str] = []
-    with open("pyproject.toml", "rb") as f:
-        manifest = tomllib.load(f)
-    # include deps from required package and previous ones in list
-    if no_previous:
-        packages = manifest["dependencies"][package]
-    else:
-        for option in deps_options[: deps_options.index(package) + 1]:
-            packages += manifest["dependencies"][option]
-
-    c.run(
-        "pip install -r /dev/stdin",
-        in_stream=io.StringIO("\n".join(packages)),
+    This function takes care of:
+    - using the TEST_DATABASE_URL environment variable if present
+    - creating a test DB with appropriate schema if TEST_DATABASE_URL environment
+    is variable not present and deleting it afterwards
+    - running the tests with the `cmd` passed, for the `path` requested and with
+    additional `args` supplied
+    """
+    environment_db_url = os.getenv("TEST_DATABASE_URL")
+    one_shot_db_path = (
+        Path(NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name)
+        if not environment_db_url
+        else None
     )
-
-    # if package == "dev":
-    #     c.run("pre-commit install", pty=True)
-
-
-@task
-def test(c: Context, args: str = "", path: str = ""):
-    """execute pytest with coverage
-
-    args: additional pytest args to pass. ex: -x -v
-    path: sub-folder or test file to test to limit scope"""
-    custom_db_url = os.getenv("TEST_DATABASE_URL")
-    db_path = None
-    if not custom_db_url:
-        db_path = pathlib.Path(
-            tempfile.NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name
-        )
-    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        if db_path:
-            c.run(
+    with ctx.cd("src"):  # pyright: ignore[reportUnknownMemberType]
+        if one_shot_db_path:
+            ctx.run(
                 "alembic upgrade head",
-                env={"DATABASE_URL": f"sqlite+pysqlite:////{db_path.resolve()}"},
+                pty=use_pty,
+                env={
+                    "DATABASE_URL": f"sqlite+pysqlite:////{one_shot_db_path.resolve()}"
+                },
             )
         try:
-            c.run(
-                f"{sys.executable} -m pytest --cov=backend "
-                f"--cov-report term-missing --cov-report html {args} "
-                f"../tests{'/' + path if path else ''}",
-                pty=True,
+            ctx.run(
+                f"{cmd} {args} ../tests{'/' + path if path else ''}",
+                pty=use_pty,
                 env={
-                    "DATABASE_URL": custom_db_url
-                    if not db_path
-                    else f"sqlite+pysqlite:////{db_path.resolve()}"
+                    "DATABASE_URL": environment_db_url
+                    if not one_shot_db_path
+                    else f"sqlite+pysqlite:////{one_shot_db_path.resolve()}"
                 },
             )
         finally:
-            if not custom_db_url and db_path and db_path.exists():
-                db_path.unlink()
-        c.run("coverage xml", pty=True)
+            if one_shot_db_path and one_shot_db_path.exists():
+                one_shot_db_path.unlink()
 
 
-@task
-def serve(c: Context, args: str = ""):
-    """run devel HTTP server locally. Use --args to specify additional uvicorn args"""
-    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        c.run(
-            f"{sys.executable} -m uvicorn backend.entrypoint:app --reload {args}",
-            pty=True,
-        )
+@task(
+    optional=["args", "path"],
+    help={
+        "args": "pytest additional arguments",
+        "path": "path to test, relative to 'tests' parent folder",
+    },
+)
+def test(ctx: Context, args: str = "", path: str = ""):
+    """run tests (without coverage)"""
+    setup_db_and_test(ctx=ctx, cmd="pytest", args=args, path=path)
 
 
-@task
-def alembic(c: Context, args: str = "", test_db: bool = False):
-    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        c.run(
-            f"{sys.executable} -m alembic {args}",
+@task(
+    optional=["args", "path"],
+    help={
+        "args": "pytest additional arguments",
+        "path": "path to test, relative to 'tests' parent folder",
+    },
+)
+def test_cov(ctx: Context, args: str = "", path: str = ""):
+    """run test vith coverage"""
+    setup_db_and_test(ctx=ctx, cmd="pytest --cov=backend", args=args, path=path)
+    # ctx.run(f"coverage run -m pytest {args}", pty=use_pty)
+
+
+@task(
+    optional=["test-db"],
+    help={
+        "cmd": "alembic command to run, including options if necessary",
+        "test-db": "flag to run command on test database",
+    },
+)
+def alembic(ctx: Context, cmd: str, *, test_db: bool = False):
+    """Run alembic command passed with `cmd`
+
+    Database is identified by the DATABASE_URL environement variable or
+    TEST_DATABASE_URL if `--test-db` flag is set.
+    """
+    with ctx.cd("src"):  # pyright: ignore[reportUnknownMemberType]
+        ctx.run(
+            f"alembic {cmd}",
+            pty=use_pty,
             env={
                 "DATABASE_URL": os.getenv("TEST_DATABASE_URL")
                 if test_db
@@ -105,109 +99,162 @@ def alembic(c: Context, args: str = "", test_db: bool = False):
         )
 
 
-@task
-def db_upgrade(c: Context, rev: str = "head", test_db: bool = False):
-    c.run(
-        f'invoke alembic --args "upgrade {rev}"',
-        env={
-            "DATABASE_URL": os.getenv("TEST_DATABASE_URL")
-            if test_db
-            else os.getenv("DATABASE_URL")
-        },
+@task(
+    optional=["rev", "test-db"],
+    help={
+        "rev": "alembic revision, default to head",
+        "test-db": "process test database",
+    },
+)
+def db_upgrade(ctx: Context, rev: str = "head", *, test_db: bool = False):
+    """Upgrade database schema with alembic
+
+    Database is identified by the DATABASE_URL environement variable or
+    TEST_DATABASE_URL if `--test-db` flag is set.
+    """
+    ctx.run(
+        f"invoke alembic --cmd 'upgrade {rev}' {'--test-db' if test_db else ''}",
+        pty=use_pty,
     )
 
 
-@task
-def db_downgrade(c: Context, rev: str = "-1"):
-    c.run(f'invoke alembic --args "downgrade {rev}"')
+@task(
+    optional=["rev", "test-db"],
+    help={
+        "rev": "alembic revision, default to head",
+        "test-db": "process test database",
+    },
+)
+def db_downgrade(ctx: Context, rev: str = "-1", *, test_db: bool = False):
+    """Downgrade database schema with alembic
+
+    Database is identified by the DATABASE_URL environement variable or
+    TEST_DATABASE_URL if `--test-db` flag is set.
+    """
+    ctx.run(
+        f"invoke alembic --cmd 'downgrade {rev}' {'--test-db' if test_db else ''}",
+        pty=use_pty,
+    )
 
 
-@task
-def db_list(c: Context):
-    c.run('invoke alembic --args "history -i"')
+@task(
+    optional=["test-db"],
+    help={
+        "test-db": "process test database",
+    },
+)
+def db_list(ctx: Context, *, test_db: bool = False):
+    """List database schema migrations with alembic
+
+    Database is identified by the DATABASE_URL environement variable or
+    TEST_DATABASE_URL if `--test-db` flag is set.
+    """
+    ctx.run(
+        f"invoke alembic --cmd 'history -i' {'--test-db' if test_db else ''}",
+        pty=use_pty,
+    )
 
 
-@task
-def db_gen(c: Context):
-    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        res = c.run("alembic-autogen-check", env={"PYTHONPATH": "."}, warn=True)
-    # only generate revision if we're out of sync with models
-    if res and res.exited > 0:
-        c.run('invoke alembic --args "revision --autogenerate -m unnamed"')
+@task(optional=["no-html"], help={"no-html": "flag to not export html report"})
+def report_cov(ctx: Context, *, no_html: bool = False):
+    """report test coverage"""
+    ctx.run("coverage combine", warn=True, pty=use_pty)
+    ctx.run("coverage report --show-missing", pty=use_pty)
+    if not no_html:
+        ctx.run("coverage html", pty=use_pty)
 
 
-@task
-def db_init_no_migration(c: Context):
-    """[dev] create database schema from models, without migration. expects empty DB"""
+@task(
+    optional=["args", "no-html"],
+    help={
+        "args": "pytest additional arguments",
+        "no-html": "flag to not export html report",
+    },
+)
+def coverage(ctx: Context, args: str = "", *, no_html: bool = False):
+    """run tests and report coverage"""
+    test_cov(ctx, args)
+    report_cov(ctx, no_html=no_html)
+
+
+@task(
+    optional=["args"], help={"args": "linting tools (black, ruff) additional arguments"}
+)
+def lint_black(ctx: Context, args: str = "."):
+    ctx.run("black --version", pty=use_pty)
+    ctx.run(f"black --check --diff {args}", pty=use_pty)
+
+
+@task(
+    optional=["args"], help={"args": "linting tools (black, ruff) additional arguments"}
+)
+def lint_ruff(ctx: Context, args: str = "."):
+    ctx.run("ruff --version", pty=use_pty)
+    ctx.run(f"ruff check {args}", pty=use_pty)
+
+
+@task(
+    optional=["black_args", "ruff_args"],
+    help={
+        "black_args": "linting (fix mode) black arguments",
+        "ruff_args": "linting (fix mode) ruff arguments",
+    },
+)
+def lintall(ctx: Context, black_args: str = ".", ruff_args: str = "."):
+    """Check linting"""
+    lint_black(ctx, black_args)
+    lint_ruff(ctx, ruff_args)
+
+
+@task(optional=["args"], help={"args": "check tools (pyright) additional arguments"})
+def check_pyright(ctx: Context, args: str = ""):
+    """Check static types with pyright"""
+    ctx.run("pyright --version")
+    ctx.run(f"pyright {args}", pty=use_pty)
+
+
+@task(optional=["args"], help={"args": "check tools (pyright) additional arguments"})
+def checkall(ctx: Context, args: str = ""):
+    """Check static types"""
+    check_pyright(ctx, args)
+
+
+@task(optional=["args"], help={"args": "black arguments"})
+def fix_black(ctx: Context, args: str = "."):
+    """Fix black formatting"""
+    ctx.run(f"black {args}", pty=use_pty)
+
+
+@task(optional=["args"], help={"args": "ruff arguments"})
+def fix_ruff(ctx: Context, args: str = "."):
+    """Fix ruff rules"""
+    ctx.run(f"ruff --fix {args}", pty=use_pty)
+
+
+@task(
+    optional=["black_args", "ruff_args"],
+    help={
+        "black_args": "linting (fix mode) black arguments",
+        "ruff_args": "linting (fix mode) ruff arguments",
+    },
+)
+def fixall(ctx: Context, black_args: str = ".", ruff_args: str = "."):
+    """Fix everything automatically"""
+    fix_black(ctx, black_args)
+    fix_ruff(ctx, ruff_args)
+    lintall(ctx, black_args=black_args, ruff_args=ruff_args)
+
+
+@task(
+    optional=["args"],
+    help={"args": "optional uvicorn additional arguments"},
+)
+def serve(c: Context, args: str = ""):
+    """Run development HTTP server locally with uvicorn.
+
+    Use --args to specify additional uvicorn args"""
     with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
         c.run(
-            f"{sys.executable} -c 'import sqlalchemy\n"
-            "from backend.models import BaseMeta;\n"
-            "engine = sqlalchemy.create_engine(str(BaseMeta.database.url))\n"
-            "BaseMeta.metadata.drop_all(engine)\n"
-            "BaseMeta.metadata.create_all(engine)\n'"
+            f"uvicorn backend.entrypoint:app --reload {args}",
+            pty=True,
         )
-
-
-@task
-def report_qa_tools_versions(c: Context):
-    print("black:")
-    black_res = c.run(f"{sys.executable} -m black --version", warn=True)
-    print()
-    print("flake8:")
-    flake8_res = c.run(f"{sys.executable} -m flake8 --version", warn=True)
-    print()
-    print("isort:")
-    isort_res = c.run(f"{sys.executable} -m isort --version", warn=True)
-    print()
-    print("pyright:")
-    pyright_res = c.run("pyright --version", warn=True)
-    print()
-
-    if (
-        not black_res
-        or black_res.exited
-        or not flake8_res
-        or flake8_res.exited
-        or not isort_res
-        or isort_res.exited
-        or not pyright_res
-        or pyright_res.exited
-    ):
-        sys.exit(1)
-
-
-@task
-def check_qa(c: Context):
-    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        print("black:")
-        black_res = c.run(f"{sys.executable} -m black --check backend", warn=True)
-        print()
-        print("flake8:")
-        flake8_res = c.run(
-            f"{sys.executable} -m flake8 backend --count --max-line-length=88"
-            " --statistics",
-            warn=True,
-        )
-        print()
-        print("isort:")
-        isort_res = c.run(
-            f"{sys.executable} -m isort --profile black --check backend", warn=True
-        )
-        print()
-        if (
-            not black_res
-            or black_res.exited
-            or not flake8_res
-            or flake8_res.exited
-            or not isort_res
-            or isort_res.exited
-        ):
-            sys.exit(1)
-
-    print("pyright:")
-    pyright_res = c.run("pyright", warn=True)
-    print("")  # clearing pyright's output (missing CRLF)
-
-    if not pyright_res or pyright_res.exited:
-        sys.exit(1)
