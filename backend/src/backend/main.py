@@ -1,12 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# vim: ai ts=4 sts=4 et sw=4 nu
+import tomllib
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from backend import __description__, __title__, __version__
+from backend import __about__
 from backend.constants import BackendConf
 from backend.routes import echo
 
@@ -14,10 +13,14 @@ PREFIX = "/v1"
 
 
 def create_app() -> FastAPI:
+    toml_content = tomllib.loads(
+        (Path(__file__).parent.parent.parent / Path("pyproject.toml")).read_text()
+    )
+
     app = FastAPI(
-        title=__title__,
-        description=__description__,
-        version=__version__,
+        title=toml_content["project"]["name"],
+        description=toml_content["project"]["description"],
+        version=__about__.__version__,
     )
 
     @app.get("/")
@@ -26,9 +29,9 @@ def create_app() -> FastAPI:
         return RedirectResponse(f"{PREFIX}/", status_code=308)
 
     api = FastAPI(
-        title=__title__,
-        description=__description__,
-        version=__version__,
+        title=toml_content["project"]["name"],
+        description=toml_content["project"]["description"],
+        version=__about__.__version__,
         docs_url="/",
         openapi_tags=[
             {

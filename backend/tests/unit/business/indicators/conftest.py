@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Generator, TypeAlias, cast
 
 import pytest
+
 from backend.business.indicators.dimensions import DimensionsValues
 from backend.business.indicators.indicator import Indicator
 from backend.business.indicators.processor import Processor
