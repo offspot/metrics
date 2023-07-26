@@ -175,7 +175,7 @@ def report_cov(ctx: Context, *, no_html: bool = False):
 )
 def coverage(ctx: Context, args: str = "", *, no_html: bool = False):
     """run tests and report coverage"""
-    test_cov(ctx, args)
+    test_cov(ctx, args=args + " --cov-report xml")
     report_cov(ctx, no_html=no_html)
 
 
