@@ -24,6 +24,7 @@ from offspot_metrics_backend.db.models import IndicatorPeriod
 def test_periods(
     init_iso_datetime: str,
     next_iso_datetime: str,
+    *,
     has_changed: bool,
     expected_year: int,
     expected_month: int,
@@ -43,9 +44,9 @@ def test_periods(
         dbsession,
     )
     assert (init_period != processor.current_period) == has_changed
-    dbPeriod = IndicatorPeriod.get_or_none(init_period, dbsession)
-    assert dbPeriod
-    period = Period.from_timestamp(dbPeriod.timestamp)
+    db_period = IndicatorPeriod.get_or_none(init_period, dbsession)
+    assert db_period
+    period = Period.from_timestamp(db_period.timestamp)
     assert period.year == expected_year
     assert period.month == expected_month
     assert period.day == expected_day

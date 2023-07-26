@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey, Index, UniqueConstraint, select
 from sqlalchemy.orm import (
@@ -78,7 +77,7 @@ class IndicatorDimension(Base):
     It might have up to 3 values for now, meaning a 3 dimensional indicator"""
 
     __tablename__ = "indicator_dimension"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
     # only 3 dimension values are supported for now, this is supposed to be way enough
     value0: Mapped[str | None] = mapped_column(index=True)
     value1: Mapped[str | None]
@@ -95,7 +94,7 @@ class IndicatorRecord(Base):
     """
 
     __tablename__ = "indicator_record"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
     indicator_id: Mapped[int] = mapped_column(index=True)
     value: Mapped[int]
 
@@ -122,7 +121,7 @@ class IndicatorState(Base):
     """
 
     __tablename__ = "indicator_state"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
     indicator_id: Mapped[int] = mapped_column(index=True)
     state: Mapped[str]
 
@@ -147,7 +146,7 @@ class KpiValue(Base):
     The kind of aggregration is either D (day), W (week), M (month) or Y (year)"""
 
     __tablename__ = "kpi"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
     kpi_id: Mapped[int] = mapped_column(index=True)
     agg_kind: Mapped[str]
     agg_value: Mapped[str]

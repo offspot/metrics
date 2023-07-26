@@ -1,7 +1,4 @@
-import abc
-
-
-class Input(abc.ABC):
+class Input:
     """A generic input interface"""
 
     ...

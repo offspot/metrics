@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.business.indicators.indicator import Indicator
@@ -43,7 +41,9 @@ class Processor:
             return
 
         # persist the current period in DB
-        dbPeriod = Persister.persist_period(period=self.current_period, session=session)
+        db_period = Persister.persist_period(
+            period=self.current_period, session=session
+        )
 
         # persist all indicators dimensions
         Persister.persist_indicator_dimensions(
@@ -57,12 +57,12 @@ class Processor:
         if self.current_period == tick_period:
             # if we are in the same period, simply persist new states
             Persister.persist_indicator_states(
-                period=dbPeriod, indicators=self.indicators, session=session
+                period=db_period, indicators=self.indicators, session=session
             )
         else:
             # otherwise, persist records and clear in-memory states
             Persister.persist_indicator_records(
-                period=dbPeriod, indicators=self.indicators, session=session
+                period=db_period, indicators=self.indicators, session=session
             )
             self.reset_state()
             self.current_period = tick_period
@@ -78,18 +78,18 @@ class Processor:
         self.reset_state()
 
         # retrieve last known period from DB
-        lastPeriod = Persister.get_last_period(session)
+        last_period = Persister.get_last_period(session)
 
         # if there is no last period, nothing to do except set current period
-        if not lastPeriod:
+        if not last_period:
             self.current_period = current_period
             return
 
         # set current period as the last one and restore state from DB
-        self.current_period = lastPeriod
+        self.current_period = last_period
         for indicator in self.indicators:
             states = Persister.get_restore_data(
-                lastPeriod, indicator.unique_id, session
+                last_period, indicator.unique_id, session
             )
             for state in states:
                 recorder = indicator.get_new_recorder()

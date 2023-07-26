@@ -13,10 +13,10 @@ class SampleGenericIndicator(Indicator):
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def can_process_input(self, input_: Input) -> bool:
+    def can_process_input(self, input_: Input) -> bool:  # noqa: ARG002
         return True
 
-    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:  # noqa: ARG002
         return DimensionsValues(None, None, None)
 
 
