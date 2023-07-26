@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .input import Input
+from offspot_metrics_backend.business.inputs.input import Input
 
 
 @dataclass

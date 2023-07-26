@@ -2,7 +2,7 @@ import abc
 
 from sqlalchemy.orm import Session
 
-from ..agg_kind import AggKind
+from offspot_metrics_backend.business.agg_kind import AggKind
 
 
 class Kpi(abc.ABC):

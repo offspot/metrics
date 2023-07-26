@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 
-from .agg_kind import AggKind
+from offspot_metrics_backend.business.agg_kind import AggKind
 
 
 @dataclass

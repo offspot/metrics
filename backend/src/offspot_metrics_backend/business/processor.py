@@ -1,12 +1,20 @@
 from sqlalchemy.orm import Session
 
-from ..db import dbsession
-from .indicators.content_visit import ContentHomeVisit, ContentObjectVisit
-from .indicators.processor import Processor as IndicatorProcessor
-from .inputs.input import Input
-from .kpis.content_popularity import ContentObjectPopularity, ContentPopularity
-from .kpis.processor import Processor as KpiProcessor
-from .period import Period
+from offspot_metrics_backend.business.indicators.content_visit import (
+    ContentHomeVisit,
+    ContentObjectVisit,
+)
+from offspot_metrics_backend.business.indicators.processor import (
+    Processor as IndicatorProcessor,
+)
+from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.kpis.content_popularity import (
+    ContentObjectPopularity,
+    ContentPopularity,
+)
+from offspot_metrics_backend.business.kpis.processor import Processor as KpiProcessor
+from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.db import dbsession
 
 
 class Processor:

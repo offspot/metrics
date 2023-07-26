@@ -12,7 +12,7 @@ class Processor:
     """A processor is responsible for transforming inputs into indicator records"""
 
     def __init__(self, current_period: Period) -> None:
-        self.indicators: List[Indicator] = []
+        self.indicators: list[Indicator] = []
         self.current_period = current_period
 
     def process_input(self, input_: Input) -> None:

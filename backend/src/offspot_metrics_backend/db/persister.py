@@ -4,15 +4,15 @@ import sqlalchemy as sa
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
 
-from ..business.agg_kind import AggKind
-from ..business.indicators.indicator import Indicator
-from ..business.kpis.value import Value
-from ..business.period import Period
-from ..db.models import IndicatorDimension as DimensionDb
-from ..db.models import IndicatorPeriod as PeriodDb
-from ..db.models import IndicatorRecord as RecordDb
-from ..db.models import IndicatorState as StateDb
-from ..db.models import KpiValue as KpiValueDb
+from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.kpis.value import Value
+from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.db.models import IndicatorDimension as DimensionDb
+from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
+from offspot_metrics_backend.db.models import IndicatorRecord as RecordDb
+from offspot_metrics_backend.db.models import IndicatorState as StateDb
+from offspot_metrics_backend.db.models import KpiValue as KpiValueDb
 
 
 class Persister:
@@ -34,7 +34,7 @@ class Persister:
 
     @classmethod
     def persist_indicator_dimensions(
-        cls, indicators: List[Indicator], session: Session
+        cls, indicators: list[Indicator], session: Session
     ) -> None:
         """Store all dimensions of all indicators in DB if not already present"""
         for indicator in indicators:
@@ -56,7 +56,7 @@ class Persister:
 
     @classmethod
     def persist_indicator_records(
-        cls, period: PeriodDb, indicators: List[Indicator], session: Session
+        cls, period: PeriodDb, indicators: list[Indicator], session: Session
     ) -> None:
         """Store all indicator records in DB"""
         for indicator in indicators:
@@ -74,7 +74,7 @@ class Persister:
 
     @classmethod
     def persist_indicator_states(
-        cls, period: PeriodDb, indicators: List[Indicator], session: Session
+        cls, period: PeriodDb, indicators: list[Indicator], session: Session
     ) -> None:
         """Store all indicators temporary state in DB"""
         for indicator in indicators:
@@ -91,7 +91,7 @@ class Persister:
                 session.add(dbState)
 
     @classmethod
-    def get_last_period(cls, session: Session) -> Optional[Period]:
+    def get_last_period(cls, session: Session) -> Period | None:
         """Return the last period stored in DB"""
         dbPeriod = session.execute(
             sa.select(PeriodDb).order_by(PeriodDb.timestamp.desc()).limit(1)
@@ -103,7 +103,7 @@ class Persister:
     @classmethod
     def get_restore_data(
         cls, period: Period, indicator_id: int, session: Session
-    ) -> List[StateDb]:
+    ) -> list[StateDb]:
         """Return all state data to restore from DB to memory"""
         return list(
             session.execute(
@@ -117,7 +117,7 @@ class Persister:
     @classmethod
     def get_kpi_values(
         cls, kpi_id: int, agg_kind: AggKind, session: Session
-    ) -> List[Value]:
+    ) -> list[Value]:
         """Return all KPI values for a given KPI and a given kind of period"""
         return [
             Value(agg_value=dbValue.agg_value, kpi_value=dbValue.kpi_value)

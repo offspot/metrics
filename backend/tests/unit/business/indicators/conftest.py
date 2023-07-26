@@ -1,6 +1,7 @@
+from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Generator, TypeAlias, cast
+from typing import TypeAlias, cast
 
 import pytest
 
