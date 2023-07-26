@@ -35,7 +35,10 @@ class IntCounterRecorder(Recorder):
     def __init__(self) -> None:
         self.counter: int = 0
 
-    def process_input(self, input_: Input) -> None:
+    def process_input(
+        self,
+        input_: Input,  # noqa: ARG002
+    ) -> None:
         """Processing an input consists simply in updating the counter"""
         self.counter += 1
 

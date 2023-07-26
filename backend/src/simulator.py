@@ -181,12 +181,12 @@ def rand_sim():
 
         content = get_random_content_from_sim()
 
-        object = get_random_object_from_sim(content)
+        random_object = get_random_object_from_sim(content)
 
         if random.randint(0, 10) == 10:
             processor.process_input(ContentHomeVisit(content))
         else:
-            processor.process_input(ContentObjectVisit(content, object))
+            processor.process_input(ContentObjectVisit(content, random_object))
 
         if random.randint(0, 10) == 10:
             processor.process_tick(tick_period=Period(now))

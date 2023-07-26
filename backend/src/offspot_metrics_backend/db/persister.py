@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import sqlalchemy as sa
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
@@ -24,13 +22,13 @@ class Persister:
     @classmethod
     def persist_period(cls, period: Period, session: Session) -> PeriodDb:
         """Store one period in DB in DB if not already present"""
-        dbPeriod = PeriodDb.get_or_none(period, session)
+        db_period = PeriodDb.get_or_none(period, session)
 
-        if not dbPeriod:
-            dbPeriod = PeriodDb.from_period(period)
-            session.add(dbPeriod)
+        if not db_period:
+            db_period = PeriodDb.from_period(period)
+            session.add(db_period)
 
-        return dbPeriod
+        return db_period
 
     @classmethod
     def persist_indicator_dimensions(
@@ -39,20 +37,20 @@ class Persister:
         """Store all dimensions of all indicators in DB if not already present"""
         for indicator in indicators:
             for record in indicator.get_records():
-                dbDimension = session.execute(
+                db_dimension = session.execute(
                     sa.select(DimensionDb)
                     .where(DimensionDb.value0 == record.dimensions.value0)
                     .where(DimensionDb.value1 == record.dimensions.value1)
                     .where(DimensionDb.value2 == record.dimensions.value2)
                 ).scalar_one_or_none()
 
-                if not dbDimension:
-                    dbDimension = DimensionDb(
+                if not db_dimension:
+                    db_dimension = DimensionDb(
                         record.dimensions.value0,
                         record.dimensions.value1,
                         record.dimensions.value2,
                     )
-                    session.add(dbDimension)
+                    session.add(db_dimension)
 
     @classmethod
     def persist_indicator_records(
@@ -61,16 +59,16 @@ class Persister:
         """Store all indicator records in DB"""
         for indicator in indicators:
             for record in indicator.get_records():
-                dbDimension = session.execute(
+                db_dimension = session.execute(
                     sa.select(DimensionDb)
                     .where(DimensionDb.value0 == record.dimensions.value0)
                     .where(DimensionDb.value1 == record.dimensions.value1)
                     .where(DimensionDb.value2 == record.dimensions.value2)
                 ).scalar_one()
-                dbRecord = RecordDb(indicator.unique_id, record.value)
-                dbRecord.dimension = dbDimension
-                dbRecord.period = period
-                session.add(dbRecord)
+                db_record = RecordDb(indicator.unique_id, record.value)
+                db_record.dimension = db_dimension
+                db_record.period = period
+                session.add(db_record)
 
     @classmethod
     def persist_indicator_states(
@@ -79,26 +77,26 @@ class Persister:
         """Store all indicators temporary state in DB"""
         for indicator in indicators:
             for state in indicator.get_states():
-                dbDimension = session.execute(
+                db_dimension = session.execute(
                     sa.select(DimensionDb)
                     .where(DimensionDb.value0 == state.dimensions.value0)
                     .where(DimensionDb.value1 == state.dimensions.value1)
                     .where(DimensionDb.value2 == state.dimensions.value2)
                 ).scalar_one()
-                dbState = StateDb(indicator.unique_id, state.value)
-                dbState.dimension = dbDimension
-                dbState.period = period
-                session.add(dbState)
+                db_state = StateDb(indicator.unique_id, state.value)
+                db_state.dimension = db_dimension
+                db_state.period = period
+                session.add(db_state)
 
     @classmethod
     def get_last_period(cls, session: Session) -> Period | None:
         """Return the last period stored in DB"""
-        dbPeriod = session.execute(
+        db_period = session.execute(
             sa.select(PeriodDb).order_by(PeriodDb.timestamp.desc()).limit(1)
         ).scalar_one_or_none()
-        if not dbPeriod:
+        if not db_period:
             return None
-        return dbPeriod.to_period()
+        return db_period.to_period()
 
     @classmethod
     def get_restore_data(

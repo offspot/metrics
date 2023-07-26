@@ -182,7 +182,6 @@ def test_restore_from_db_continue_same_period(
     dbsession: Session,
 ) -> None:
     processor.indicators = [total_by_content_and_subfolder_indicator]
-    processor.current_period
     processor.process_input(input1)
     processor.process_input(input1)
     processor.process_input(input2)
@@ -218,7 +217,6 @@ def test_restore_from_db_start_new_period(
     dbsession: Session,
 ) -> None:
     processor.indicators = [total_by_content_and_subfolder_indicator]
-    processor.current_period
     processor.process_input(input1)
     processor.process_input(input1)
     processor.process_input(input2)

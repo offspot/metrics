@@ -17,7 +17,8 @@ Session = sessionmaker(bind=create_engine(url=BackendConf.database_url, echo=Fal
 # See https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(
-    dbapi_connection: DBAPIConnection, connection_record: ConnectionPoolEntry
+    dbapi_connection: DBAPIConnection,
+    connection_record: ConnectionPoolEntry,  # noqa: ARG001
 ):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")

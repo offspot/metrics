@@ -1,6 +1,5 @@
 import abc
 from collections.abc import Generator
-from typing import Dict
 
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.indicators.holder import Record, State
