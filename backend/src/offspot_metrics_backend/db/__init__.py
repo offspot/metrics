@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from sqlalchemy import SelectBase, create_engine, event, func, select
 from sqlalchemy.engine import Engine

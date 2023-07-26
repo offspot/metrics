@@ -1,5 +1,6 @@
+from collections.abc import Generator
 from datetime import datetime
-from typing import Generator, TypeAlias
+from typing import TypeAlias
 
 import pytest
 from sqlalchemy.orm import Session

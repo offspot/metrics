@@ -1,5 +1,6 @@
 import abc
-from typing import Dict, Generator
+from collections.abc import Generator
+from typing import Dict
 
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.indicators.holder import Record, State
@@ -21,7 +22,7 @@ class Indicator(abc.ABC):
 
     def __init__(self) -> None:
         super().__init__()
-        self.recorders: Dict[DimensionsValues, Recorder] = {}
+        self.recorders: dict[DimensionsValues, Recorder] = {}
 
     @abc.abstractmethod
     def can_process_input(self, input_: Input) -> bool:

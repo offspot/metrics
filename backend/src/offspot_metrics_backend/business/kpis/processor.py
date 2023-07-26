@@ -3,18 +3,18 @@ from typing import List
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
 
-from ...db.persister import Persister
-from ..agg_kind import AggKind
-from ..period import Period
-from .kpi import Kpi
-from .value import Value
+from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.kpis.kpi import Kpi
+from offspot_metrics_backend.business.kpis.value import Value
+from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.db.persister import Persister
 
 
 class Processor:
     """A processor is responsible for transforming indicator records into kpis"""
 
     def __init__(self, current_period: Period) -> None:
-        self.kpis: List[Kpi] = []
+        self.kpis: list[Kpi] = []
         self.current_period = current_period
         self.current_day = current_period.get_truncated_value(AggKind.DAY)
 
@@ -55,7 +55,7 @@ class Processor:
     @classmethod
     def get_aggregations_to_keep(
         cls, agg_kind: AggKind, now: Period
-    ) -> List[str] | None:
+    ) -> list[str] | None:
         if agg_kind == AggKind.DAY:
             return [
                 now.get_shifted(relativedelta(days=-delta)).get_truncated_value(
@@ -90,7 +90,7 @@ class Processor:
         This method act on a given KPI for a given kind of aggregation.
         Existing KPI values are updated in DB. New ones are created.
         Old ones are deleted"""
-        values: List[Value] = Persister.get_kpi_values(
+        values: list[Value] = Persister.get_kpi_values(
             kpi_id=kpi.unique_id, agg_kind=agg_kind, session=session
         )
         current_agg_value = now.get_truncated_value(agg_kind)
