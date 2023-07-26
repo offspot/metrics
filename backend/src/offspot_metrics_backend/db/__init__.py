@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import ConnectionPoolEntry
 
-from backend.constants import BackendConf
+from offspot_metrics_backend.constants import BackendConf
 
 Session = sessionmaker(bind=create_engine(url=BackendConf.database_url, echo=False))
 

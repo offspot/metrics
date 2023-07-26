@@ -1,10 +1,13 @@
 FROM python:3.11-slim-bookworm
 LABEL org.opencontainers.image.source https://github.com/offspot/metrics
 
-# Install necessary packages
+# Specifying a workdir which is not "/"" is mandatory for proper uvicorn watchfiles
+# operation (used mostly only in dev, but changing the workdir does not harm production)
+WORKDIR "/home"
+
+# Install necessary packages (only pip so far)
 RUN python -m pip install --no-cache-dir -U \
-      pip \
-      invoke
+      pip
 
 # to set to your clients' origins
 ENV ALLOWED_ORIGINS http://localhost
@@ -14,9 +17,8 @@ ENV DATABASE_URL sqlite+pysqlite:///local.db
 COPY src /src/src
 COPY pyproject.toml *.md /src/
 
-# Install + cleanup
+# Install project (including dependencies) + cleanup afterwards
 RUN pip install --no-cache-dir /src \
  && rm -rf /src
 
-# TODO: fix this
-CMD ["invoke", "serve", "--args", "--host 0.0.0.0 --port 80"]
+CMD ["uvicorn", "offspot_metrics_backend.entrypoint:app"]

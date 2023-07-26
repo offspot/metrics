@@ -5,13 +5,13 @@ import pytest
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from backend.business.agg_kind import AggKind
-from backend.business.kpis.kpi import Kpi
-from backend.business.kpis.processor import Processor
-from backend.business.period import Period as Period
-from backend.db import count_from_stmt
-from backend.db.models import IndicatorPeriod as PeriodDb
-from backend.db.models import KpiValue
+from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.kpis.kpi import Kpi
+from offspot_metrics_backend.business.kpis.processor import Processor
+from offspot_metrics_backend.business.period import Period as Period
+from offspot_metrics_backend.db import count_from_stmt
+from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
+from offspot_metrics_backend.db.models import KpiValue
 
 init_datetime_day_dummyvalue = "D - 1686182400 - 1686268800"
 init_datetime_day_minus_one_dummyvalue = "D - 1686096000 - 1686182400"

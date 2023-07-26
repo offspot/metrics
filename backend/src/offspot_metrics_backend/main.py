@@ -1,25 +1,20 @@
-import tomllib
-from pathlib import Path
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from backend import __about__
-from backend.constants import BackendConf
-from backend.routes import echo
+from offspot_metrics_backend import __about__
+from offspot_metrics_backend.constants import BackendConf
+from offspot_metrics_backend.routes import echo
 
 PREFIX = "/v1"
+TITLE = "Offspot Metrics Backend"
+DESCRIPTION = "The API powering the UI of Offspot Metrics"
 
 
 def create_app() -> FastAPI:
-    toml_content = tomllib.loads(
-        (Path(__file__).parent.parent.parent / Path("pyproject.toml")).read_text()
-    )
-
     app = FastAPI(
-        title=toml_content["project"]["name"],
-        description=toml_content["project"]["description"],
+        title=TITLE,
+        description=DESCRIPTION,
         version=__about__.__version__,
     )
 
@@ -29,8 +24,8 @@ def create_app() -> FastAPI:
         return RedirectResponse(f"{PREFIX}/", status_code=308)
 
     api = FastAPI(
-        title=toml_content["project"]["name"],
-        description=toml_content["project"]["description"],
+        title=TITLE,
+        description=DESCRIPTION,
         version=__about__.__version__,
         docs_url="/",
         openapi_tags=[

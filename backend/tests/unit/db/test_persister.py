@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.db.models import IndicatorRecord
+from offspot_metrics_backend.db.models import IndicatorRecord
 
 
 def test_fk_missing(dbsession: Session):

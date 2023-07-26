@@ -3,7 +3,17 @@ services:
     build: ../backend
     container_name: om_backend
     volumes:
-      - ../backend/src:/src/src
+      - ../backend/src/offspot_metrics_backend:/usr/local/lib/python3.11/site-packages/offspot_metrics_backend
+    command:
+      - uvicorn
+      - offspot_metrics_backend.entrypoint:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "80"
+      - --reload
+      - --reload-dir
+      - /usr/local/lib/python3.11/site-packages/offspot_metrics_backend
     ports:
       - 8000:80
   backend-tools:

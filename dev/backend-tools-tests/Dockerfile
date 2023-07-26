@@ -2,21 +2,20 @@ FROM python:3.11-slim-bookworm
 
 WORKDIR /src
 
-# install hatch for dev purposes + upgrade pip
-RUN python -m pip install --no-cache-dir --upgrade hatch \
- && hatch shell \
- && python -m pip install -U pip
+# install hatch
+RUN python -m pip install --no-cache-dir --upgrade hatch
 
-# copy project dependencies
+# copy project dependencies (including early __about__.py since it is needed to create hatch shell)
 COPY pyproject.toml *.md tasks.py /src/
-COPY src/backend/__about__.py /src/src/backend/__about__.py
+COPY src/offspot_metrics_backend/__about__.py /src/src/offspot_metrics_backend/__about__.py
 
 # start hatch context
 RUN cd /src \
  && hatch shell
 
-# install project dependencies
-RUN python -m pip install ".[dev]"
+# upgrade pip + install project dependencies
+RUN python -m pip install --no-cache-dir -U pip \
+ && python -m pip install --no-cache-dir ".[dev]"
 
 # copy project files
 COPY src /src/src

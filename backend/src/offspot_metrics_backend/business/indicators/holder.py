@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-from backend.business.indicators.dimensions import DimensionsValues
+from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 
 T = TypeVar("T")
 
