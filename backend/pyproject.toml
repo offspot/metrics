@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "offspot-metrics"
+name = "offspot_metrics_backend"
 authors = [
   { name = "Kiwix", email = "dev@kiwix.org" },
 ]
@@ -50,10 +50,10 @@ test = [
 dev = [
     "pre-commit == 3.3.3",
     "debugpy == 1.6.7",
-    "offspot-metrics[scripts]",
-    "offspot-metrics[lint]",
-    "offspot-metrics[test]",
-    "offspot-metrics[check]",
+    "offspot_metrics_backend[scripts]",
+    "offspot_metrics_backend[lint]",
+    "offspot_metrics_backend[test]",
+    "offspot_metrics_backend[check]",
 ]
 
 [project.urls]
@@ -61,7 +61,7 @@ Homepage = "https://github.com/offspot/metrics"
 Donate = "https://www.kiwix.org/en/support-us/"
 
 [tool.hatch.version]
-path = "src/backend/__about__.py"
+path = "src/offspot_metrics_backend/__about__.py"
 
 [tool.hatch.build]
 exclude = [
@@ -185,7 +185,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["backend"]
+known-first-party = ["offspot_metrics_backend"]
 
 [tool.ruff.flake8-bugbear]
 # add exceptions to B008 for fastapi.
@@ -204,15 +204,15 @@ testpaths = ["tests"]
 pythonpath = [".", "src"]
 
 [tool.coverage.paths]
-offspot-metrics = ["src/backend"]
+offspot_metrics_backend = ["src/offspot_metrics_backend"]
 tests = ["tests"]
 
 [tool.coverage.run]
-source_pkgs = ["offspot-metrics"]
+source_pkgs = ["offspot_metrics_backend"]
 branch = true
 parallel = true
 omit = [
-  "src/backend/__about__.py",
+  "src/offspot_metrics_backend/__about__.py",
 ]
 
 [tool.coverage.report]

@@ -4,12 +4,15 @@ from typing import Generator, TypeAlias, cast
 
 import pytest
 
-from backend.business.indicators.dimensions import DimensionsValues
-from backend.business.indicators.indicator import Indicator
-from backend.business.indicators.processor import Processor
-from backend.business.indicators.recorder import IntCounterRecorder, Recorder
-from backend.business.inputs.input import Input
-from backend.business.period import Period
+from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
+from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.processor import Processor
+from offspot_metrics_backend.business.indicators.recorder import (
+    IntCounterRecorder,
+    Recorder,
+)
+from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.period import Period
 
 IndicatorGenerator: TypeAlias = Generator[Indicator, None, None]
 InputGenerator: TypeAlias = Generator[Input, None, None]

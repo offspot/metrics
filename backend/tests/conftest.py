@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from backend.constants import BackendConf
-from backend.db.initializer import Initializer
+from offspot_metrics_backend.constants import BackendConf
+from offspot_metrics_backend.db.initializer import Initializer
 
 
 def pytest_sessionstart(session: Any) -> None:

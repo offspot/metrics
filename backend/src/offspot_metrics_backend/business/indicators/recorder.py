@@ -1,6 +1,6 @@
 import abc
 
-from backend.business.inputs.input import Input
+from offspot_metrics_backend.business.inputs.input import Input
 
 
 class Recorder(abc.ABC):
