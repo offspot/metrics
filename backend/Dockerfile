@@ -21,4 +21,6 @@ COPY pyproject.toml *.md /src/
 RUN pip install --no-cache-dir /src \
  && rm -rf /src
 
-CMD ["uvicorn", "offspot_metrics_backend.entrypoint:app"]
+EXPOSE 80
+
+CMD ["uvicorn", "offspot_metrics_backend.entrypoint:app", "--host", "0.0.0.0", "--port", "80"]

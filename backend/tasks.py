@@ -1,4 +1,4 @@
-# pyright: strict, reportUntypedFunctionDecorator=false
+# pyright: strict, reportUntypedFunctionDecorator=false, reportUnknownMemberType=false
 import os
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -9,7 +9,7 @@ from invoke.tasks import task  # pyright: ignore [reportUnknownVariableType]
 use_pty = not os.getenv("CI", "")
 
 
-def setup_db_and_test(ctx: Context, cmd: str, args: str, path: str):
+def setup_db_and_test(ctx: Context, cmd: str, args: str):
     """Setup the test DB and run the tests
 
     This function takes care of:
@@ -19,60 +19,54 @@ def setup_db_and_test(ctx: Context, cmd: str, args: str, path: str):
     - running the tests with the `cmd` passed, for the `path` requested and with
     additional `args` supplied
     """
-    environment_db_url = os.getenv("TEST_DATABASE_URL")
-    one_shot_db_path = (
-        Path(NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name)
-        if not environment_db_url
-        else None
-    )
-    with ctx.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        if one_shot_db_path:
-            ctx.run(
-                "alembic upgrade head",
-                pty=use_pty,
-                env={
-                    "DATABASE_URL": f"sqlite+pysqlite:////{one_shot_db_path.resolve()}"
-                },
-            )
-        try:
-            ctx.run(
-                f"{cmd} {args} ../tests{'/' + path if path else ''}",
-                pty=use_pty,
-                env={
-                    "DATABASE_URL": environment_db_url
-                    if not one_shot_db_path
-                    else f"sqlite+pysqlite:////{one_shot_db_path.resolve()}"
-                },
-            )
-        finally:
-            if one_shot_db_path and one_shot_db_path.exists():
-                one_shot_db_path.unlink()
+    temp_db_path = None
+    test_db_url = os.getenv("TEST_DATABASE_URL")
+    if not test_db_url:
+        temp_db_path = Path(
+            NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name
+        ).resolve()
+        test_db_url = f"sqlite+pysqlite:////{temp_db_path}"
+    with ctx.cd("src"):
+        ctx.run("alembic upgrade head", pty=use_pty, env={"DATABASE_URL": test_db_url})
+    try:
+        ctx.run(
+            f"{cmd} {args}",
+            pty=use_pty,
+            env={"DATABASE_URL": test_db_url},
+        )
+    finally:
+        if temp_db_path:
+            temp_db_path.unlink(missing_ok=True)
 
 
-@task(
-    optional=["args", "path"],
-    help={
-        "args": "pytest additional arguments",
-        "path": "path to test, relative to 'tests' parent folder",
-    },
-)
-def test(ctx: Context, args: str = "", path: str = ""):
+@task(optional=["args"], help={"args": "pytest additional arguments"})
+def test(ctx: Context, args: str = ""):
     """run tests (without coverage)"""
-    setup_db_and_test(ctx=ctx, cmd="pytest", args=args, path=path)
+    setup_db_and_test(ctx=ctx, cmd="pytest", args=args)
 
 
-@task(
-    optional=["args", "path"],
-    help={
-        "args": "pytest additional arguments",
-        "path": "path to test, relative to 'tests' parent folder",
-    },
-)
-def test_cov(ctx: Context, args: str = "", path: str = ""):
+@task(optional=["args"], help={"args": "pytest additional arguments"})
+def test_cov(ctx: Context, args: str = ""):
     """run test vith coverage"""
-    setup_db_and_test(
-        ctx=ctx, cmd="pytest --cov=offspot_metrics_backend", args=args, path=path
-    )
+    setup_db_and_test(ctx=ctx, cmd="pytest --cov=offspot_metrics_backend", args=args)
+
+
+def call_alembic(ctx: Context, cmd: str, *, test_db: bool = False):
+    """Helper function shared by multiple tasks to call alembic"""
+
+    # this won't be needed once https://github.com/pyinvoke/invoke/issues/170 will be
+    # implemented and we will be able to call alembic task from other related tasks
+
+    with ctx.cd("src"):
+        ctx.run(
+            f"alembic {cmd}",
+            pty=use_pty,
+            env={
+                "DATABASE_URL": os.getenv("TEST_DATABASE_URL")
+                if test_db
+                else os.getenv("DATABASE_URL")
+            },
+        )
 
 
 @task(
@@ -88,16 +82,8 @@ def alembic(ctx: Context, cmd: str, *, test_db: bool = False):
     Database is identified by the DATABASE_URL environement variable or
     TEST_DATABASE_URL if `--test-db` flag is set.
     """
-    with ctx.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        ctx.run(
-            f"alembic {cmd}",
-            pty=use_pty,
-            env={
-                "DATABASE_URL": os.getenv("TEST_DATABASE_URL")
-                if test_db
-                else os.getenv("DATABASE_URL")
-            },
-        )
+
+    call_alembic(ctx=ctx, cmd=cmd, test_db=test_db)
 
 
 @task(
@@ -113,10 +99,7 @@ def db_upgrade(ctx: Context, rev: str = "head", *, test_db: bool = False):
     Database is identified by the DATABASE_URL environement variable or
     TEST_DATABASE_URL if `--test-db` flag is set.
     """
-    ctx.run(
-        f"invoke alembic --cmd 'upgrade {rev}' {'--test-db' if test_db else ''}",
-        pty=use_pty,
-    )
+    call_alembic(ctx=ctx, cmd=f"upgrade {rev}", test_db=test_db)
 
 
 @task(
@@ -132,10 +115,7 @@ def db_downgrade(ctx: Context, rev: str = "-1", *, test_db: bool = False):
     Database is identified by the DATABASE_URL environement variable or
     TEST_DATABASE_URL if `--test-db` flag is set.
     """
-    ctx.run(
-        f"invoke alembic --cmd 'downgrade {rev}' {'--test-db' if test_db else ''}",
-        pty=use_pty,
-    )
+    call_alembic(ctx=ctx, cmd=f"downgrade {rev}", test_db=test_db)
 
 
 @task(
@@ -150,20 +130,16 @@ def db_list(ctx: Context, *, test_db: bool = False):
     Database is identified by the DATABASE_URL environement variable or
     TEST_DATABASE_URL if `--test-db` flag is set.
     """
-    ctx.run(
-        f"invoke alembic --cmd 'history -i' {'--test-db' if test_db else ''}",
-        pty=use_pty,
-    )
+    call_alembic(ctx=ctx, cmd="history -i", test_db=test_db)
 
 
 @task(optional=["no-html"], help={"no-html": "flag to not export html report"})
 def report_cov(ctx: Context, *, no_html: bool = False):
     """report test coverage"""
-    with ctx.cd("src"):  # pyright: ignore[reportUnknownMemberType]
-        ctx.run("coverage combine", warn=True, pty=use_pty)
-        ctx.run("coverage report --show-missing", pty=use_pty)
-        if not no_html:
-            ctx.run("coverage html", pty=use_pty)
+    ctx.run("coverage combine", warn=True, pty=use_pty)
+    ctx.run("coverage report --show-missing", pty=use_pty)
+    if not no_html:
+        ctx.run("coverage html", pty=use_pty)
 
 
 @task(
@@ -175,7 +151,7 @@ def report_cov(ctx: Context, *, no_html: bool = False):
 )
 def coverage(ctx: Context, args: str = "", *, no_html: bool = False):
     """run tests and report coverage"""
-    test_cov(ctx, args)
+    test_cov(ctx, args=args + " --cov-report xml")
     report_cov(ctx, no_html=no_html)
 
 
@@ -255,7 +231,7 @@ def serve(c: Context, args: str = ""):
     """Run development HTTP server locally with uvicorn.
 
     Use --args to specify additional uvicorn args"""
-    with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
+    with c.cd("src"):
         c.run(
             f"uvicorn offspot_metrics_backend.entrypoint:app --reload {args}",
             pty=True,

@@ -5,7 +5,7 @@ Metrics - Data architecture
 
 ## Raw data
 
-Raw data is produced by existing systems, typically reverse proxy log files, nmon system monitoring, ... 
+Raw data is produced by existing systems, typically reverse proxy log files, nmon system monitoring, ...
 
 Raw data is expected to be purged at least when older than one year, at most when older than few minutes (needed to transfer them to indicators).
 
