@@ -1,9 +1,16 @@
 # Offspot Metrics Backend
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+This is the backend component of `metrics` which is responsible to:
+- receive or retrieve input events and transform them into indicators then KPI
+- serve the API for the frontend UI
 
-### Constants
+## Environment variables
 
-- Database is configured through `$DATABASE_URL` with fallback to `sqlite+pysqlite:///dev.db`
+- Database is configured through `DATABASE_URL` with fallback to `sqlite+pysqlite:////{src_dir}/dev.db`
+- Allowed origins is configured through `ALLOWED_ORIGINS` with fallback to `http://localhost|http://localhost:8000|http://localhost:8080`
 
-See `constants.py`
+See [`constants.py`](src/offspot_metrics_backend/constants.py)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
