@@ -48,6 +48,7 @@ docker exec -it om_backend-tools invoke db-upgrade
 ```
 
 You can also check that everything is ok:
+
 ```sh
 docker exec -it om_backend-tools invoke alembic --args "check"
 ```
@@ -60,6 +61,7 @@ Just do the same as above with the backend-tests container (instead of the backe
 The backend might typically fail if the DB schema is not up-to-date, or if you create some nasty bug while modifying the code.
 
 Restart it with:
+
 ```sh
 docker restart om_backend
 ```
@@ -75,6 +77,7 @@ docker exec -it om_backend-tools invoke db-upgrade --test-db
 ```
 
 Run all tests:
+
 ```sh
 docker exec -it om_backend-tools invoke test
 ```
@@ -93,13 +96,13 @@ docker exec -it om_backend-tools invoke test --path "unit/business/indicators/te
 
 ### backend database schema
 
-To generate DB schema documentation, you can run the following command once your 
+To generate DB schema documentation, you can run the following command once your
 docker-compose setup is started (and supposing that your local DB is up-to-date):
 
 ```sh
 cd dev
 wget -O /tmp/sqlite-jdbc-3.42.0.0.jar https://github.com/xerial/sqlite-jdbc/releases/download/3.42.0.0/sqlite-jdbc-3.42.0.0.jar
-docker run -v "/tmp/sqlite-jdbc-3.42.0.0.jar:/drivers/sqlite-jdbc-3.42.0.0.jar" -v "$(pwd)/schemaspy.properties:/schemaspy.properties" -v "$(pwd)/schemaspy:/output" -v "$(pwd)/../backend/src/backend/dev.db:/data/database.db" schemaspy/schemaspy:latest
+docker run -name schemaspy-offspot-metrics --rm -v "/tmp/sqlite-jdbc-3.42.0.0.jar:/drivers/sqlite-jdbc-3.42.0.0.jar" -v "$(pwd)/schemaspy.properties:/schemaspy.properties" -v "$(pwd)/schemaspy:/output" -v "$(pwd)/../backend/src/offspot_metrics_backend/dev.db:/data/database.db" schemaspy/schemaspy:latest
 ```
 
 Nota: of course you might update the Sqlite JDBC driver version 😉

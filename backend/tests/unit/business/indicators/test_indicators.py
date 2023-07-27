@@ -3,14 +3,14 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.business.indicators.dimensions import DimensionsValues
-from backend.business.indicators.holder import Record
-from backend.business.indicators.indicator import Indicator
-from backend.business.indicators.processor import Processor
-from backend.business.inputs.input import Input
-from backend.business.period import Period
-from backend.db import count_from_stmt
-from backend.db.models import (
+from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
+from offspot_metrics_backend.business.indicators.holder import Record
+from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.processor import Processor
+from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.db import count_from_stmt
+from offspot_metrics_backend.db.models import (
     IndicatorDimension,
     IndicatorPeriod,
     IndicatorRecord,
@@ -182,7 +182,6 @@ def test_restore_from_db_continue_same_period(
     dbsession: Session,
 ) -> None:
     processor.indicators = [total_by_content_and_subfolder_indicator]
-    processor.current_period
     processor.process_input(input1)
     processor.process_input(input1)
     processor.process_input(input2)
@@ -218,7 +217,6 @@ def test_restore_from_db_start_new_period(
     dbsession: Session,
 ) -> None:
     processor.indicators = [total_by_content_and_subfolder_indicator]
-    processor.current_period
     processor.process_input(input1)
     processor.process_input(input1)
     processor.process_input(input2)

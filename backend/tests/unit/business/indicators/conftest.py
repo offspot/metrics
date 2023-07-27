@@ -1,14 +1,19 @@
+from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Generator, TypeAlias, cast
+from typing import TypeAlias, cast
 
 import pytest
-from backend.business.indicators.dimensions import DimensionsValues
-from backend.business.indicators.indicator import Indicator
-from backend.business.indicators.processor import Processor
-from backend.business.indicators.recorder import IntCounterRecorder, Recorder
-from backend.business.inputs.input import Input
-from backend.business.period import Period
+
+from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
+from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.processor import Processor
+from offspot_metrics_backend.business.indicators.recorder import (
+    IntCounterRecorder,
+    Recorder,
+)
+from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.period import Period
 
 IndicatorGenerator: TypeAlias = Generator[Indicator, None, None]
 InputGenerator: TypeAlias = Generator[Input, None, None]
@@ -41,7 +46,7 @@ class TotalIndicator(Indicator):
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:  # noqa: ARG002
         return DimensionsValues(None, None, None)
 
 

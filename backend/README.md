@@ -1,22 +1,16 @@
 # Offspot Metrics Backend
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+This is the backend component of `metrics` which is responsible to:
+- receive or retrieve input events and transform them into indicators then KPI
+- serve the API for the frontend UI
 
-## devel usage
+## Environment variables
 
-```sh
-pip install -U invoke  # only once
-invoke install-deps --package dev db-upgrade serve
-```
+- Database is configured through `DATABASE_URL` with fallback to `sqlite+pysqlite:////{src_dir}/dev.db`
+- Allowed origins is configured through `ALLOWED_ORIGINS` with fallback to `http://localhost|http://localhost:8000|http://localhost:8080`
 
-### Constants
+See [`constants.py`](src/offspot_metrics_backend/constants.py)
 
-- Database is configured through `$DATABASE_URL` with fallback to `sqlite+pysqlite:///dev.db`
+## Contributing
 
-See `constants.py`
-
-### Guidelines
-
-- Don't take assigned issues. Comment if those get staled.
-- If your contribution is far from trivial, open an issue to discuss it first.
-- Ensure your code passed [black formatting](https://pypi.org/project/black/), [isort](https://pypi.org/project/isort/) and [flake8](https://pypi.org/project/flake8/) (88 chars)
+See [CONTRIBUTING.md](CONTRIBUTING.md).

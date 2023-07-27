@@ -1,13 +1,14 @@
+from collections.abc import Generator
 from datetime import datetime
-from typing import Generator, TypeAlias
+from typing import TypeAlias
 
 import pytest
 from sqlalchemy.orm import Session
 
-from backend.business.agg_kind import AggKind
-from backend.business.kpis.kpi import Kpi
-from backend.business.kpis.processor import Processor
-from backend.business.period import Period
+from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.kpis.kpi import Kpi
+from offspot_metrics_backend.business.kpis.processor import Processor
+from offspot_metrics_backend.business.period import Period
 
 ProcessorGenerator: TypeAlias = Generator[Processor, None, None]
 KpiGenerator: TypeAlias = Generator[Kpi, None, None]
@@ -25,7 +26,11 @@ class DummyKpi(Kpi):
     unique_id = -2001  # this ID is unique to each kind of kpi
 
     def get_value(
-        self, agg_kind: AggKind, start_ts: int, stop_ts: int, session: Session
+        self,
+        agg_kind: AggKind,
+        start_ts: int,
+        stop_ts: int,
+        session: Session,  # noqa: ARG002
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""

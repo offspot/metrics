@@ -1,19 +1,22 @@
 import pytest
 
-from backend.business.indicators.dimensions import DimensionsValues
-from backend.business.indicators.indicator import Indicator
-from backend.business.indicators.recorder import IntCounterRecorder, Recorder
-from backend.business.inputs.input import Input
+from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
+from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.recorder import (
+    IntCounterRecorder,
+    Recorder,
+)
+from offspot_metrics_backend.business.inputs.input import Input
 
 
 class SampleGenericIndicator(Indicator):
     def get_new_recorder(self) -> Recorder:
         return IntCounterRecorder()
 
-    def can_process_input(self, input_: Input) -> bool:
+    def can_process_input(self, input_: Input) -> bool:  # noqa: ARG002
         return True
 
-    def get_dimensions_values(self, input_: Input) -> DimensionsValues:
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:  # noqa: ARG002
         return DimensionsValues(None, None, None)
 
 

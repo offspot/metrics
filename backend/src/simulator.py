@@ -5,11 +5,14 @@ from datetime import datetime, timedelta
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session
 
-import backend.db.models as dbm
-from backend.business.inputs.content_visit import ContentHomeVisit, ContentObjectVisit
-from backend.business.period import Period
-from backend.business.processor import Processor
-from backend.constants import BackendConf
+import offspot_metrics_backend.db.models as dbm
+from offspot_metrics_backend.business.inputs.content_visit import (
+    ContentHomeVisit,
+    ContentObjectVisit,
+)
+from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.business.processor import Processor
+from offspot_metrics_backend.constants import BackendConf
 
 # Some known contents (some are repeated many times to influence the distribution)
 contents = [
@@ -178,12 +181,12 @@ def rand_sim():
 
         content = get_random_content_from_sim()
 
-        object = get_random_object_from_sim(content)
+        random_object = get_random_object_from_sim(content)
 
         if random.randint(0, 10) == 10:
             processor.process_input(ContentHomeVisit(content))
         else:
-            processor.process_input(ContentObjectVisit(content, object))
+            processor.process_input(ContentObjectVisit(content, random_object))
 
         if random.randint(0, 10) == 10:
             processor.process_tick(tick_period=Period(now))

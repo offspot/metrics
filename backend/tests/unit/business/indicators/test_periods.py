@@ -3,12 +3,12 @@ from datetime import datetime
 import pytest
 from sqlalchemy.orm import Session
 
-from backend.business.agg_kind import AggKind
-from backend.business.indicators.indicator import Indicator
-from backend.business.indicators.processor import Processor
-from backend.business.inputs.input import Input
-from backend.business.period import Period
-from backend.db.models import IndicatorPeriod
+from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.processor import Processor
+from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.db.models import IndicatorPeriod
 
 
 @pytest.mark.parametrize(
@@ -24,6 +24,7 @@ from backend.db.models import IndicatorPeriod
 def test_periods(
     init_iso_datetime: str,
     next_iso_datetime: str,
+    *,
     has_changed: bool,
     expected_year: int,
     expected_month: int,
@@ -43,9 +44,9 @@ def test_periods(
         dbsession,
     )
     assert (init_period != processor.current_period) == has_changed
-    dbPeriod = IndicatorPeriod.get_or_none(init_period, dbsession)
-    assert dbPeriod
-    period = Period.from_timestamp(dbPeriod.timestamp)
+    db_period = IndicatorPeriod.get_or_none(init_period, dbsession)
+    assert db_period
+    period = Period.from_timestamp(db_period.timestamp)
     assert period.year == expected_year
     assert period.month == expected_month
     assert period.day == expected_day

@@ -3,9 +3,9 @@ Core processing logic
 
 ## Business logic
 
-- The [higher level processor](backend/src/backend/business/processor.py) is responsible to dispatch events to lower level processors
-- The [indicator level processor](backend/src/backend/business/indicators/processor.py) is responsible to operations linked to indicators
-- The [KPI level processor](backend/src/backend/business/indicators/processor.py) is responsible to operations linked to KPI
+- The [higher level processor](backend/src/offspot_metrics_backend/business/processor.py) is responsible to dispatch events to lower level processors
+- The [indicator level processor](backend/src/offspot_metrics_backend/business/indicators/processor.py) is responsible to operations linked to indicators
+- The [KPI level processor](backend/src/offspot_metrics_backend/business/indicators/processor.py) is responsible to operations linked to KPI
 
 ![Processing high level](processing.excalidraw.png)
 
@@ -41,14 +41,13 @@ Indicators and KPIs are managed in the core logic with abstract classes. They ha
 
 ### Indicators
 
-Real indicators implementations are a subclass of the[Indicator class](backend/src/backend/business/indicators/indicator.py)
+Real indicators implementations are a subclass of the[Indicator class](backend/src/offspot_metrics_backend/business/indicators/indicator.py)
 
 Each indicator implementation must have a unique id in the range 1001-1999.
 
 
 ### KPIs
 
-Real KPIs implementations are a subclass of the[KPI class](backend/src/backend/business/kpis/kpi.py)
+Real KPIs implementations are a subclass of the[KPI class](backend/src/offspot_metrics_backend/business/kpis/kpi.py)
 
 Each KPI implementation must have a unique id in the range 2001-2999.
-

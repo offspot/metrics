@@ -1,7 +1,7 @@
 """Create all first tables
 
 Revision ID: 3c40b9f8c0e8
-Revises: 
+Revises:
 Create Date: 2023-07-24 09:52:15.031073
 
 """
