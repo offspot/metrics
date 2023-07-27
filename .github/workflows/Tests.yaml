@@ -31,7 +31,7 @@ jobs:
       - name: Upload coverage report to codecov
         uses: codecov/codecov-action@v3
         with:
-          directory: backend/src
+          directory: backend
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build_docker:
