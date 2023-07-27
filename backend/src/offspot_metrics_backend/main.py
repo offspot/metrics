@@ -6,26 +6,22 @@ from offspot_metrics_backend import __about__
 from offspot_metrics_backend.constants import BackendConf
 from offspot_metrics_backend.routes import echo
 
-PREFIX = "/v1"
-TITLE = "Offspot Metrics Backend"
-DESCRIPTION = "The API powering the UI of Offspot Metrics"
-
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title=TITLE,
-        description=DESCRIPTION,
+        title=__about__.__api_title__,
+        description=__about__.__api_description__,
         version=__about__.__version__,
     )
 
     @app.get("/")
     async def landing() -> RedirectResponse:  # pyright: ignore[reportUnusedFunction]
         """Redirect to root of latest version of the API"""
-        return RedirectResponse(f"{PREFIX}/", status_code=308)
+        return RedirectResponse(f"/{__about__.__api_version__}/", status_code=308)
 
     api = FastAPI(
-        title=TITLE,
-        description=DESCRIPTION,
+        title=__about__.__api_title__,
+        description=__about__.__api_description__,
         version=__about__.__version__,
         docs_url="/",
         openapi_tags=[
@@ -55,6 +51,6 @@ def create_app() -> FastAPI:
 
     api.include_router(router=echo.router)
 
-    app.mount(PREFIX, api)
+    app.mount(f"/{__about__.__api_version__}", api)
 
     return app
