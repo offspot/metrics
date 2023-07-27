@@ -13,23 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version-file: backend/pyproject.toml
-          architecture: x64
-
-      - name: Build packages
-        working-directory: backend
-        run: |
-          pip install -U pip build
-          python -m build --sdist --wheel
-
-      - name: Upload to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1.8
-        with:
-          packages-dir: backend/dist/
-
       - name: Build and push Docker image
         uses: openzim/docker-publish-action@v10
         with:

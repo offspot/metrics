@@ -18,7 +18,7 @@ jobs:
           context: backend
           image-name: offspot/metrics_backend
           manual-tag: dev
-          atest-on-tag: false
+          latest-on-tag: false
           restrict-to: offspot/metrics
           registries: ghcr.io
           credentials:
