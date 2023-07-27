@@ -3,7 +3,7 @@ from json import dumps
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
-from backend.business.kpis.kpi import Kpi
+from offspot_metrics_backend.business.kpis.kpi import Kpi
 
 from ...db.models import IndicatorDimension, IndicatorPeriod, IndicatorRecord
 from ..agg_kind import AggKind

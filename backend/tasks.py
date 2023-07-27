@@ -70,8 +70,9 @@ def test(ctx: Context, args: str = "", path: str = ""):
 )
 def test_cov(ctx: Context, args: str = "", path: str = ""):
     """run test vith coverage"""
-    setup_db_and_test(ctx=ctx, cmd="pytest --cov=backend", args=args, path=path)
-    # ctx.run(f"coverage run -m pytest {args}", pty=use_pty)
+    setup_db_and_test(
+        ctx=ctx, cmd="pytest --cov=offspot_metrics_backend", args=args, path=path
+    )
 
 
 @task(
@@ -158,10 +159,11 @@ def db_list(ctx: Context, *, test_db: bool = False):
 @task(optional=["no-html"], help={"no-html": "flag to not export html report"})
 def report_cov(ctx: Context, *, no_html: bool = False):
     """report test coverage"""
-    ctx.run("coverage combine", warn=True, pty=use_pty)
-    ctx.run("coverage report --show-missing", pty=use_pty)
-    if not no_html:
-        ctx.run("coverage html", pty=use_pty)
+    with ctx.cd("src"):  # pyright: ignore[reportUnknownMemberType]
+        ctx.run("coverage combine", warn=True, pty=use_pty)
+        ctx.run("coverage report --show-missing", pty=use_pty)
+        if not no_html:
+            ctx.run("coverage html", pty=use_pty)
 
 
 @task(
@@ -255,6 +257,6 @@ def serve(c: Context, args: str = ""):
     Use --args to specify additional uvicorn args"""
     with c.cd("src"):  # pyright: ignore[reportUnknownMemberType]
         c.run(
-            f"uvicorn backend.entrypoint:app --reload {args}",
+            f"uvicorn offspot_metrics_backend.entrypoint:app --reload {args}",
             pty=True,
         )
