@@ -33,7 +33,9 @@ It is not the statically compiled version.
 
 ### kiwix-serve
 
-This is a kiwix server, serving zim files placed in the `zims` folder.
+This is a kiwix server, serving zim files placed in the `zims` subfolder.
+
+See below for recommended ZIMs in the [Instructions](#instructions) section.
 
 ### reverse-proxy
 
@@ -72,11 +74,33 @@ docker exec -it om_backend-tools invoke db-upgrade
 You can also check that everything is ok:
 
 ```sh
-docker exec -it om_backend-tools invoke alembic --args "check"
+docker exec -it om_backend-tools invoke alembic check
 ```
 
 Note that to run integration tests, we use a separate DB, you hence have to set/update the DB schema as well.
 Just do the same as above with the backend-tests container (instead of the backend-tools)
+
+## Run a simulation to inject synthetic data
+
+In order to inject synthetic data into the database, a simulation script can be run
+
+```sh
+docker exec -it om_backend-tools python src/simulator.py
+```
+
+## Create real data
+
+You can test the whole integration suite (i.e. with landing page, kiwix-serve and Filebeat).
+
+**Nota:** this is not compatible from simulator data which will progressively be erased by new live data.
+
+You first have to enable processing in `docker-compose.yml`: set `RUN_PROCESSING: "True"`.
+
+```
+docker compose -p om up -d --force-recreate backend
+```
+
+You can then browse packages at http://127.0.0.1:8000/ and statistics will show up after up to 1 hour in the web UI at http://127.0.0.1:8003/
 
 ## Restart the backend
 
