@@ -39,7 +39,7 @@ def create_app() -> FastAPI:
     # events regularly and hence do not want to cleanup DB from simulation results
     # The environment variable must hence be explicitely set to False (case-insensitive)
     # all other values will start the processing.
-    run_processing = not (os.getenv("RUN_PROCESSING", "True").lower() == "false")
+    run_processing = not (os.getenv("RUN_PROCESSING", "False").lower() == "false")
 
     if run_processing:
         logger.info("Starting processing")
@@ -49,7 +49,7 @@ def create_app() -> FastAPI:
         processor = Processor()
         processor.startup(current_period=Period.now())
     else:
-        logger.warn("Processing is disabled")
+        logger.warning("Processing is disabled")
 
     background_tasks = set()
 
