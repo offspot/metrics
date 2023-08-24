@@ -97,3 +97,7 @@ class Period:
                 stop=int(stop.timestamp()),
             )
         raise AttributeError
+
+    @classmethod
+    def now(cls) -> "Period":
+        return Period(datetime.datetime.now())  # noqa: DTZ005
