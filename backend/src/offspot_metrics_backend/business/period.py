@@ -1,5 +1,5 @@
+import datetime
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 
@@ -14,14 +14,16 @@ class Interval:
 
 @dataclass
 class Period:
-    dt: datetime
+    dt: datetime.datetime
 
-    def __init__(self, dt: datetime) -> None:
-        self.dt = datetime(year=dt.year, month=dt.month, day=dt.day, hour=dt.hour)
+    def __init__(self, dt: datetime.datetime) -> None:
+        self.dt = datetime.datetime(
+            year=dt.year, month=dt.month, day=dt.day, hour=dt.hour
+        )
 
     @classmethod
     def from_timestamp(cls, ts: int) -> "Period":
-        return Period(datetime.fromtimestamp(ts))
+        return Period(datetime.datetime.fromtimestamp(ts))
 
     @property
     def year(self) -> int:
@@ -67,29 +69,29 @@ class Period:
 
     def get_interval(self, agg_kind: AggKind) -> Interval:
         if agg_kind == AggKind.DAY:
-            start = datetime(year=self.year, month=self.month, day=self.day)
+            start = datetime.datetime(year=self.year, month=self.month, day=self.day)
             return Interval(
                 start=int(start.timestamp()),
-                stop=int((start + timedelta(days=1)).timestamp()),
+                stop=int((start + datetime.timedelta(days=1)).timestamp()),
             )
         if agg_kind == AggKind.WEEK:
-            start = datetime(
+            start = datetime.datetime(
                 year=self.year, month=self.month, day=self.day
-            ) + timedelta(days=1 - self.weekday)
+            ) + datetime.timedelta(days=1 - self.weekday)
             return Interval(
                 start=int(start.timestamp()),
-                stop=int((start + timedelta(days=7)).timestamp()),
+                stop=int((start + datetime.timedelta(days=7)).timestamp()),
             )
         if agg_kind == AggKind.MONTH:
-            start = datetime(year=self.year, month=self.month, day=1)
-            stop = datetime(year=self.year, month=self.month + 1, day=1)
+            start = datetime.datetime(year=self.year, month=self.month, day=1)
+            stop = datetime.datetime(year=self.year, month=self.month + 1, day=1)
             return Interval(
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),
             )
         if agg_kind == AggKind.YEAR:
-            start = datetime(year=self.year, month=1, day=1)
-            stop = datetime(year=self.year + 1, month=1, day=1)
+            start = datetime.datetime(year=self.year, month=1, day=1)
+            stop = datetime.datetime(year=self.year + 1, month=1, day=1)
             return Interval(
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),
