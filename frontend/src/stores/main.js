@@ -21,10 +21,10 @@ export const useMainStore = defineStore('main', {
     update_kpi(value) {
       switch (value) {
         case 'Top contents':
-          this.selected_kpi_id = 1
+          this.selected_kpi_id = 2001
           break;
         case 'Top 50 resources':
-          this.selected_kpi_id = 2
+          this.selected_kpi_id = 2002
           break;
         default:
           this.selected_kpi_id = null

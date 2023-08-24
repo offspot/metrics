@@ -29,8 +29,8 @@ onMounted(() => {
           </div>
           <div class="row" v-if="!main.is_loading">
             <div v-if="main.value_for_selected_kpi_id">
-              <Kpi1 v-if="main.selected_kpi_id === 1" :value="main.value_for_selected_kpi_id" />
-              <Kpi2 v-if="main.selected_kpi_id === 2" :value="main.value_for_selected_kpi_id" />
+              <Kpi1 v-if="main.selected_kpi_id === 2001" :value="main.value_for_selected_kpi_id" />
+              <Kpi2 v-if="main.selected_kpi_id === 2002" :value="main.value_for_selected_kpi_id" />
             </div>
           </div>
         </div>
