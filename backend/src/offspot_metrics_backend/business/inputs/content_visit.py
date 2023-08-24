@@ -4,7 +4,7 @@ from offspot_metrics_backend.business.inputs.input import Input
 
 
 @dataclass
-class ContentObjectVisit(Input):
+class ContentItemVisit(Input):
     """Input representing a visit of one object in one content package
 
     This typically represent an article in Wikipedia, a guide in iFixit, a question

@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.business.indicators.content_visit import (
     ContentHomeVisit,
-    ContentObjectVisit,
+    ContentItemVisit,
 )
 from offspot_metrics_backend.business.indicators.processor import (
     Processor as IndicatorProcessor,
@@ -36,7 +36,7 @@ class Processor:
         self.kpi_processor = KpiProcessor(current_period=current_period)
 
         # Assign existing indicators and kpis
-        self.indicator_processor.indicators = [ContentHomeVisit(), ContentObjectVisit()]
+        self.indicator_processor.indicators = [ContentHomeVisit(), ContentItemVisit()]
         self.kpi_processor.kpis = [ContentPopularity(), ContentObjectPopularity()]
 
         # Restore data from DB to memory

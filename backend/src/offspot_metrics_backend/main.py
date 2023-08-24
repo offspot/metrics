@@ -48,17 +48,28 @@ def create_app() -> FastAPI:
     else:
         logger.warn("Processing is disabled")
 
+    background_tasks = set()
+
     @app.on_event("startup")
     async def app_startup():  # pyright: ignore[reportUnusedFunction]
         """Start background tasks"""
-        if run_processing:
-            create_task(filebeat.run(processor))
-            create_task(ticker())
+        if run_processing and filebeat and processor:
+            filebeat_task = create_task(filebeat.run(processor))
+            background_tasks.add(filebeat_task)
+            filebeat_task.add_done_callback(background_tasks.discard)
+
+            ticker_task = create_task(ticker())
+            background_tasks.add(ticker_task)
+            ticker_task.add_done_callback(background_tasks.discard)
 
     async def ticker():
         """Start a processor tick every minute"""
         while True:
             await sleep(60)
+            if not processor:
+                system_exit = SystemExit("Processor is not set")
+                system_exit.code = 1
+                raise system_exit
             logger.debug("Processing a clock tick")
             processor.process_tick(tick_period=Period.now())
 

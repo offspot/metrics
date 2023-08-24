@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 import offspot_metrics_backend.db.models as dbm
 from offspot_metrics_backend.business.inputs.content_visit import (
     ContentHomeVisit,
-    ContentObjectVisit,
+    ContentItemVisit,
 )
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
@@ -186,7 +186,7 @@ def rand_sim():
         if random.randint(0, 10) == 10:
             processor.process_input(ContentHomeVisit(content))
         else:
-            processor.process_input(ContentObjectVisit(content, random_object))
+            processor.process_input(ContentItemVisit(content, random_object))
 
         if random.randint(0, 10) == 10:
             processor.process_tick(tick_period=Period(now))
@@ -205,13 +205,13 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(ContentObjectVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(seconds=45)
 
     for i in range(10):
-        processor.process_input(ContentObjectVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(seconds=15)
@@ -221,7 +221,7 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(ContentObjectVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(minutes=1)
@@ -233,7 +233,7 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(ContentObjectVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(minutes=1)

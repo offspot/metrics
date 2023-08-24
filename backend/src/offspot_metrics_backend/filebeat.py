@@ -5,8 +5,8 @@ from subprocess import PIPE, Popen
 
 import psutil
 
-from backend.business.log_converter import LogConverter
-from backend.business.processor import Processor
+from offspot_metrics_backend.business.log_converter import LogConverter
+from offspot_metrics_backend.business.processor import Processor
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +42,8 @@ class FileBeatRunner:
             while True:
                 for line in iter(filebeat.stdout.readline, b""):
                     inputs = self.converter.process(line.decode().strip())
-                    for input in inputs:
-                        processor.process_input(input=input)
+                    for input_ in inputs:
+                        processor.process_input(input_=input_)
 
                 if filebeat.poll() is not None:
                     logger.error("Filebeat has exited, will restart in 10 secs")

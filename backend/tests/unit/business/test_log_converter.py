@@ -1,18 +1,23 @@
 import pathlib
-from typing import List
 
 import pytest
 
-from backend.business.inputs.content_visit import ContentHomeVisit, ContentObjectVisit
-from backend.business.inputs.input import Input
-from backend.business.log_converter import IncorrectConfiguration, LogConverter
+from offspot_metrics_backend.business.inputs.content_visit import (
+    ContentHomeVisit,
+    ContentItemVisit,
+)
+from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.log_converter import (
+    IncorrectConfigurationError,
+    LogConverter,
+)
 
 
 def test_parsing_empty_conf():
     path = pathlib.Path(__file__).parent.absolute().joinpath("conf_empty.yaml")
     converter = LogConverter()
 
-    with pytest.raises(IncorrectConfiguration):
+    with pytest.raises(IncorrectConfigurationError):
         converter.parse_package_configuration_from_file(str(path))
 
 
@@ -22,7 +27,7 @@ def test_parsing_missing_packages():
     )
     converter = LogConverter()
 
-    with pytest.raises(IncorrectConfiguration):
+    with pytest.raises(IncorrectConfigurationError):
         converter.parse_package_configuration_from_file(str(path))
 
 
@@ -77,9 +82,9 @@ def test_parsing_warnings():
             r"""1-5-million-lines-of-code-0-tests-where\"},"""
             r"""\"resp_headers\":{\"Content-Type\":[\"text/html; charset=utf\"]}}"}""",
             [
-                ContentObjectVisit(
+                ContentItemVisit(
                     content="Wikipedia",
-                    object="/questions/149/1-5-million-lines-of-code-0-tests-where",
+                    item="/questions/149/1-5-million-lines-of-code-0-tests-where",
                 )
             ],
         ),
@@ -91,7 +96,7 @@ def test_parsing_warnings():
         ),
     ],
 )
-def test_process_ok(log_line: str, expected_inputs: List[Input]):
+def test_process_ok(log_line: str, expected_inputs: list[Input]):
     path = pathlib.Path(__file__).parent.absolute().joinpath("conf_ok.yaml")
     converter = LogConverter()
     converter.parse_package_configuration_from_file(str(path))

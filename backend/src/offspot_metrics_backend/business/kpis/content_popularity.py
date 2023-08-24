@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.business.indicators.content_visit import (
     ContentHomeVisit,
-    ContentObjectVisit,
+    ContentItemVisit,
 )
 from offspot_metrics_backend.business.kpis.kpi import Kpi
 from offspot_metrics_backend.db.models import (
@@ -40,7 +40,7 @@ class ContentPopularity(Kpi):
                 func.sum(IndicatorRecord.value).label("count"),
             )
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == CONTENT_HOME_VISIT_ID)
+            .where(IndicatorRecord.indicator_id == ContentHomeVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
         ).scalar_one()
@@ -63,16 +63,14 @@ class ContentPopularity(Kpi):
         )
 
         return dumps(
-            list(
-                map(
-                    lambda x: {
-                        "content": x.content,
-                        "count": x.count,
-                        "percentage": round(int(str(x.count)) * 100 / total_count, 2),
-                    },
-                    session.execute(query),
-                )
-            )
+            [
+                {
+                    "content": x.content,
+                    "count": x.count,
+                    "percentage": round(int(str(x.count)) * 100 / total_count, 2),
+                }
+                for x in session.execute(query)
+            ]
         )
 
 
@@ -100,7 +98,7 @@ class ContentObjectPopularity(Kpi):
                 func.sum(IndicatorRecord.value).label("count"),
             )
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == CONTENT_OBJECT_VISIT_ID)
+            .where(IndicatorRecord.indicator_id == ContentItemVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
         ).scalar_one()
@@ -108,20 +106,20 @@ class ContentObjectPopularity(Kpi):
         subquery = (
             select(
                 IndicatorDimension.value0.label("content"),
-                IndicatorDimension.value1.label("object"),
+                IndicatorDimension.value1.label("item"),
                 func.sum(IndicatorRecord.value).label("count"),
             )
             .join(IndicatorRecord)
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == ContentObjectVisit.unique_id)
+            .where(IndicatorRecord.indicator_id == ContentItemVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
-            .group_by("content", "object")
+            .group_by("content", "item")
         ).subquery("content_with_count")
 
         query = (
-            select(subquery.c.count, subquery.c.content, subquery.c.object)
-            .order_by(desc(subquery.c.count), subquery.c.content, subquery.c.object)
+            select(subquery.c.count, subquery.c.content, subquery.c.item)
+            .order_by(desc(subquery.c.count), subquery.c.content, subquery.c.item)
             .limit(50)
         )
 
@@ -129,7 +127,7 @@ class ContentObjectPopularity(Kpi):
             [
                 {
                     "content": record.content,
-                    "object": record.object,
+                    "item": record.item,
                     "count": record.count,
                     "percentage": round(int(str(record.count)) * 100 / total_count, 2),
                 }

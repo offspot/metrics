@@ -2,19 +2,20 @@ import json
 import logging
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 import yaml
 
-from backend.business.inputs.content_visit import ContentHomeVisit, ContentObjectVisit
-from backend.business.inputs.input import Input
+from offspot_metrics_backend.business.inputs.content_visit import (
+    ContentHomeVisit,
+    ContentItemVisit,
+)
+from offspot_metrics_backend.business.inputs.input import Input
 
 logger = logging.getLogger(__name__)
 
-Warning = str
 
-
-class IncorrectConfiguration(Exception):
+class IncorrectConfigurationError(Exception):
     pass
 
 
@@ -26,7 +27,7 @@ class LogConverter:
 
         if file_location is None:
             file_location = os.getenv("PACKAGE_CONF_FILE", "/conf/packages.yml")
-        with open(file_location, "r") as stream:
+        with open(file_location) as stream:
             conf_data = yaml.safe_load(stream)
             self.parse_package_configuration(conf_data=conf_data)
 
@@ -41,22 +42,24 @@ class LogConverter:
 
         logger.info("Parsing PACKAGE_CONF_FILE completed")
 
-    def parse_package_configuration(self, conf_data: Dict[str, Any]):
-        self.files: Dict[str, Any] = {}
+    def parse_package_configuration(self, conf_data: dict[str, Any]):
+        self.files: dict[str, Any] = {}
         self.zim_host: str | None = None
-        self.zims: Dict[str, Any] = {}
-        self.warnings: List[Warning] = []
+        self.zims: dict[str, Any] = {}
+        self.warnings: list[str] = []
 
         if not conf_data:
-            raise IncorrectConfiguration("configuration is missing or empty")
+            raise IncorrectConfigurationError("configuration is missing or empty")
 
         if "packages" not in conf_data:
-            raise IncorrectConfiguration("'packages' key not found in configuration")
+            raise IncorrectConfigurationError(
+                "'packages' key not found in configuration"
+            )
 
         for package in conf_data["packages"]:
             self.parse_one_package(package=package)
 
-    def parse_one_package(self, package: Dict[str, Any]):
+    def parse_one_package(self, package: dict[str, Any]):
         url = package.get("url")
         if not url:
             self.warnings.append("Package with missing 'url' ignored")
@@ -80,13 +83,12 @@ class LogConverter:
         elif kind == "zim":
             if self.zim_host is None:
                 self.zim_host = host
-            else:
-                if self.zim_host != host:
-                    self.warnings.append(
-                        f"Ignoring second zim host '{self.zim_host}', only one host"
-                        " supported"
-                    )
-                    return
+            elif self.zim_host != host:
+                self.warnings.append(
+                    f"Ignoring second zim host '{self.zim_host}', only one host"
+                    " supported"
+                )
+                return
 
             match = re.match(r"^//.*?/viewer#(.*)", url)
             if not match:
@@ -103,7 +105,7 @@ class LogConverter:
             self.warnings.append(f"Package with unsupported 'kind' : '{kind}' ignored")
             return
 
-    def process(self, line: str) -> List[Input]:
+    def process(self, line: str) -> list[Input]:
         logger.info(f"Parsing {line}")
         try:
             log = json.loads(line)
@@ -136,19 +138,19 @@ class LogConverter:
         else:
             return []
 
-    def process_zim(self, uri: str, content_type: str | None) -> List[Input]:
+    def process_zim(self, uri: str, content_type: str | None) -> list[Input]:
         match = re.match(r"^/content/(.+?)(/.*)?$", uri)
         if not match:
             return []
 
         zim = match.group(1)
-        object = match.group(2)
+        item = match.group(2)
 
         if zim not in self.zims:
             return []
 
         title = self.zims[zim]["title"]
-        if object is None or object == "/":
+        if item is None or item == "/":
             return [ContentHomeVisit(content=title)]
         else:
             if content_type is None:
@@ -160,11 +162,11 @@ class LogConverter:
                 or "epub" in content_type
                 or "pdf" in content_type
             ):
-                return [ContentObjectVisit(content=title, object=object)]
+                return [ContentItemVisit(content=title, item=item)]
             else:
                 return []
 
-    def process_file(self, uri: str, host: str) -> List[Input]:
+    def process_file(self, uri: str, host: str) -> list[Input]:
         if uri == "/":
             return [ContentHomeVisit(content=self.files[host]["title"])]
         else:

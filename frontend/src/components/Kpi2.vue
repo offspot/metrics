@@ -22,7 +22,7 @@ defineProps({
       </thead>
       <tbody>
         <tr v-for="res in JSON.parse(value)">
-          <td>{{ res.object }}</td>
+          <td>{{ res.item }}</td>
           <td>{{ res.content }}</td>
         </tr>
       </tbody>
