@@ -16,10 +16,13 @@ from offspot_metrics_backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
 
-# fix this, this is not the same log as uvicorn ...
+# - fix this, this is not the same log format as uvicorn logs but are mixed in the same
+#  STDOUT...
+# - read debug level from environment variable
 logging.basicConfig(
-    level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
+    level=logging.DEBUG, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
+
 
 logger = logging.getLogger(__name__)
 

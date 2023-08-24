@@ -106,7 +106,6 @@ class LogConverter:
             return
 
     def process(self, line: str) -> list[Input]:
-        logger.info(f"Parsing {line}")
         try:
             log = json.loads(line)
         except json.JSONDecodeError:

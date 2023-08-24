@@ -41,8 +41,10 @@ class FileBeatRunner:
 
             while True:
                 for line in iter(filebeat.stdout.readline, b""):
+                    logger.debug(f"Filebeat sent: {line}")
                     inputs = self.converter.process(line.decode().strip())
                     for input_ in inputs:
+                        logger.debug(f"Processing input: {input_}")
                         processor.process_input(input_=input_)
 
                 if filebeat.poll() is not None:
