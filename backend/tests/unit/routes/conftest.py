@@ -1,14 +1,16 @@
 import asyncio
-from typing import Any, AsyncGenerator, List
+from collections.abc import AsyncGenerator
+from typing import Any
 
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
-from backend.db.models import KpiValue
-from backend.main import create_app
+from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.main import create_app
 
 
 @pytest.fixture(scope="session")
@@ -27,14 +29,14 @@ def app():
     return create_app()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, Any]:
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 
 
-@pytest.fixture()
-async def kpis(dbsession: Session) -> AsyncGenerator[List[KpiValue], Any]:
+@pytest_asyncio.fixture()
+async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiValue], Any]:
     dbsession.execute(delete(KpiValue))
     kpis = [
         KpiValue(kpi_id=1, agg_kind="D", agg_value="2023-03-01", kpi_value="165"),

@@ -1,12 +1,15 @@
-from typing import List
-
+import pytest
 from httpx import AsyncClient
 
-from backend.db.models import KpiValue
-from backend.main import PREFIX
+from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.main import PREFIX
 
 
-async def test_aggregations(client: AsyncClient, kpis: List[KpiValue]):
+@pytest.mark.asyncio
+async def test_aggregations(
+    client: AsyncClient,
+    kpis: list[KpiValue],  # noqa: ARG001
+):
     response = await client.get(f"{PREFIX}/aggregations")
     assert response.status_code == 200
     response_json = response.json()

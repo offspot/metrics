@@ -69,29 +69,42 @@ class Period:
 
     def get_interval(self, agg_kind: AggKind) -> Interval:
         if agg_kind == AggKind.DAY:
-            start = datetime.datetime(year=self.year, month=self.month, day=self.day)
+            start = datetime.datetime(
+                year=self.year,
+                month=self.month,
+                day=self.day,
+                tzinfo=datetime.UTC,
+            )
             return Interval(
                 start=int(start.timestamp()),
                 stop=int((start + datetime.timedelta(days=1)).timestamp()),
             )
         if agg_kind == AggKind.WEEK:
             start = datetime.datetime(
-                year=self.year, month=self.month, day=self.day
+                year=self.year, month=self.month, day=self.day, tzinfo=datetime.UTC
             ) + datetime.timedelta(days=1 - self.weekday)
             return Interval(
                 start=int(start.timestamp()),
                 stop=int((start + datetime.timedelta(days=7)).timestamp()),
             )
         if agg_kind == AggKind.MONTH:
-            start = datetime.datetime(year=self.year, month=self.month, day=1)
-            stop = datetime.datetime(year=self.year, month=self.month + 1, day=1)
+            start = datetime.datetime(
+                year=self.year, month=self.month, day=1, tzinfo=datetime.UTC
+            )
+            stop = datetime.datetime(
+                year=self.year, month=self.month + 1, day=1, tzinfo=datetime.UTC
+            )
             return Interval(
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),
             )
         if agg_kind == AggKind.YEAR:
-            start = datetime.datetime(year=self.year, month=1, day=1)
-            stop = datetime.datetime(year=self.year + 1, month=1, day=1)
+            start = datetime.datetime(
+                year=self.year, month=1, day=1, tzinfo=datetime.UTC
+            )
+            stop = datetime.datetime(
+                year=self.year + 1, month=1, day=1, tzinfo=datetime.UTC
+            )
             return Interval(
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),

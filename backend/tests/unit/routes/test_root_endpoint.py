@@ -1,8 +1,10 @@
+import pytest
 from httpx import AsyncClient
 
-from backend.main import PREFIX
+from offspot_metrics_backend.main import PREFIX
 
 
+@pytest.mark.asyncio
 async def test_root(client: AsyncClient):
     response = await client.get("/", follow_redirects=False)
     assert response.status_code == 308
