@@ -29,13 +29,13 @@ def app():
     return create_app()
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")  # pyright: ignore
 async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, Any]:
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 
 
-@pytest_asyncio.fixture()
+@pytest_asyncio.fixture()  # pyright: ignore
 async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiValue], Any]:
     dbsession.execute(delete(KpiValue))
     kpis = [

@@ -65,7 +65,10 @@ class Period:
             return f"{self.dt.year:04}-{self.month:02}"
         if agg_kind == AggKind.YEAR:
             return f"{self.year:04}"
-        raise AttributeError
+
+        # we should never get there except if the enum is modified and we
+        # forget to modify this function
+        raise AttributeError  # pragma: no cover
 
     def get_interval(self, agg_kind: AggKind) -> Interval:
         if agg_kind == AggKind.DAY:
@@ -109,7 +112,10 @@ class Period:
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),
             )
-        raise AttributeError
+
+        # we should never get there except if the enum is modified and we
+        # forget to modify this function
+        raise AttributeError  # pragma: no cover
 
     @classmethod
     def now(cls) -> "Period":

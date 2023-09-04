@@ -31,6 +31,7 @@ services:
     container_name: om_backend-tools
     volumes:
       - ../backend/src:/src/src
+      - ../backend/pyproject.toml:/src/pyproject.toml
       - ../backend/htmlcov:/src/htmlcov
       - ../backend/tasks.py:/src/tasks.py
       - ../backend/tests:/src/tests

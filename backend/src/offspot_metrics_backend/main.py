@@ -1,6 +1,7 @@
 import logging
 import os
-from asyncio import create_task, sleep
+from asyncio import Task, create_task, sleep
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -51,7 +52,7 @@ def create_app() -> FastAPI:
     else:
         logger.warning("Processing is disabled")
 
-    background_tasks = set()
+    background_tasks = set[Task[Any]]()
 
     @app.on_event("startup")
     async def app_startup():  # pyright: ignore[reportUnusedFunction]

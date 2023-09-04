@@ -18,40 +18,39 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 ]
 dependencies = [
-    "alembic == 1.11.1",
-    "fastapi[all] == 0.95.2",
-    "fastapi-pagination == 0.12.4",
-    "marshmallow == 3.19.0",
+    "alembic == 1.11.3",
+    "fastapi[all] == 0.101.1",
+    "fastapi-pagination == 0.12.9",
+    "marshmallow == 3.20.1",
     "marshmallow-sqlalchemy == 0.29.0",
     "psutil ==5.9.5",
     "python-dateutil == 2.8.2",
     "PyYAML == 6.0.1",
-    "SQLAlchemy == 2.0.15",
+    "SQLAlchemy == 2.0.20",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 scripts = [
-    "invoke == 2.1.2",
+    "invoke == 2.2.0",
 ]
 lint = [
-    "black == 23.3.0",
-    "ruff == 0.0.272",
+    "black == 23.7.0",
+    "ruff == 0.0.285",
 ]
 check = [
-    "pyright == 1.1.317",
+    "pyright == 1.1.323",
 ]
 test = [
     "coverage == 7.2.7",
     "httpx == 0.24.1",
     "pytest == 7.3.1",
     "pytest-asyncio == 0.21.0",
-    "pytest-cov == 4.1.0"
 ]
 dev = [
     "pre-commit == 3.3.3",
     "debugpy == 1.6.7",
-    "ipykernel == 6.23.2",
+    "ipykernel == 6.25.1",
     "offspot_metrics_backend[scripts]",
     "offspot_metrics_backend[lint]",
     "offspot_metrics_backend[test]",
@@ -81,6 +80,7 @@ run = "inv test --args '{args}'"
 run-cov = "inv test-cov --args '{args}'"
 report-cov = "inv report-cov"
 coverage = "inv coverage --args '{args}'"
+html = "inv coverage --html --args '{args}'"
 
 [tool.hatch.envs.lint]
 template = "lint"
@@ -96,7 +96,7 @@ fix-ruff = "inv fix-ruff --args '{args}'"
 fixall = "inv fixall --args '{args}'"
 
 [tool.hatch.envs.check]
-features = ["scripts", "check"]
+features = ["scripts", "test", "check"]
 
 [tool.hatch.envs.check.scripts]
 pyright = "inv check-pyright --args '{args}'"
@@ -219,6 +219,10 @@ branch = true
 parallel = true
 omit = [
   "src/offspot_metrics_backend/__about__.py",
+  "src/offspot_metrics_backend/main.py", # glue logic
+  "src/offspot_metrics_backend/filebeat.py", # glue logic
+  "src/offspot_metrics_backend/business/processor.py", # glue logic
+  "src/offspot_metrics_backend/business/indicators/content_visit.py", # straightforward implementation, pointless to test
 ]
 
 [tool.coverage.report]

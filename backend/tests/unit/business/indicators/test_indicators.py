@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from dateutil.relativedelta import relativedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -140,6 +141,26 @@ def test_process_tick(
     assert count_from_stmt(dbsession, select(IndicatorRecord)) == 5
     assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2
+    processor.post_process_tick(Period(init_datetime + timedelta(hours=2)), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 5
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2
+    processor.post_process_tick(
+        Period(init_datetime + relativedelta(years=1)), dbsession
+    )
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 5
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2
+    processor.post_process_tick(
+        Period(init_datetime + relativedelta(years=1) + relativedelta(days=1)),
+        dbsession,
+    )
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 0
 
 
 def test_restore_from_db_current_period(

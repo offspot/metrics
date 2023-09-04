@@ -10,10 +10,9 @@ logger = logging.getLogger(__name__)
 
 class Initializer:
     @staticmethod
-    def ensure_schema_is_up_to_date(src_dir: Path | None = None):
+    def ensure_schema_is_up_to_date(src_dir: Path):
         """Checks if Alembic schema has been applied to the DB"""
         logger.info("Checking database schema")
-        if src_dir:
-            os.chdir(src_dir)
+        os.chdir(src_dir)
         cfg = config.Config("alembic.ini")
         check(cfg)

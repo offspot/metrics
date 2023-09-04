@@ -9,24 +9,24 @@ class Recorder(abc.ABC):
     @abc.abstractmethod
     def process_input(self, input_: Input) -> None:
         """Process an input by updating recorder internal state"""
-        ...  # pragma: nocover
+        ...  # pragma: no cover
 
     @property
     @abc.abstractmethod
     def value(self) -> int:
         """Return the final value of the recorder, based on internal state"""
-        ...  # pragma: nocover
+        ...  # pragma: no cover
 
     @property
     @abc.abstractmethod
     def state(self) -> str:
         """Return a serialized representation of recorder internal state"""
-        ...  # pragma: nocover
+        ...  # pragma: no cover
 
     @abc.abstractmethod
     def restore_state(self, value: str):
         """Restore the recorder internal state from its serialized representation"""
-        ...  # pragma: nocover
+        ...  # pragma: no cover
 
 
 class IntCounterRecorder(Recorder):

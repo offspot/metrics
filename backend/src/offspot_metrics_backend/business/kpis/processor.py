@@ -77,7 +77,10 @@ class Processor:
             ]
         if agg_kind == AggKind.YEAR:
             return None  # Special value meaning that all values are kept
-        raise AttributeError
+
+        # we should never get there except if the enum is modified and we
+        # forget to modify this function
+        raise AttributeError  # pragma: no cover
 
     @classmethod
     def compute_kpi_values_for_aggregation_kind(
