@@ -39,7 +39,7 @@ lint = [
     "ruff == 0.0.285",
 ]
 check = [
-    "pyright == 1.1.323",
+    "pyright == 1.1.325",
 ]
 test = [
     "coverage == 7.2.7",
