@@ -18,7 +18,7 @@ Raw logs are transformed into inputs via the [LogConverter](backend/src//backend
 
 Inputs are then transformed into Indicators by an [Indicator Processor](backend/src//backend/business/indicators/processor.py). This processor knows the list of all indicators configured on the system. It is responsible to :
 - proposes each input to each indicator capable to handle the current kind of input
-- transfer data once per minute into the database
+- transfer data once per minute into the database to resist unattended process shutdown (e.g. due to power outages)
 - refresh indicators once per hour and store them into the database
 - cleanup old indicators data and associated unused data
 - reload transient data from the database when the backend restarts (after a power cycle for instance)
