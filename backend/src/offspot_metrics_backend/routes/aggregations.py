@@ -2,10 +2,9 @@ from dataclasses import dataclass
 
 from fastapi import APIRouter
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-from offspot_metrics_backend.db import dbsession
 from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.routes import DbSession
 
 router = APIRouter(
     prefix="/aggregations",
@@ -33,12 +32,9 @@ class Aggregations:  # simply to not return an array as root JSON object
         },
     },
 )
-async def aggregations() -> Aggregations:
-    return aggregations_inner()
-
-
-@dbsession
-def aggregations_inner(session: Session) -> Aggregations:
+def aggregations(
+    session: DbSession,
+) -> Aggregations:
     query = select(KpiValue.agg_kind, KpiValue.agg_value).distinct()
 
     return Aggregations(

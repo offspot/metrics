@@ -2,10 +2,9 @@ from dataclasses import dataclass
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-from offspot_metrics_backend.db import dbsession
 from offspot_metrics_backend.db.models import KpiValue as DbKpiValue
+from offspot_metrics_backend.routes import DbSession
 
 router = APIRouter(
     prefix="/kpis",
@@ -28,13 +27,11 @@ class WebKpiValue:
         404: {"description": "KPI not found"},
     },
 )
-async def kpi_values(kpi_id: str, agg_kind: str, agg_value: str) -> WebKpiValue:
-    return kpi_values_inner(kpi_id=kpi_id, agg_kind=agg_kind, agg_value=agg_value)
-
-
-@dbsession
-def kpi_values_inner(
-    kpi_id: str, agg_kind: str, agg_value: str, session: Session
+async def kpi_values(
+    kpi_id: str,
+    agg_kind: str,
+    agg_value: str,
+    session: DbSession,
 ) -> WebKpiValue:
     query = (
         select(DbKpiValue.kpi_id, DbKpiValue.kpi_value)
