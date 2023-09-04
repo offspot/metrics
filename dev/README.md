@@ -61,7 +61,7 @@ cd dev
 docker compose -p offspot_metrics up -d
 ```
 
-## Setup DB
+### Setup DB
 
 If this is your first run or if you made any schema change, you need to set/update the DB schema before having all containers OK.
 
@@ -80,7 +80,7 @@ docker exec -it om_backend-tools invoke alembic check
 Note that to run integration tests, we use a separate DB, you hence have to set/update the DB schema as well.
 Just do the same as above with the backend-tests container (instead of the backend-tools)
 
-## Run a simulation to inject synthetic data
+### Run a simulation to inject synthetic data
 
 In order to inject synthetic data into the database, a simulation script can be run
 
@@ -88,7 +88,7 @@ In order to inject synthetic data into the database, a simulation script can be 
 docker exec -it om_backend-tools python src/simulator.py
 ```
 
-## Create real data
+### Create real data
 
 You can test the whole integration suite (i.e. with landing page, kiwix-serve and Filebeat).
 
@@ -102,7 +102,7 @@ docker compose -p om up -d --force-recreate backend
 
 You can then browse packages at http://127.0.0.1:8000/ and statistics will show up after up to 1 hour in the web UI at http://127.0.0.1:8003/
 
-## Restart the backend
+### Restart the backend
 
 The backend might typically fail if the DB schema is not up-to-date, or if you create some nasty bug while modifying the code.
 
@@ -114,7 +114,7 @@ docker restart om_backend
 
 Other containers might be restarted the same way.
 
-## Run tests
+### Run tests
 
 Create + upgrade test DB schema if needed:
 
