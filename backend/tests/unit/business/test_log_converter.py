@@ -13,18 +13,13 @@ from offspot_metrics_backend.business.log_converter import (
 )
 
 
-def test_parsing_no_file_provided():
-    converter = LogConverter()
-    converter.parse_package_configuration_from_file()
-
-
 def test_parsing_missing_file_provided():
     converter = LogConverter()
 
     with pytest.raises(FileNotFoundError) as exc:
-        converter.parse_package_configuration_from_file("/idontexists/packages.yaml")
+        converter.parse_package_configuration_from_file()
 
-    assert "/idontexists/packages.yaml" in str(exc.value)
+    assert "/conf/packages.yml" in str(exc.value)
 
 
 def test_parsing_empty_conf():
