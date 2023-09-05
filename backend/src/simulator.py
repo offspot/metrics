@@ -16,26 +16,26 @@ from offspot_metrics_backend.constants import BackendConf
 
 # Some known contents (some are repeated many times to influence the distribution)
 contents = [
-    "wikipedia_fr",
-    "wikipedia_fr",
-    "wikipedia_fr",
-    "wikipedia_en",
-    "wikipedia_en",
-    "wikipedia_en",
-    "gutenberg",
-    "gutenberg",
-    "gutenberg",
-    "stackoverflow",
-    "ted_en_playlist-11-must-see-ted-talks",
-    "ted_en_playlist-11-must-see-ted-talks",
-    "ted_en_playlist-how-to-survive-following-your-passions",
-    "ted_en_playlist-how-to-survive-following-your-passions",
+    "Wikipedia FR",
+    "Wikipedia FR",
+    "Wikipedia FR",
+    "Wikipedia EN",
+    "Wikipedia EN",
+    "Wikipedia EN",
+    "Gutenberg Project",
+    "Gutenberg Project",
+    "Gutenberg Project",
+    "StackOverflow",
+    "TED EN - 11 must see talks",
+    "TED EN - 11 must see talks",
+    "TED EN - How to survive following your passions",
+    "TED EN - How to survive following your passions",
 ]
 
 # For every known content, some known items
 # (some are repeated many times to influence the distribution)
 items = {
-    "wikipedia_fr": [
+    "Wikipedia FR": [
         "Coupe_de_France_de_rugby_à_XIII_1938-1939",
         "Électricité_de_France",
         "Esthétique_environnementale",
@@ -46,25 +46,25 @@ items = {
         "Kiwix",
         "Kiwix",
     ],
-    "wikipedia_en": [
+    "Wikipedia EN": [
         "Kiwix",
     ],
-    "gutenberg": [
+    "Gutenberg Project": [
         "Romeo and Juliet_cover.1513",
         "The Blue Castle%3A a novel.67979",
         "The Odyssey_cover.1727",
     ],
-    "stackoverflow": [
+    "StackOverflow": [
         "questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-"
         "unsorted-array",
         "questions/2003505/how-do-i-delete-a-git-branch-locally-and-remotely",
     ],
-    "ted_en_playlist-11-must-see-ted-talks": [
+    "TED EN - 11 must see talks": [
         "do-schools-kill-creativity",
         "do-schools-kill-creativity",
         "the-danger-of-a-single-story",
     ],
-    "ted_en_playlist-how-to-survive-following-your-passions": [
+    "TED EN - How to survive following your passions": [
         "how-to-find-work-you-love",
         "how-to-find-work-you-love",
         "how-to-find-work-you-love",
