@@ -5,6 +5,8 @@ src_dir = pathlib.Path(__file__).parent.resolve()
 
 
 class BackendConf:
+    """Shared backend configuration"""
+
     database_url: str = os.getenv(
         "DATABASE_URL", f"sqlite+pysqlite:////{src_dir}/dev.db"
     )

@@ -14,12 +14,19 @@ router = APIRouter(
 
 @dataclass
 class Aggregation:
+    """One aggregation value with its kind"""
+
     kind: str
     value: str
 
 
 @dataclass
-class Aggregations:  # simply to not return an array as root JSON object
+class Aggregations:
+    """A list of aggregation values
+
+    This is mandatory to not return a list as top Json object since it is not
+    recommended for security reasons in Javascript"""
+
     aggregations: list[Aggregation]
 
 

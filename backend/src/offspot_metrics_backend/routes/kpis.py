@@ -13,7 +13,9 @@ router = APIRouter(
 
 
 @dataclass
-class WebKpiValue:
+class KpiValue:
+    """A KPI value with its ID"""
+
     kpi_id: int
     value: str
 
@@ -32,7 +34,7 @@ async def kpi_values(
     agg_kind: str,
     agg_value: str,
     session: DbSession,
-) -> WebKpiValue:
+) -> KpiValue:
     query = (
         select(DbKpiValue.kpi_id, DbKpiValue.kpi_value)
         .where(DbKpiValue.kpi_id == kpi_id)
@@ -47,4 +49,4 @@ async def kpi_values(
             detail="KPI not found",
         )
 
-    return WebKpiValue(kpi_id=item.kpi_id, value=item.kpi_value)
+    return KpiValue(kpi_id=item.kpi_id, value=item.kpi_value)

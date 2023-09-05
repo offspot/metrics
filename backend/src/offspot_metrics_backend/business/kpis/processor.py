@@ -54,6 +54,12 @@ class Processor:
     def get_aggregations_to_keep(
         cls, agg_kind: AggKind, now: Period
     ) -> list[str] | None:
+        """Return the list of list of aggregations that do not have to be purged
+
+        Aggregations are purged once too old (older than 7 days for daily aggregations,
+        4 weeks for weekly aggregations, ...). This function returns the list of
+        aggregation values that have to be kept (i.e. others have to be purged).
+        """
         if agg_kind == AggKind.DAY:
             return [
                 now.get_shifted(relativedelta(days=-delta)).get_truncated_value(

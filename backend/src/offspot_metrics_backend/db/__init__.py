@@ -20,6 +20,7 @@ def set_sqlite_pragma(
     dbapi_connection: DBAPIConnection,
     connection_record: ConnectionPoolEntry,  # noqa: ARG001
 ):
+    """Helper function to activate SQLite foreign keys pragma at first connection"""
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()

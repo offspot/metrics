@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class IncorrectConfigurationError(Exception):
+    """Exception raised when configuration in packages.yaml is incorrect"""
+
     pass
 
 
@@ -23,6 +25,7 @@ class LogConverter:
     """Converts logs received from the reverse proxy into inputs to process"""
 
     def parse_package_configuration_from_file(self, file_location: str | None = None):
+        """Parse packages.yml configuration based on provided file"""
         logger.info("Parsing PACKAGE_CONF_FILE")
 
         if file_location is None:
@@ -43,6 +46,7 @@ class LogConverter:
         logger.info("Parsing PACKAGE_CONF_FILE completed")
 
     def parse_package_configuration(self, conf_data: dict[str, Any]):
+        """Parse configuration based on dictionary of configuration data"""
         self.files: dict[str, Any] = {}
         self.zim_host: str | None = None
         self.zims: dict[str, Any] = {}
@@ -60,6 +64,7 @@ class LogConverter:
             self.parse_one_package(package=package)
 
     def parse_one_package(self, package: dict[str, Any]):
+        """Parse one package configuration"""
         url = package.get("url")
         if not url:
             self.warnings.append("Package with missing 'url' ignored")
@@ -106,6 +111,7 @@ class LogConverter:
             return
 
     def process(self, line: str) -> list[Input]:
+        """Transform one log line into corresponding inputs"""
         try:
             log = json.loads(line)
         except json.JSONDecodeError:
@@ -138,6 +144,7 @@ class LogConverter:
             return []
 
     def process_zim(self, uri: str, content_type: str | None) -> list[Input]:
+        """Transform one log event identified as ZIM into inputs"""
         match = re.match(r"^/content/(.+?)(/.*)?$", uri)
         if not match:
             return []
@@ -166,6 +173,7 @@ class LogConverter:
                 return []
 
     def process_file(self, uri: str, host: str) -> list[Input]:
+        """Transform one log event identified as static file into inputs"""
         if uri == "/":
             return [ContentHomeVisit(content=self.files[host]["title"])]
         else:

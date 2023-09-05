@@ -8,12 +8,19 @@ from offspot_metrics_backend.business.agg_kind import AggKind
 
 @dataclass
 class Interval:
+    """A dataclass holding an interval start and stop timestamp"""
+
     start: int
     stop: int
 
 
 @dataclass
 class Period:
+    """A processing period
+
+    A processing period lasts one hour. All events happening in the samed period are
+    aggregated in a single indicator state and then transformed into a record"""
+
     dt: datetime.datetime
 
     def __init__(self, dt: datetime.datetime) -> None:
@@ -23,40 +30,53 @@ class Period:
 
     @classmethod
     def from_timestamp(cls, ts: int) -> "Period":
+        """Transform a timestamp into a period
+
+        timestamp (ts) is the number of seconds since Unix epoch
+        """
         return Period(datetime.datetime.fromtimestamp(ts))
 
     @property
     def year(self) -> int:
+        """Return the period year"""
         return self.dt.year
 
     @property
     def month(self) -> int:
+        """Return the period month"""
         return self.dt.month
 
     @property
     def day(self) -> int:
+        """Return the period day"""
         return self.dt.day
 
     @property
     def hour(self) -> int:
+        """Return the period hour"""
         return self.dt.hour
 
     @property
     def week(self) -> int:
+        """Return the period week number (ISO)"""
         return self.dt.isocalendar().week
 
     @property
     def weekday(self) -> int:
+        """Return the period day of the week (ISO)"""
         return self.dt.isoweekday()
 
     @property
     def timestamp(self) -> int:
+        """Transform the period into a timstamp"""
         return int(self.dt.timestamp())
 
     def get_shifted(self, delta: relativedelta) -> "Period":
+        """Return a new period shifted from delta"""
         return Period(self.dt + delta)
 
     def get_truncated_value(self, agg_kind: AggKind) -> str:
+        """Truncate the period to corresponding day, week, month, year."""
         if agg_kind == AggKind.DAY:
             return f"{self.dt.year:04}-{self.month:02}-{self.day:02}"
         if agg_kind == AggKind.WEEK:
@@ -71,6 +91,10 @@ class Period:
         raise AttributeError  # pragma: no cover
 
     def get_interval(self, agg_kind: AggKind) -> Interval:
+        """Transform the period into an interval matching the kind og aggregation
+
+        E.g. for a weekly aggregation, the interval will start at the beginning and
+        finish at the end of the week enclosing the period"""
         if agg_kind == AggKind.DAY:
             start = datetime.datetime(
                 year=self.year,
@@ -119,4 +143,5 @@ class Period:
 
     @classmethod
     def now(cls) -> "Period":
+        """Returns current period based on current datetime"""
         return Period(datetime.datetime.now())  # noqa: DTZ005

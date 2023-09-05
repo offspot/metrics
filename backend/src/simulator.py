@@ -121,10 +121,12 @@ def rand_sim_update_now(now: datetime) -> datetime:
 
 
 def get_random_content_from_sim() -> str:
+    """Return one random content"""
     return contents[random.randint(0, len(contents) - 1)]
 
 
 def get_random_object_from_sim(content: str) -> str:
+    """Return one random object"""
     if random.randint(0, 3) == 3:
         rnd = random.randint(0, 100)
         if rnd < 10:

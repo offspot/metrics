@@ -12,10 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class FileBeatRunner:
+    """A class responsible to manage filebeat execution"""
+
     def __init__(self, converter: LogConverter) -> None:
         self.converter = converter
 
     async def run(self, processor: Processor):
+        """Keep a filebeat process up and running at all times"""
+
         # restart filebeat forever
         while True:
             # kill all already running filebeat processes
