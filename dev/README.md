@@ -27,7 +27,7 @@ Context is setup with appropriate environment variables:
 
 ### frontend-tools
 
-This container hosts the development frontend UI (i.e. `yarn dev`). 
+This container hosts the development frontend UI (i.e. `yarn dev`).
 
 It is not the statically compiled version.
 
@@ -48,7 +48,7 @@ It is configured with a sample sets of contents :
 
 ## Instructions
 
-Download the ZIMs you want to use for tests in the `zims` folder. 
+Download the ZIMs you want to use for tests in the `zims` folder.
 
 Caddy is configured to use these two zims:
 - https://download.kiwix.org/zim/stack_exchange/sqa.stackexchange.com_en_all_2023-05.zim
@@ -76,9 +76,6 @@ You can also check that everything is ok:
 ```sh
 docker exec -it om_backend-tools invoke alembic check
 ```
-
-Note that to run integration tests, we use a separate DB, you hence have to set/update the DB schema as well.
-Just do the same as above with the backend-tests container (instead of the backend-tools)
 
 ### Run a simulation to inject synthetic data
 
@@ -120,6 +117,11 @@ Create + upgrade test DB schema if needed:
 
 ```sh
 docker exec -it om_backend-tools invoke db-upgrade --test-db
+```
+
+Check that schema is up to date:
+```sh
+docker exec -it om_backend-tools invoke alembic check --test-db
 ```
 
 Run all tests:
