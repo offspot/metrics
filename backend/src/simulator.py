@@ -32,9 +32,9 @@ contents = [
     "ted_en_playlist-how-to-survive-following-your-passions",
 ]
 
-# For every known content, some known objects
+# For every known content, some known items
 # (some are repeated many times to influence the distribution)
-objects = {
+items = {
     "wikipedia_fr": [
         "Coupe_de_France_de_rugby_à_XIII_1938-1939",
         "Électricité_de_France",
@@ -120,43 +120,43 @@ def rand_sim_update_now(now: datetime) -> datetime:
     return now
 
 
-def get_random_content_from_sim() -> str:
+def get_random_content() -> str:
     """Return one random content"""
     return contents[random.randint(0, len(contents) - 1)]
 
 
-def get_random_object_from_sim(content: str) -> str:
-    """Return one random object"""
+def get_random_item(content: str) -> str:
+    """Return one random item"""
     if random.randint(0, 3) == 3:
         rnd = random.randint(0, 100)
         if rnd < 10:
-            return "random_object_1"
+            return "random_item_1"
         elif rnd < 12:
-            return "random_object_2"
+            return "random_item_2"
         elif rnd < 18:
-            return "random_object_3"
+            return "random_item_3"
         elif rnd < 25:
-            return "random_object_4"
+            return "random_item_4"
         elif rnd < 40:
-            return "random_object_5"
+            return "random_item_5"
         elif rnd < 52:
-            return "random_object_6"
+            return "random_item_6"
         elif rnd < 66:
-            return "random_object_7"
+            return "random_item_7"
         elif rnd < 72:
-            return "random_object_8"
+            return "random_item_8"
         elif rnd < 84:
-            return "random_object_9"
+            return "random_item_9"
         elif rnd < 90:
-            return "random_object_10"
+            return "random_item_10"
         elif rnd < 94:
-            return "random_object_11"
+            return "random_item_11"
         elif rnd < 96:
-            return "random_object_12"
+            return "random_item_12"
         else:
-            return "random_object_11"
+            return "random_item_11"
     else:
-        return objects[content][random.randint(0, len(objects[content]) - 1)]
+        return items[content][random.randint(0, len(items[content]) - 1)]
 
 
 def rand_sim():
@@ -181,14 +181,14 @@ def rand_sim():
             processor.process_tick(tick_period=Period(now))
             processor = restart_processor(now)
 
-        content = get_random_content_from_sim()
+        content = get_random_content()
 
-        random_object = get_random_object_from_sim(content)
+        random_item = get_random_item(content)
 
         if random.randint(0, 10) == 10:
             processor.process_input(ContentHomeVisit(content))
         else:
-            processor.process_input(ContentItemVisit(content, random_object))
+            processor.process_input(ContentItemVisit(content, random_item))
 
         if random.randint(0, 10) == 10:
             processor.process_tick(tick_period=Period(now))
@@ -207,13 +207,13 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(seconds=45)
 
     for i in range(10):
-        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(seconds=15)
@@ -223,7 +223,7 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(minutes=1)
@@ -235,7 +235,7 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(ContentItemVisit("content1", f"object{(i+2) % 4}"))
+        processor.process_input(ContentItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(ContentHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(minutes=1)
