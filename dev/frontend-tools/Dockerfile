@@ -4,5 +4,6 @@ FROM node:20.2.0-slim
 WORKDIR /work
 COPY . /work
 RUN yarn
+ENV NODE_ENV=dev
 ENV VITE_BACKEND_ROOT_API http://localhost:8002/v1
 CMD ["yarn", "dev", "--host", "0.0.0.0"]
