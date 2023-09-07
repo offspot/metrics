@@ -8,7 +8,6 @@ services:
       - filebeat-data:/filebeat-data
       - ../backend/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - ./packages.yml:/conf/packages.yml
-      - ../backend/src/offspot_metrics_backend/dev.db:/data/database.db
     command:
       - uvicorn
       - offspot_metrics_backend.entrypoint:app
@@ -24,6 +23,7 @@ services:
     environment:
       PACKAGE_CONF_FILE: /conf/packages.yml
       RUN_PROCESSING: "False"
+      DATABASE_URL: sqlite+pysqlite:////usr/local/lib/python3.11/site-packages/offspot_metrics_backend/dev.db
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools/Dockerfile
