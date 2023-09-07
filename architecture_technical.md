@@ -38,7 +38,8 @@ A Vue.JS application serves dashboards of the KPI data.
 ## Integration
 
 The backend Docker image assumes that:
-- a Caddy reverse proxy is used, and the folder where its logs are output is mounted in the /reverse-proxy-logs folder
+- a Caddy reverse proxy is used, and the folder where its logs are output is mounted in the `/reverse-proxy-logs` folder
+- a persistent volume is mounted at `/filebeat-data`
 - a `packages.yml` file is mounted in `/conf/packages.yml` or any other location passed via the `PACKAGE_CONF_FILE` environment variable ; this file contains the `offspot` packages configuration and its format is an `offspot` convention
 
 ## SQLite
