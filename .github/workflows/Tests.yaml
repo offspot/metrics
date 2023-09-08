@@ -46,7 +46,14 @@ jobs:
 
       - name: Ensure we can start the Docker image
         run: |
-          docker run -d --rm --name test_container offspot_metrics_backend
+          echo "Starting the container"
+          docker run -d --name test_container offspot_metrics_backend
+          echo "Waiting 5 seconds"
           sleep 5
+          echo "Checking container logs"
+          docker logs test_container
+          echo "Checking the container is still there"
           docker ps | grep test_container
+          echo "Cleanup"
           docker stop test_container
+          docker rm test_container
