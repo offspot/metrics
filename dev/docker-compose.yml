@@ -50,14 +50,15 @@ services:
       - 8003:5173
   kiwix-serve:
     container_name: om_kiwix
-    image: ghcr.io/kiwix/kiwix-serve
-    # see https://github.com/offspot/metrics/issues/24
-    #image: ghcr.io/offspot/kiwix-serve:3.5.0-2 # there is no more latest/dev version
+    image: ghcr.io/offspot/kiwix-serve:3.5.0-2 # there is no more latest/dev version
     volumes:
       - ./zims:/data
-    command: '*.zim'
+    command:
+      - kiwix-serve
+      - /data/devops.stackexchange.com_en_all_2023-05.zim
+      - /data/sqa.stackexchange.com_en_all_2023-05.zim
     ports:
-      - 8001:8080
+      - 8001:80
   reverse-proxy:
     container_name: om_reverse-proxy
     image: caddy:2.6.1-alpine
