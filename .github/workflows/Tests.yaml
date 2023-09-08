@@ -46,8 +46,10 @@ jobs:
 
       - name: Ensure we can start the Docker image
         run: |
+          echo "Creating fake configuration file"
+          echo -n -e "---\npackages: []\n" > /tmp/packages.yml
           echo "Starting the container"
-          docker run -d --name test_container offspot_metrics_backend
+          docker run -d --name test_container -v /tmp/packages.yml:/conf/packages.yml offspot_metrics_backend
           echo "Waiting 5 seconds"
           sleep 5
           echo "Checking container logs"
