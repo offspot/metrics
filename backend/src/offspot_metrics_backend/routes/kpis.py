@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 
+from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.db.models import KpiValue as DbKpiValue
 from offspot_metrics_backend.routes import DbSession
 
@@ -31,8 +33,8 @@ class KpiValue:
 )
 async def kpi_values(
     kpi_id: str,
-    agg_kind: str,
-    agg_value: str,
+    agg_kind: Annotated[str, Query(pattern=AggKind.pattern())],
+    agg_value: Annotated[str, Query()],
     session: DbSession,
 ) -> KpiValue:
     query = (

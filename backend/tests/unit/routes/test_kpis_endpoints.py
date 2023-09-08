@@ -39,6 +39,17 @@ async def test_kpis_not_exist(
     kpis: list[KpiValue],  # noqa: ARG001
 ):
     response = await client.get(
-        f"{PREFIX}/kpis/whatever/values?agg_kind=whatever&agg_value=whatever"
+        f"{PREFIX}/kpis/whatever/values?agg_kind=W&agg_value=whatever"
     )
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_kpis_wrong_agg_kind(
+    client: AsyncClient,
+    kpis: list[KpiValue],  # noqa: ARG001
+):
+    response = await client.get(
+        f"{PREFIX}/kpis/whatever/values?agg_kind=whatever&agg_value=whatever"
+    )
+    assert response.status_code == 422

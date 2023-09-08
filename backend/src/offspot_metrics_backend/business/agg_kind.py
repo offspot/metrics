@@ -8,3 +8,11 @@ class AggKind(Enum):
     WEEK = "W"
     MONTH = "M"
     YEAR = "Y"
+
+    @classmethod
+    def values(cls) -> list[str]:
+        return [e.value for e in AggKind]
+
+    @classmethod
+    def pattern(cls) -> str:
+        return f'^{"|".join(cls.values())}$'
