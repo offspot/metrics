@@ -23,8 +23,11 @@ ENV DATABASE_URL sqlite+pysqlite:////data/database.db
 COPY src /src/src
 COPY pyproject.toml *.md /src/
 
-# Install project (including dependencies) + cleanup afterwards
+# Install project (including dependencies) + install empty DB + cleanup afterwards
 RUN pip install --no-cache-dir /src \
+ && mkdir /data \
+ && cd /src/src \
+ && alembic upgrade head \
  && rm -rf /src
 
 EXPOSE 80
