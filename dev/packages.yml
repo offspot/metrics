@@ -1,4 +1,5 @@
 ---
+# configuration, based on https://github.com/offspot/container-images/tree/main/dashboard format
 packages:
 - kind: zim
   title: StackExchange - DevOps
