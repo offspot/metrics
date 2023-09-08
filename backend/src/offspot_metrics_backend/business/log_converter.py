@@ -5,6 +5,12 @@ from typing import Any
 
 import yaml
 
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    # we don't NEED cython ext but it's faster so use it if avail.
+    from yaml import SafeLoader
+
 from offspot_metrics_backend.business.inputs.content_visit import (
     ContentHomeVisit,
     ContentItemVisit,
@@ -29,7 +35,7 @@ class LogConverter:
         logger.info("Parsing PACKAGE_CONF_FILE")
 
         with open(BackendConf.package_conf_file_location) as fh:
-            conf_data = yaml.safe_load(fh)
+            conf_data = yaml.load(fh, Loader=SafeLoader)
             self._parse_package_configuration_data(conf_data=conf_data)
 
         for warning in self.warnings:
