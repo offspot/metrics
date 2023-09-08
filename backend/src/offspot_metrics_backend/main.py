@@ -1,5 +1,5 @@
 import logging
-import os
+import sys
 from asyncio import Task, create_task, sleep
 from typing import Any
 
@@ -16,6 +16,9 @@ from offspot_metrics_backend.filebeat import FileBeatRunner
 from offspot_metrics_backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
+TICK_PERIOD = (
+    60  # tick period in seconds, changing this need a detailed impact analysis
+)
 
 # - fix this, this is not the same log format as uvicorn logs but are mixed in the same
 #  STDOUT...
@@ -35,29 +38,27 @@ def create_app() -> FastAPI:
         version=__about__.__version__,
     )
 
-    # Boolean stoping background processing of logs + indicators / kpis update / cleanup
-    # Useful mostly for local development purpose when we do not want to generate new
-    # events regularly and hence do not want to cleanup DB from simulation results
-    # The environment variable must hence be explicitely set to False (case-insensitive)
-    # all other values will start the processing.
-    run_processing = not (os.getenv("RUN_PROCESSING", "False").lower() == "false")
+    if not BackendConf.filebeat_present:
+        logger.warning(
+            f"filebeat process not found at {BackendConf.filebeat_process_location}"
+        )
 
-    if run_processing:
+    if BackendConf.processing_disabled or not BackendConf.filebeat_present:
+        logger.warning("Processing is disabled")
+        converter = filebeat = processor = None
+    else:
         logger.info("Starting processing")
         converter = LogConverter()
-        converter.parse_package_configuration_from_file()
         filebeat = FileBeatRunner(converter=converter)
         processor = Processor()
         processor.startup(current_period=Period.now())
-    else:
-        logger.warning("Processing is disabled")
 
     background_tasks = set[Task[Any]]()
 
     @app.on_event("startup")
     async def app_startup():  # pyright: ignore[reportUnusedFunction]
         """Start background tasks"""
-        if run_processing and filebeat and processor:
+        if not BackendConf.processing_disabled and filebeat and processor:
             filebeat_task = create_task(filebeat.run(processor))
             background_tasks.add(filebeat_task)
             filebeat_task.add_done_callback(background_tasks.discard)
@@ -69,11 +70,10 @@ def create_app() -> FastAPI:
     async def ticker():
         """Start a processor tick every minute"""
         while True:
-            await sleep(60)
+            await sleep(TICK_PERIOD)
             if not processor:
-                system_exit = SystemExit("Processor is not set")
-                system_exit.code = 1
-                raise system_exit
+                # This should never happen, but better safe than sorry
+                sys.exit("Processor is not set")
             logger.debug("Processing a clock tick")
             processor.process_tick(tick_period=Period.now())
 

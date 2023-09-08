@@ -46,7 +46,7 @@ def aggregations(
 
     return Aggregations(
         aggregations=[
-            Aggregation(kind=x.agg_kind, value=x.agg_value)
-            for x in session.execute(query)
+            Aggregation(kind=record.agg_kind, value=record.agg_value)
+            for record in session.execute(query)
         ]
     )

@@ -11,45 +11,41 @@ from offspot_metrics_backend.business.log_converter import (
     IncorrectConfigurationError,
     LogConverter,
 )
+from offspot_metrics_backend.constants import BackendConf
 
 
 def test_parsing_missing_file_provided():
-    converter = LogConverter()
+    with pytest.raises(FileNotFoundError, match="/conf/packages.yml"):
+        LogConverter()
 
-    with pytest.raises(FileNotFoundError) as exc:
-        converter.parse_package_configuration_from_file()
 
-    assert "/conf/packages.yml" in str(exc.value)
+def _set_package_conf_file_location(location: str):
+    path = pathlib.Path(__file__).parent.absolute().joinpath(location)
+    BackendConf.package_conf_file_location = str(path)
 
 
 def test_parsing_empty_conf():
-    path = pathlib.Path(__file__).parent.absolute().joinpath("conf_empty.yaml")
-    converter = LogConverter()
-
+    _set_package_conf_file_location("conf_empty.yaml")
     with pytest.raises(IncorrectConfigurationError):
-        converter.parse_package_configuration_from_file(str(path))
+        LogConverter()
 
 
 def test_parsing_missing_packages():
-    path = (
-        pathlib.Path(__file__).parent.absolute().joinpath("conf_missing_packages.yaml")
-    )
-    converter = LogConverter()
-
+    _set_package_conf_file_location("conf_missing_packages.yaml")
     with pytest.raises(IncorrectConfigurationError):
-        converter.parse_package_configuration_from_file(str(path))
+        LogConverter()
 
 
 def test_parsing_ok():
-    path = pathlib.Path(__file__).parent.absolute().joinpath("conf_ok.yaml")
+    _set_package_conf_file_location("conf_ok.yaml")
     converter = LogConverter()
-    converter.parse_package_configuration_from_file(str(path))
     assert converter.warnings == []
     assert converter.files == {
         "nomad.renaud.test": {"title": "Nomad exercices du CP à la 3è"},
         "mathews.renaud.test": {"title": "Chasse au trésor Math Mathews"},
     }
     assert converter.zims == {
+        "super.zim_2023-05": {"title": "Super content"},
         "wikipedia_en_ray_charles": {"title": "Ray Charles"},
         "wikipedia_en_all": {"title": "Wikipedia"},
     }
@@ -57,9 +53,8 @@ def test_parsing_ok():
 
 
 def test_parsing_warnings():
-    path = pathlib.Path(__file__).parent.absolute().joinpath("conf_with_warnings.yaml")
+    _set_package_conf_file_location("conf_with_warnings.yaml")
     converter = LogConverter()
-    converter.parse_package_configuration_from_file(str(path))
     assert converter.warnings == [
         "Package with missing 'url' ignored",
         "Package with missing 'title' ignored",
@@ -106,17 +101,15 @@ def test_parsing_warnings():
     ],
 )
 def test_process_ok(log_line: str, expected_inputs: list[Input]):
-    path = pathlib.Path(__file__).parent.absolute().joinpath("conf_ok.yaml")
+    _set_package_conf_file_location("conf_ok.yaml")
     converter = LogConverter()
-    converter.parse_package_configuration_from_file(str(path))
     inputs = converter.process(log_line)
     assert inputs == expected_inputs
 
 
 def test_process_nok():
-    path = pathlib.Path(__file__).parent.absolute().joinpath("processing_conf.yaml")
+    _set_package_conf_file_location("processing_conf.yaml")
     converter = LogConverter()
-    converter.parse_package_configuration_from_file(str(path))
     path = pathlib.Path(__file__).parent.absolute().joinpath("processing_nok.txt")
     with open(path) as fp:
         for line in fp:

@@ -35,6 +35,10 @@ packages:
   download:
     url: //download-zims.renaud.test/wikipedia_en_all.zim
     size: 100473163776
+- kind: zim
+  title: Super content
+  description: Link to a content instead of viewer
+  url: //kiwix.renaud.test/content/super.zim_2023-05/this_is_a_super_page
 - kind: files
   title: "Nomad exercices du CP \xE0 la 3\xE8"
   description: Application Android

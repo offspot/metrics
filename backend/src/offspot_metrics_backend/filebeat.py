@@ -1,18 +1,20 @@
 import logging
 import os
 from asyncio import sleep
+from pathlib import Path
 from subprocess import PIPE, Popen
 
 import psutil
 
 from offspot_metrics_backend.business.log_converter import LogConverter
 from offspot_metrics_backend.business.processor import Processor
+from offspot_metrics_backend.constants import BackendConf
 
 logger = logging.getLogger(__name__)
 
 
 class FileBeatRunner:
-    """A class responsible to manage filebeat execution"""
+    """Manages filebeat execution"""
 
     def __init__(self, converter: LogConverter) -> None:
         self.converter = converter
@@ -31,12 +33,14 @@ class FileBeatRunner:
             # start filebeat and capture stdout
             logger.info("Starting filebeat in background")
             filebeat = Popen(
-                "/usr/share/filebeat/filebeat", cwd="/usr/share/filebeat", stdout=PIPE
+                BackendConf.filebeat_process_location,
+                cwd=Path(BackendConf.filebeat_process_location).parent,
+                stdout=PIPE,
             )
 
             # mainly for type hinter, not supposed to happen
             if filebeat.stdout is None:
-                logger.error("Failed to catpure stdout, will retry in 10 secs")
+                logger.error("Failed to capture stdout, will retry in 10 secs")
                 await sleep(10)
                 continue
 

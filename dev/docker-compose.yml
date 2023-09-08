@@ -22,7 +22,7 @@ services:
       - 8002:80
     environment:
       PACKAGE_CONF_FILE: /conf/packages.yml
-      RUN_PROCESSING: "False"
+      PROCESSING_DISABLED: "True"
       DATABASE_URL: sqlite+pysqlite:////usr/local/lib/python3.11/site-packages/offspot_metrics_backend/dev.db
   backend-tools:
     build:
@@ -36,6 +36,7 @@ services:
       - ../backend/tasks.py:/src/tasks.py
       - ../backend/tests:/src/tests
     environment:
+      PROCESSING_DISABLED: "True"
       DATABASE_URL: sqlite+pysqlite:////src/src/offspot_metrics_backend/dev.db
       TEST_DATABASE_URL: sqlite+pysqlite:////src/tests/test.db
   frontend-tools:
@@ -50,6 +51,8 @@ services:
   kiwix-serve:
     container_name: om_kiwix
     image: ghcr.io/kiwix/kiwix-serve
+    # see https://github.com/offspot/metrics/issues/24
+    #image: ghcr.io/offspot/kiwix-serve:3.5.0-2 # there is no more latest/dev version
     volumes:
       - ./zims:/data
     command: '*.zim'
@@ -60,7 +63,6 @@ services:
     image: caddy:2.6.1-alpine
     volumes:
       - ./reverse-proxy/config/Caddyfile:/etc/caddy/Caddyfile
-      - ./reverse-proxy/data:/data
       - ./file-browser-data:/file-browser-data
       - reverse-proxy-srv:/srv
     ports:

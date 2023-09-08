@@ -8,10 +8,11 @@ filebeat.inputs:
 output.console:
   enabled: true
 
-logging.to_files: true
-logging.files:
-  rotateeverybytes: 1048576 # = 1MB
-  keepfiles: 2
+# Disable all logging
+logging.to_stderr: false
+logging.to_files: false
+logging.to_syslog: false
+logging.to_eventlog: false
 
+# data path is used to store filebeat internal data
 path.data: /filebeat-data/data
-path.logs: /filebeat-data/logs

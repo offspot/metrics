@@ -68,7 +68,7 @@ class Period:
 
     @property
     def timestamp(self) -> int:
-        """Transform the period into a timstamp"""
+        """Transform the period into a timestamp"""
         return int(self.dt.timestamp())
 
     def get_shifted(self, delta: relativedelta) -> "Period":
@@ -91,7 +91,7 @@ class Period:
         raise AttributeError  # pragma: no cover
 
     def get_interval(self, agg_kind: AggKind) -> Interval:
-        """Transform the period into an interval matching the kind og aggregation
+        """Transform the period into an interval matching the kind of aggregation
 
         E.g. for a weekly aggregation, the interval will start at the beginning and
         finish at the end of the week enclosing the period"""
@@ -109,7 +109,7 @@ class Period:
         if agg_kind == AggKind.WEEK:
             start = datetime.datetime(
                 year=self.year, month=self.month, day=self.day, tzinfo=datetime.UTC
-            ) + datetime.timedelta(days=1 - self.weekday)
+            ) - datetime.timedelta(days=self.weekday - 1)
             return Interval(
                 start=int(start.timestamp()),
                 stop=int((start + datetime.timedelta(days=7)).timestamp()),

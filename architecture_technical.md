@@ -37,10 +37,26 @@ A Vue.JS application serves dashboards of the KPI data.
 
 ## Integration
 
-The backend Docker image assumes that:
+The `backend` assumes that:
 - a Caddy reverse proxy is used, and the folder where its logs are output is mounted in the `/reverse-proxy-logs` folder
-- a persistent volume is mounted at `/filebeat-data`
-- a `packages.yml` file is mounted in `/conf/packages.yml` or any other location passed via the `PACKAGE_CONF_FILE` environment variable ; this file contains the `offspot` packages configuration and its format is an `offspot` convention
+    - we assume that
+- filebeat is only started from inside a Docker container (e.g. not directly on a developer machine), and a **persistent volume** is mounted at `/filebeat-data`
+- a `packages.yml` file is mounted in `/conf/packages.yml` or any other location passed via the
+`PACKAGE_CONF_FILE` environment variable ; this file contains the `offspot` packages configuration and
+ its format is an `offspot` convention
+    - we parse the list of `packages` and process the `kind`, `title` and `url` attributes
+    - we assume that `url` attribute matches the `^//(?P<host>.*?)/.*` regular expression to extract
+    host name and use it afterwards when matching reverse proxy log lines with the correct package
+    - when `kind` is `zim`, we use extract zim alias from `url` attribute and use it afterwards when
+    matching reverse proxy log lines with the correct ZIM. Regexp must match:
+      - either the `^//.*?/viewer#(?P<zim>.*)$` regexp
+    (e.g. //kiwix.local/viewer/viewer#sqa.stackexchange.com_en_all_2023-05)
+      - or the `//.*?/content/(?P<zim>.+?)(?:/.*)?$` regexp
+    (e.g. //kiwix.local/content/sqa.stackexchange.com_en_all_2023-05/a_super_home_page)
+- `kiwix-serve` is serving resources through the `/content` url. More precisely, we assume that access logs
+on `kiwix-serve` are matching the `^/content/(?P<zim>.+?)(?P<item>/.*)?$` regular expression when a ZIM
+resource is displayed (where `zim` is the zim alias mentionned above, extracted from the `packages.yml`
+configuration file)
 
 ## SQLite
 

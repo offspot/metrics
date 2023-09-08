@@ -65,11 +65,11 @@ class ContentPopularity(Kpi):
         return dumps(
             [
                 {
-                    "content": x.content,
-                    "count": x.count,
-                    "percentage": round(int(str(x.count)) * 100 / total_count, 2),
+                    "content": record.content,
+                    "count": record.count,
+                    "percentage": round(int(str(record.count)) * 100 / total_count, 2),
                 }
-                for x in session.execute(query)
+                for record in session.execute(query)
             ]
         )
 

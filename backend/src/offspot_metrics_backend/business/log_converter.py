@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import re
 from typing import Any
 
@@ -11,6 +10,7 @@ from offspot_metrics_backend.business.inputs.content_visit import (
     ContentItemVisit,
 )
 from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.constants import BackendConf
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +24,13 @@ class IncorrectConfigurationError(Exception):
 class LogConverter:
     """Converts logs received from the reverse proxy into inputs to process"""
 
-    def parse_package_configuration_from_file(self, file_location: str | None = None):
+    def __init__(self) -> None:
         """Parse packages.yml configuration based on provided file"""
         logger.info("Parsing PACKAGE_CONF_FILE")
 
-        if file_location is None:
-            file_location = os.getenv("PACKAGE_CONF_FILE", "/conf/packages.yml")
-        with open(file_location) as stream:
-            conf_data = yaml.safe_load(stream)
-            self.parse_package_configuration(conf_data=conf_data)
+        with open(BackendConf.package_conf_file_location) as fh:
+            conf_data = yaml.safe_load(fh)
+            self._parse_package_configuration_data(conf_data=conf_data)
 
         for warning in self.warnings:
             logger.warning(warning)
@@ -41,11 +39,11 @@ class LogConverter:
             logger.info(f"Found File {file} in {host}")
 
         for zim, data in self.zims.items():
-            logger.info(f"Found Zim {zim} with {data} in {self.zim_host}")
+            logger.info(f"Found ZIM {zim} with {data} in {self.zim_host}")
 
         logger.info("Parsing PACKAGE_CONF_FILE completed")
 
-    def parse_package_configuration(self, conf_data: dict[str, Any]):
+    def _parse_package_configuration_data(self, conf_data: dict[str, Any]):
         """Parse configuration based on dictionary of configuration data"""
         self.files: dict[str, Any] = {}
         self.zim_host: str | None = None
@@ -61,9 +59,9 @@ class LogConverter:
             )
 
         for package in conf_data["packages"]:
-            self.parse_one_package(package=package)
+            self._parse_one_package(package=package)
 
-    def parse_one_package(self, package: dict[str, Any]):
+    def _parse_one_package(self, package: dict[str, Any]):
         """Parse one package configuration"""
         url = package.get("url")
         if not url:
@@ -75,11 +73,11 @@ class LogConverter:
             self.warnings.append("Package with missing 'title' ignored")
             return
 
-        match = re.match(r"^//(.*?)/.*", url)
+        match = re.match(r"^//(?P<host>.*?)/.*", url)
         if not match:
             self.warnings.append(f"Unsupported URL: {url}")
             return
-        host = match.group(1)
+        host = match.group("host")
 
         kind = package.get("kind")
         if kind == "files":
@@ -95,11 +93,15 @@ class LogConverter:
                 )
                 return
 
-            match = re.match(r"^//.*?/viewer#(.*)", url)
-            if not match:
+            match_viewer = re.match(r"^//.*?/viewer#(?P<zim>.*)$", url)
+            match_content = re.match(r"^//.*?/content/(?P<zim>.+?)(?:/.*)?$", url)
+            if match_viewer:
+                zim = match_viewer.group("zim")
+            elif match_content:
+                zim = match_content.group("zim")
+            else:
                 self.warnings.append(f"Unsupported ZIM URL: {url}")
                 return
-            zim = match.group(1)
 
             self.zims[zim] = {"title": title}
             return
@@ -137,20 +139,20 @@ class LogConverter:
         content_type: str | None = message.get("resp_headers", {}).get("Content-Type")
 
         if host == self.zim_host:
-            return self.process_zim(uri=uri, content_type=content_type)
+            return self._process_zim(uri=uri, content_type=content_type)
         elif host in self.files:
-            return self.process_file(uri=uri, host=host)
+            return self._process_file(uri=uri, host=host)
         else:
             return []
 
-    def process_zim(self, uri: str, content_type: str | None) -> list[Input]:
+    def _process_zim(self, uri: str, content_type: str | None) -> list[Input]:
         """Transform one log event identified as ZIM into inputs"""
-        match = re.match(r"^/content/(.+?)(/.*)?$", uri)
+        match = re.match(r"^/content/(?P<zim>.+?)(?P<item>/.*)?$", uri)
         if not match:
             return []
 
-        zim = match.group(1)
-        item = match.group(2)
+        zim = match.group("zim")
+        item = match.group("item")
 
         if zim not in self.zims:
             return []
@@ -172,7 +174,7 @@ class LogConverter:
             else:
                 return []
 
-    def process_file(self, uri: str, host: str) -> list[Input]:
+    def _process_file(self, uri: str, host: str) -> list[Input]:
         """Transform one log event identified as static file into inputs"""
         if uri == "/":
             return [ContentHomeVisit(content=self.files[host]["title"])]

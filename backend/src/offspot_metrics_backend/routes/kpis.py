@@ -24,7 +24,7 @@ class KpiValue:
     "/{kpi_id}/values",
     responses={
         200: {
-            "description": "Returns the kpi value for a given aggregation",
+            "description": "Returns the kpi values for a given aggregation",
         },
         404: {"description": "KPI not found"},
     },

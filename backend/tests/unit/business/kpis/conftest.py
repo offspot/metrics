@@ -63,9 +63,11 @@ class DataRecord:
     dimension_value2: str | None = None
 
     @property
-    def dimension_key(self):
+    def dimension_key(self) -> tuple[str | None, str | None, str | None]:
         return (
-            f"{self.dimension_value0}¶{self.dimension_value1}¶{self.dimension_value2}"
+            self.dimension_value0,
+            self.dimension_value1,
+            self.dimension_value2,
         )
 
 

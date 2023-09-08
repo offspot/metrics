@@ -89,9 +89,9 @@ docker exec -it om_backend-tools python src/simulator.py
 
 You can test the whole integration suite (i.e. with landing page, kiwix-serve and Filebeat).
 
-**Nota:** this is not compatible from simulator data which will progressively be erased by new live data.
+**Nota:** this is not compatible with simulator data which will progressively be erased by new live data.
 
-You first have to enable processing in `docker-compose.yml`: set `RUN_PROCESSING: "True"`.
+You first have to enable processing in `docker-compose.yml`: set `PROCESSING_DISABLED: "False"` (or just remove the environment variable).
 
 ```
 docker compose -p om up -d --force-recreate backend
