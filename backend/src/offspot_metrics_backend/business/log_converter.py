@@ -113,7 +113,7 @@ class LogConverter:
             return
 
     def process(self, line: str) -> list[Input]:
-        """Transform one log line into corresponding inputs"""
+        """Transform one log line transmitted by Filebeat into corresponding inputs"""
         try:
             log = json.loads(line)
         except json.JSONDecodeError:
@@ -121,6 +121,7 @@ class LogConverter:
         if "message" not in log:
             return []
         try:
+            # message contains the original log (from Caddy)
             message = json.loads(log["message"])
         except json.JSONDecodeError:
             return []
