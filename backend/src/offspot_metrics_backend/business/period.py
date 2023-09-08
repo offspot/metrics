@@ -23,10 +23,8 @@ class Period:
 
     dt: datetime.datetime
 
-    def __init__(self, dt: datetime.datetime) -> None:
-        self.dt = datetime.datetime(
-            year=dt.year, month=dt.month, day=dt.day, hour=dt.hour
-        )
+    def __post_init__(self):
+        self.dt = datetime.datetime.combine(self.dt.date(), datetime.time(self.dt.hour))
 
     @classmethod
     def from_timestamp(cls, ts: int) -> "Period":
