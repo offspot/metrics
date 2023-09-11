@@ -11,19 +11,15 @@ At some point in the future, the system is meant to centralize data in a Cloud f
 
 ![Technical architecture](architecture_technical.excalidraw.png)
 
-Filebeat (from Elasticsearch) is used to process the various inputs easily (read rotating log files nicely, poll a webserver with some stats, ...) and forwards these events to the backend server.
+The backend is directly responsible to extract the various inputs from its environment (by reading rotating log files nicely, polling a webserver to grep some stats, ...).
 
-Filebeat has been chosen because it is assumed to be lightweight, already capable to handle complex situation like keeping a pointer to last log data read in a file, or also detect and handle nicely log files rotation. The OSS edition is used (i.e. we do not depend on the Elastic Licence, but only Apache License version 2.0).
+This has been prefered to the use of an external program (e.g Filebeat, Logstash, ...) because what is needed is indeed limited (no complex processing), partially implemented in some libraries (e.g. watchdog) and there is no free lunch (no external program perfectly fitted to our use case). The integration of an external program is in addition not something straightforward.
 
-The backend server is responsible to start Filebeat and watch events (in JSON) sent by Filebeat through its standard output STDOUT. If the Filebeat process is stopped (crash, ...), the backend server will try to restart it every 10 seconds. When the backend server starts, it also kills any left-over Filebeat process which might already be running.
-
-The backend server is responsible to process the raw logs received from Filebeat and transform them into inputs to compute indicator records.
+The backend server is hence responsible to detect new raw logs received from Caddy reverse proxy, and transform them into inputs to compute indicator records.
 
 On-the-fly, every indicator has a current state used to store intermediate computations that will be needed to create the final record value. This state is updated at each event.
 
 Indicator states are kept in memory. They are transfered to the SQLite database every minute (this is mandatory since it is quite common that the offspot is not shutdown properly).
-
-The backend is also capable to handle nicely SIGINT signals to shutdown Filebeat properly and transfer all indicator state to the database.
 
 When the backend starts, it first reloads this state data from database.
 
@@ -39,8 +35,7 @@ A Vue.JS application serves dashboards of the KPI data.
 
 The `backend` assumes that:
 - a Caddy reverse proxy is used, and the folder where its logs are output is mounted in the `/reverse-proxy-logs` folder
-    - we assume that
-- filebeat is only started from inside a Docker container (e.g. not directly on a developer machine), and a **persistent volume** is mounted at `/filebeat-data`
+    - we assume that logs are written in JSON ; we support rotated log files ; we do not supported compressed rotated files
 - a `packages.yml` file is mounted in `/conf/packages.yml` or any other location passed via the
 `PACKAGE_CONF_FILE` environment variable ; this file contains the `offspot` packages configuration and
  its format is an `offspot` convention

@@ -8,11 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from offspot_metrics_backend import __about__
-from offspot_metrics_backend.business.log_converter import LogConverter
+from offspot_metrics_backend.business.caddy_log_converter import CaddyLogConverter
+from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEvent
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
 from offspot_metrics_backend.constants import BackendConf
-from offspot_metrics_backend.filebeat import FileBeatRunner
 from offspot_metrics_backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
@@ -38,34 +38,44 @@ def create_app() -> FastAPI:
         version=__about__.__version__,
     )
 
-    if not BackendConf.filebeat_present:
-        logger.warning(
-            f"filebeat process not found at {BackendConf.filebeat_process_location}"
-        )
-
-    if BackendConf.processing_disabled or not BackendConf.filebeat_present:
+    if BackendConf.processing_disabled:
         logger.warning("Processing is disabled")
-        converter = filebeat = processor = None
+        converter = log_watcher = processor = None
     else:
         logger.info("Starting processing")
-        converter = LogConverter()
-        filebeat = FileBeatRunner(converter=converter)
         processor = Processor()
         processor.startup(current_period=Period.now())
+
+        converter = CaddyLogConverter()
+
+        def handle_log_event(event: NewLineEvent):
+            logger.debug(f"Log watcher sent: {event.line_content}")
+            inputs = converter.process(event.line_content)
+            for input_ in inputs:
+                logger.debug(f"Processing input: {input_}")
+                processor.process_input(input_=input_)
+
+        log_watcher = LogWatcher(
+            path=BackendConf.reverse_proxy_logs_location, handler=handle_log_event
+        )
 
     background_tasks = set[Task[Any]]()
 
     @app.on_event("startup")
     async def app_startup():  # pyright: ignore[reportUnusedFunction]
         """Start background tasks"""
-        if not BackendConf.processing_disabled and filebeat and processor:
-            filebeat_task = create_task(filebeat.run(processor))
-            background_tasks.add(filebeat_task)
-            filebeat_task.add_done_callback(background_tasks.discard)
+        if not BackendConf.processing_disabled and log_watcher and processor:
+            log_watcher_task = create_task(start_watcher(log_watcher))
+            background_tasks.add(log_watcher_task)
+            log_watcher_task.add_done_callback(background_tasks.discard)
 
             ticker_task = create_task(ticker())
             background_tasks.add(ticker_task)
             ticker_task.add_done_callback(background_tasks.discard)
+
+    async def start_watcher(log_watcher: LogWatcher):
+        """Start the log watcher as a coroutine"""
+        log_watcher.start()
 
     async def ticker():
         """Start a processor tick every minute"""

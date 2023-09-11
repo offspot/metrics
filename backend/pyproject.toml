@@ -27,6 +27,7 @@ dependencies = [
     "python-dateutil == 2.8.2",
     "PyYAML == 6.0.1",
     "SQLAlchemy == 2.0.20",
+    "watchdog == 3.0.0",
 ]
 dynamic = ["version"]
 
@@ -220,7 +221,6 @@ parallel = true
 omit = [
   "src/offspot_metrics_backend/__about__.py",
   "src/offspot_metrics_backend/main.py", # glue logic
-  "src/offspot_metrics_backend/filebeat.py", # glue logic
   "src/offspot_metrics_backend/business/processor.py", # glue logic
   "src/offspot_metrics_backend/business/indicators/content_visit.py", # straightforward implementation, pointless to test
 ]

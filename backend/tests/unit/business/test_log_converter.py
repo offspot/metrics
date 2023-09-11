@@ -2,21 +2,21 @@ import pathlib
 
 import pytest
 
+from offspot_metrics_backend.business.caddy_log_converter import (
+    CaddyLogConverter,
+    IncorrectConfigurationError,
+)
 from offspot_metrics_backend.business.inputs.content_visit import (
     ContentHomeVisit,
     ContentItemVisit,
 )
 from offspot_metrics_backend.business.inputs.input import Input
-from offspot_metrics_backend.business.log_converter import (
-    IncorrectConfigurationError,
-    LogConverter,
-)
 from offspot_metrics_backend.constants import BackendConf
 
 
 def test_parsing_missing_file_provided():
     with pytest.raises(FileNotFoundError, match="/conf/packages.yml"):
-        LogConverter()
+        CaddyLogConverter()
 
 
 def _set_package_conf_file_location(location: str):
@@ -27,18 +27,18 @@ def _set_package_conf_file_location(location: str):
 def test_parsing_empty_conf():
     _set_package_conf_file_location("conf_empty.yaml")
     with pytest.raises(IncorrectConfigurationError):
-        LogConverter()
+        CaddyLogConverter()
 
 
 def test_parsing_missing_packages():
     _set_package_conf_file_location("conf_missing_packages.yaml")
     with pytest.raises(IncorrectConfigurationError):
-        LogConverter()
+        CaddyLogConverter()
 
 
 def test_parsing_ok():
     _set_package_conf_file_location("conf_ok.yaml")
-    converter = LogConverter()
+    converter = CaddyLogConverter()
     assert converter.warnings == []
     assert converter.files == {
         "nomad.renaud.test": {"title": "Nomad exercices du CP à la 3è"},
@@ -54,7 +54,7 @@ def test_parsing_ok():
 
 def test_parsing_warnings():
     _set_package_conf_file_location("conf_with_warnings.yaml")
-    converter = LogConverter()
+    converter = CaddyLogConverter()
     assert converter.warnings == [
         "Package with missing 'url' ignored",
         "Package with missing 'title' ignored",
@@ -102,14 +102,14 @@ def test_parsing_warnings():
 )
 def test_process_ok(log_line: str, expected_inputs: list[Input]):
     _set_package_conf_file_location("conf_ok.yaml")
-    converter = LogConverter()
+    converter = CaddyLogConverter()
     inputs = converter.process(log_line)
     assert inputs == expected_inputs
 
 
 def test_process_nok():
     _set_package_conf_file_location("processing_conf.yaml")
-    converter = LogConverter()
+    converter = CaddyLogConverter()
     path = pathlib.Path(__file__).parent.absolute().joinpath("processing_nok.txt")
     with open(path) as fp:
         for line in fp:

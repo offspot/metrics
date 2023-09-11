@@ -27,8 +27,8 @@ class IncorrectConfigurationError(Exception):
     pass
 
 
-class LogConverter:
-    """Converts logs received from the reverse proxy into inputs to process"""
+class CaddyLogConverter:
+    """Converts logs received from Caddy reverse proxy into inputs to process"""
 
     def __init__(self) -> None:
         """Parse packages.yml configuration based on provided file"""
@@ -119,16 +119,9 @@ class LogConverter:
             return
 
     def process(self, line: str) -> list[Input]:
-        """Transform one log line transmitted by Filebeat into corresponding inputs"""
+        """Transform one Caddy log line into corresponding inputs"""
         try:
-            log = json.loads(line)
-        except json.JSONDecodeError:
-            return []
-        if "message" not in log:
-            return []
-        try:
-            # message contains the original log (from Caddy)
-            message = json.loads(log["message"])
+            message = json.loads(line)
         except json.JSONDecodeError:
             return []
         if "level" not in message or message["level"] != "info":

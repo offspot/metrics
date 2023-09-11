@@ -9,12 +9,6 @@ WORKDIR "/home"
 RUN python -m pip install --no-cache-dir -U \
       pip
 
-# Choose right architecture
-# COPY --from=docker.elastic.co/beats/filebeat-oss:8.8.1-arm64 /usr/share/filebeat /usr/share/filebeat
-COPY --from=docker.elastic.co/beats/filebeat-oss:8.8.1 /usr/share/filebeat /usr/share/filebeat
-COPY filebeat.yml /usr/share/filebeat/filebeat.yml
-RUN chmod go-w /usr/share/filebeat/filebeat.yml
-
 # to set to your clients' origins
 ENV ALLOWED_ORIGINS http://localhost:8003|http://127.0.0.1:8003
 ENV DATABASE_URL sqlite+pysqlite:////data/database.db

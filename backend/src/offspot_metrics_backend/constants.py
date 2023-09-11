@@ -24,6 +24,6 @@ class BackendConf:
     # all other values will enable the processing.
     processing_disabled = os.getenv("PROCESSING_DISABLED", "False").lower() == "true"
 
-    filebeat_process_location = "/usr/share/filebeat/filebeat"
-
-    filebeat_present = pathlib.Path(filebeat_process_location).exists()
+    reverse_proxy_logs_location = os.getenv(
+        "REVERSE_PROXY_LOGS_LOCATION", "/reverse-proxy-logs"
+    )
