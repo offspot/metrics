@@ -42,7 +42,7 @@ The `backend` assumes that:
   - in the Docker image, by default both are in the `/data` folder which should be mounted as a volume
 - a `packages.yml` file is mounted in `/conf/packages.yml` or any other location passed via the
 `PACKAGE_CONF_FILE` environment variable ; this file contains the `offspot` packages configuration and
- its format is an `offspot` convention
+ its format is an `offspot` [convention](https://github.com/offspot/container-images/tree/main/dashboard)
     - we parse the list of `packages` and process the `kind`, `title` and `url` attributes
     - we assume that `url` attribute matches the `^//(?P<host>.*?)/.*` regular expression to extract
     host name and use it afterwards when matching reverse proxy log lines with the correct package
