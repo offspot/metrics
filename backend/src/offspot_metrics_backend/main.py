@@ -51,7 +51,8 @@ class Main:
     @asynccontextmanager
     async def lifespan(self, _: FastAPI):
         # Startup
-        Initializer.upgrade_db_schema(src_dir=Path(__file__).parent.parent)
+        logger.debug(f"Database URL: {BackendConf.database_url}")
+        Initializer.upgrade_db_schema(src_dir=Path(__file__).parent)
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
             self.processor.startup(current_period=Period.now())

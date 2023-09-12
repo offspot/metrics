@@ -203,7 +203,7 @@ ban-relative-imports = "all"
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 # Simulator is using pseudo-random generator and magic values on purpose
-"src/simulator.py" = ["S311", "PLR2004"]
+"src/offspot_metrics_backend/simulator.py" = ["S311", "PLR2004"]
 
 [tool.pytest.ini_options]
 minversion = "7.3"
