@@ -15,7 +15,7 @@ def pytest_sessionstart(session: Any) -> None:  # noqa: ARG001
     Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
-    Initializer.ensure_schema_is_up_to_date(src_dir=Path("src"))
+    Initializer.upgrade_db_schema(src_dir=Path("src"))
 
 
 @pytest.fixture

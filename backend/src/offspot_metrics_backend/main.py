@@ -1,6 +1,7 @@
 import logging
 from asyncio import Task, create_task, sleep
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI
@@ -13,6 +14,7 @@ from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEven
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
 from offspot_metrics_backend.constants import BackendConf
+from offspot_metrics_backend.db.initializer import Initializer
 from offspot_metrics_backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
@@ -49,6 +51,7 @@ class Main:
     @asynccontextmanager
     async def lifespan(self, _: FastAPI):
         # Startup
+        Initializer.upgrade_db_schema(src_dir=Path(__file__).parent.parent)
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
             self.processor.startup(current_period=Period.now())

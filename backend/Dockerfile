@@ -22,7 +22,6 @@ COPY pyproject.toml *.md /src/
 RUN pip install --no-cache-dir /src \
  && mkdir -p /data/logwatcher \
  && cd /src/src \
- && alembic upgrade head \
  && rm -rf /src
 
 EXPOSE 80
