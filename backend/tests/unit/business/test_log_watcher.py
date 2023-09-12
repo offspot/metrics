@@ -315,3 +315,16 @@ def test_log_watcher_no_exit():
     lwh = LogWatcherHandler(noop)
     lwh.on_any_event(FileDeletedEvent("some_path"))
     lwh.on_any_event(FileMovedEvent("some_path", "other_path"))
+
+
+def test_log_watcher_big_special_chars(log_watcher_tester: LogWatcherTester):
+    def modify_files(tempdir: Path):
+        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+            fh.write("L1😁1\n")
+        time.sleep(PAUSE_IN_MS)
+        with open(tempdir.joinpath("file1.txt"), mode="a") as fh:
+            fh.write("L1😤2\n")
+
+    log_watcher_tester.run(modify_files)
+
+    assert log_watcher_tester.new_lines == ["L1😁1", "L1😤2"]
