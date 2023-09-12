@@ -1,5 +1,5 @@
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
 import pytest
@@ -24,12 +24,13 @@ def event_loop():
         loop.close()
 
 
-@pytest.fixture(scope="session")
-def app():
+@pytest.fixture()
+def app(set_package_conf_file_location: Callable[[str], None]):
+    set_package_conf_file_location("conf_routes.yaml")
     return Main().create_app()
 
 
-@pytest_asyncio.fixture(scope="session")  # pyright: ignore
+@pytest_asyncio.fixture()  # pyright: ignore
 async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, Any]:
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client

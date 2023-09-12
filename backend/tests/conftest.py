@@ -1,5 +1,4 @@
 from collections.abc import Generator
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -15,7 +14,7 @@ def pytest_sessionstart(session: Any) -> None:  # noqa: ARG001
     Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
-    Initializer.upgrade_db_schema(src_dir=Path("src"))
+    Initializer.upgrade_db_schema()
 
 
 @pytest.fixture

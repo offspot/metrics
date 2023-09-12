@@ -1,7 +1,6 @@
 import logging
 from asyncio import Task, create_task, sleep
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI
@@ -52,7 +51,7 @@ class Main:
     async def lifespan(self, _: FastAPI):
         # Startup
         logger.debug(f"Database URL: {BackendConf.database_url}")
-        Initializer.upgrade_db_schema(src_dir=Path(__file__).parent)
+        Initializer.upgrade_db_schema()
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
             self.processor.startup(current_period=Period.now())

@@ -26,8 +26,6 @@ def setup_db_and_test(ctx: Context, cmd: str, args: str):
             NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name
         ).resolve()
         test_db_url = f"sqlite+pysqlite:////{temp_db_path}"
-    with ctx.cd("src"):
-        ctx.run("alembic upgrade head", pty=use_pty, env={"DATABASE_URL": test_db_url})
     try:
         ctx.run(
             f"{cmd} {args}",
