@@ -10,7 +10,7 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.db.models import KpiValue
-from offspot_metrics_backend.main import create_app
+from offspot_metrics_backend.main import Main
 
 
 @pytest.fixture(scope="session")
@@ -26,7 +26,7 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 def app():
-    return create_app()
+    return Main().create_app()
 
 
 @pytest_asyncio.fixture(scope="session")  # pyright: ignore

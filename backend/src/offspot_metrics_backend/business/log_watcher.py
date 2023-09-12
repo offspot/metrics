@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from asyncio import sleep
@@ -17,10 +18,6 @@ from watchdog.events import (
 )
 from watchdog.observers import Observer
 
-# TODO:
-# - persist current status and reload at startup
-# - shutdown properly when the task is asked to stop (UWSGI reload)
-
 logger = logging.getLogger(__name__)
 
 
@@ -33,9 +30,17 @@ class NewLineEvent:
 class LogWatcherHandler(FileSystemEventHandler):
     """Handler of watchdog events"""
 
-    def __init__(self, handler: Callable[[NewLineEvent], None]):
+    def __init__(self, data_folder: str, handler: Callable[[NewLineEvent], None]):
         self.file_pointers: dict[str, int] = {}
         self.line_process_func = handler
+        if not Path(data_folder).exists():
+            raise ValueError(f"Logwatcher data folder is missing: {data_folder}")
+        self.state_file_path = Path(data_folder).joinpath("log_watcher_state.json")
+        if not self.state_file_path.exists():
+            return  # This is ok on first startup
+        with open(self.state_file_path) as fh:
+            state = json.load(fh)
+            self.file_pointers = state["file_pointers"]
 
     def _is_moved_event(
         self, event: FileSystemEvent
@@ -105,6 +110,9 @@ class LogWatcherHandler(FileSystemEventHandler):
             # code above
             raise AttributeError  # pragma: no cover
 
+        with open(self.state_file_path, "w") as fh:
+            json.dump({"file_pointers": self.file_pointers}, fh)
+
 
 class LogWatcher:
     """Watch log files and call the handler function for every new line appended
@@ -125,22 +133,23 @@ class LogWatcher:
 
     def __init__(
         self,
-        path: str,
+        watched_folder: str,
+        data_folder: str,
         handler: Callable[[NewLineEvent], None],
         *,
         recursive: bool = True,
     ) -> None:
-        self.path = Path(path)
-        self.event_handler = LogWatcherHandler(handler=handler)
+        self.watched_folder = Path(watched_folder)
+        self.event_handler = LogWatcherHandler(data_folder=data_folder, handler=handler)
         self.recursive = recursive
         self.observer = Observer()
 
-    async def run(self):
+    async def run_async(self):
         """Watch directory"""
         self.process_existing_files()
 
         self.observer.schedule(  # pyright: ignore[reportUnknownMemberType]
-            self.event_handler, self.path, recursive=self.recursive
+            self.event_handler, self.watched_folder, recursive=self.recursive
         )
 
         self.observer.start()
@@ -152,6 +161,21 @@ class LogWatcher:
 
         self.observer.join()
 
+    def run_sync(self):
+        """Watch directory"""
+        self.process_existing_files()
+
+        self.observer.schedule(  # pyright: ignore[reportUnknownMemberType]
+            self.event_handler, self.watched_folder, recursive=self.recursive
+        )
+
+        self.observer.start()
+
+        while self.observer.is_alive():
+            self.observer.join(1)
+
+        self.observer.join()
+
     def stop(self):
         """Stop watcher"""
         if self.observer.is_alive():
@@ -159,7 +183,7 @@ class LogWatcher:
 
     def process_existing_files(self):
         """Process files that are already there at watcher startup"""
-        for root, _, files in os.walk(self.path):
+        for root, _, files in os.walk(self.watched_folder):
             for file_name in files:
                 file_path = os.path.join(root, file_name)
                 # Let consider that all existing files have been modified, so that we

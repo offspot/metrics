@@ -36,6 +36,10 @@ A Vue.JS application serves dashboards of the KPI data.
 The `backend` assumes that:
 - a Caddy reverse proxy is used, and the folder where its logs are output is mounted in the `/reverse-proxy-logs` folder
     - we assume that logs are written in JSON ; we support rotated log files ; we do not supported compressed rotated files
+- some data is persisted accross process restarts:
+  - an SQLite database, location based on `DATABASE_URL` environment variable
+  - one JSON file currently used by the log watcher, stored in the folder located at `LOGWATCHER_DATA_FOLDER` environment variable
+  - in the Docker image, by default both are in the `/data` folder which should be mounted as a volume
 - a `packages.yml` file is mounted in `/conf/packages.yml` or any other location passed via the
 `PACKAGE_CONF_FILE` environment variable ; this file contains the `offspot` packages configuration and
  its format is an `offspot` convention

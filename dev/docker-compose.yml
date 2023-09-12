@@ -5,8 +5,7 @@ services:
     volumes:
       - ../backend/src/offspot_metrics_backend:/usr/local/lib/python3.11/site-packages/offspot_metrics_backend
       - reverse-proxy-srv:/reverse-proxy-logs
-      - filebeat-data:/filebeat-data
-      - ../backend/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - logwatcher-data:/data/logwatcher
       - ./packages.yml:/conf/packages.yml
     command:
       - uvicorn
@@ -70,4 +69,4 @@ services:
       - 8000:80
 volumes:
   reverse-proxy-srv:
-  filebeat-data:
+  logwatcher-data:

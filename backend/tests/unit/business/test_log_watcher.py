@@ -23,6 +23,10 @@ class LogWatcherTester:
         self.new_lines: list[str]
         self.stop = False
         self.tempdir = TemporaryDirectory()
+        self.watched_path = Path(self.tempdir.name).joinpath("watched")
+        self.watched_path.mkdir()
+        self.data_path = Path(self.tempdir.name).joinpath("data")
+        self.data_path.mkdir()
 
     def new_line_handler(self, event: NewLineEvent):
         self.new_lines.append(event.line_content)
@@ -31,21 +35,29 @@ class LogWatcherTester:
         while not self.stop:
             time.sleep(1)
 
+    async def run_watcher(self, watcher: LogWatcher):
+        await watcher.run_async()
+
     def run(self, func: Callable[[Path], None], *, recursive: bool = True):
         self.new_lines = []
 
         watcher = LogWatcher(
-            path=self.tempdir.name,
+            watched_folder=str(self.watched_path),
+            data_folder=str(self.data_path),
             handler=self.new_line_handler,
             recursive=recursive,
         )
-        thread = Thread(target=watcher.start)
+
+        # task = create_task(watcher.run())
+
+        thread = Thread(target=watcher.run_sync)
         thread.start()
 
         time.sleep(PAUSE_IN_MS)  # Provide some slack time to let inotify setup complete
-        func(Path(self.tempdir.name))  # Perform test modifications
+        func(self.watched_path)  # Perform test modifications
         time.sleep(PAUSE_IN_MS)  # Provide some slack time for watcher to complete
         watcher.stop()
+        # task.cancel()
         self.tempdir.cleanup()
 
 
@@ -63,8 +75,8 @@ def test_log_watcher_noop(log_watcher_tester: LogWatcherTester):
 
 
 def test_log_watcher_simple(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.write("L1.2\n")
 
@@ -74,8 +86,8 @@ def test_log_watcher_simple(log_watcher_tester: LogWatcherTester):
 
 
 def test_log_watcher_simple_with_pending_line(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.write("L1.2\n")
             fh.write("L1.3")
@@ -86,8 +98,8 @@ def test_log_watcher_simple_with_pending_line(log_watcher_tester: LogWatcherTest
 
 
 def test_log_watcher_simple_with_flush(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        fh = open(tempdir.joinpath("file1.txt"), mode="w")
+    def modify_files(watched_path: Path):
+        fh = open(watched_path.joinpath("file1.txt"), mode="w")
         fh.write("L1.1\n")
         fh.write("L1.2\n")
         fh.flush()
@@ -100,8 +112,8 @@ def test_log_watcher_simple_with_flush(log_watcher_tester: LogWatcherTester):
 
 
 def test_log_watcher_simple_with_pause(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.write("L1.2\n")
             fh.write("L1")
@@ -116,32 +128,32 @@ def test_log_watcher_simple_with_pause(log_watcher_tester: LogWatcherTester):
 
 
 def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.flush()
             fh.write("L1.2\n")
             fh.flush()
             fh.write("L1.3")
-        with open(tempdir.joinpath("file2.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("file2.txt"), mode="w") as fh:
             fh.write("L2.1\n")
             fh.write("L2.2\n")
             fh.write("L2.")
             fh.write("3\n")
             fh.write("L2.4\n")
-        with open(tempdir.joinpath("file3.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("file3.txt"), mode="w") as fh:
             fh.write("L3.1\n")
             fh.write("L3.2\n")
             fh.write("L3.3\n")
             fh.write("L3.")
             fh.write("4\n")
 
-        fh4 = open(tempdir.joinpath("file4.txt"), mode="w")
+        fh4 = open(watched_path.joinpath("file4.txt"), mode="w")
         fh4.write("L4.1\n")
         fh4.write("L4.2\n")
         fh4.flush()
 
-        fh5 = open(tempdir.joinpath("file5.txt"), mode="w")
+        fh5 = open(watched_path.joinpath("file5.txt"), mode="w")
         fh5.write("L5.1\n")
         fh5.write("L5.2\n")
         fh5.write("L5.3\n")
@@ -154,7 +166,7 @@ def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
         fh4.write("4\n")
         fh4.close()
 
-        fh5 = open(tempdir.joinpath("file5.txt"), mode="a")
+        fh5 = open(watched_path.joinpath("file5.txt"), mode="a")
         fh5.write("L5")
         fh5.write(".4\n")
         fh5.write("L5.")
@@ -187,15 +199,17 @@ def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
 
 
 def test_log_watcher_file_moved(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1\nL2\nL3")
             fh.flush()
             time.sleep(PAUSE_IN_MS)
             fh.write("\nL4")
-        shutil.move(tempdir.joinpath("file1.txt"), tempdir.joinpath("file2.txt"))
+        shutil.move(
+            watched_path.joinpath("file1.txt"), watched_path.joinpath("file2.txt")
+        )
         time.sleep(PAUSE_IN_MS)
-        with open(tempdir.joinpath("file2.txt"), mode="a") as fh:
+        with open(watched_path.joinpath("file2.txt"), mode="a") as fh:
             fh.write("\nL5\nL6")
 
     log_watcher_tester.run(modify_files)
@@ -204,13 +218,13 @@ def test_log_watcher_file_moved(log_watcher_tester: LogWatcherTester):
 
 
 def test_log_watcher_file_deleted(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1\nL2\nL3")
         time.sleep(PAUSE_IN_MS)
-        tempdir.joinpath("file1.txt").unlink()
+        watched_path.joinpath("file1.txt").unlink()
         time.sleep(PAUSE_IN_MS)
-        with open(tempdir.joinpath("file1.txt"), mode="a") as fh:
+        with open(watched_path.joinpath("file1.txt"), mode="a") as fh:
             fh.write("L4\nL5\n")
 
     log_watcher_tester.run(modify_files)
@@ -221,13 +235,9 @@ def test_log_watcher_file_deleted(log_watcher_tester: LogWatcherTester):
 def test_log_watcher_file_existing_files_untouched(
     log_watcher_tester: LogWatcherTester,
 ):
-    with open(
-        Path(log_watcher_tester.tempdir.name).joinpath("file1.txt"), mode="w"
-    ) as fh:
+    with open(log_watcher_tester.watched_path.joinpath("file1.txt"), mode="w") as fh:
         fh.write("L1\nL2\nL3")
-    with open(
-        Path(log_watcher_tester.tempdir.name).joinpath("file3.txt"), mode="w"
-    ) as fh:
+    with open(log_watcher_tester.watched_path.joinpath("file3.txt"), mode="w") as fh:
         fh.write("M1\nM2\n")
 
     def noop(_: Path):
@@ -241,19 +251,15 @@ def test_log_watcher_file_existing_files_untouched(
 def test_log_watcher_file_existing_files_modified(
     log_watcher_tester: LogWatcherTester,
 ):
-    with open(
-        Path(log_watcher_tester.tempdir.name).joinpath("file1.txt"), mode="w"
-    ) as fh:
+    with open(log_watcher_tester.watched_path.joinpath("file1.txt"), mode="w") as fh:
         fh.write("L1\nL2\nL3")
-    with open(
-        Path(log_watcher_tester.tempdir.name).joinpath("file3.txt"), mode="w"
-    ) as fh:
+    with open(log_watcher_tester.watched_path.joinpath("file3.txt"), mode="w") as fh:
         fh.write("M1\nM2\n")
 
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="a") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="a") as fh:
             fh.write("\nL4\n")
-        with open(tempdir.joinpath("file3.txt"), mode="a") as fh:
+        with open(watched_path.joinpath("file3.txt"), mode="a") as fh:
             fh.write("M3\n")
 
     log_watcher_tester.run(modify_files)
@@ -264,11 +270,11 @@ def test_log_watcher_file_existing_files_modified(
 def test_log_watcher_file_truncated_file(
     log_watcher_tester: LogWatcherTester,
 ):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1\nL2\nL3\n")
         time.sleep(PAUSE_IN_MS)
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("M1\nM2\n")
 
     log_watcher_tester.run(modify_files)
@@ -279,9 +285,9 @@ def test_log_watcher_file_truncated_file(
 def test_log_watcher_file_nested_file_and_recursive(
     log_watcher_tester: LogWatcherTester,
 ):
-    def modify_files(tempdir: Path):
-        tempdir.joinpath("subdir").mkdir()
-        with open(tempdir.joinpath("subdir/file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        watched_path.joinpath("subdir").mkdir()
+        with open(watched_path.joinpath("subdir/file1.txt"), mode="w") as fh:
             fh.write("L1\nL2\nL3\n")
 
     log_watcher_tester.run(modify_files)
@@ -292,9 +298,9 @@ def test_log_watcher_file_nested_file_and_recursive(
 def test_log_watcher_file_nested_file_and_norecursive(
     log_watcher_tester: LogWatcherTester,
 ):
-    def modify_files(tempdir: Path):
-        tempdir.joinpath("subdir").mkdir()
-        with open(tempdir.joinpath("subdir/file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        watched_path.joinpath("subdir").mkdir()
+        with open(watched_path.joinpath("subdir/file1.txt"), mode="w") as fh:
             fh.write("L1\nL2\nL3\n")
 
     log_watcher_tester.run(modify_files, recursive=False)
@@ -312,17 +318,19 @@ def test_log_watcher_no_exit():
     def noop(_: NewLineEvent):
         pass
 
-    lwh = LogWatcherHandler(noop)
+    tempdir = TemporaryDirectory()
+    lwh = LogWatcherHandler(data_folder=tempdir.name, handler=noop)
     lwh.on_any_event(FileDeletedEvent("some_path"))
     lwh.on_any_event(FileMovedEvent("some_path", "other_path"))
+    tempdir.cleanup()
 
 
 def test_log_watcher_big_special_chars(log_watcher_tester: LogWatcherTester):
-    def modify_files(tempdir: Path):
-        with open(tempdir.joinpath("file1.txt"), mode="w") as fh:
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
             fh.write("L1😁1\n")
         time.sleep(PAUSE_IN_MS)
-        with open(tempdir.joinpath("file1.txt"), mode="a") as fh:
+        with open(watched_path.joinpath("file1.txt"), mode="a") as fh:
             fh.write("L1😤2\n")
 
     log_watcher_tester.run(modify_files)

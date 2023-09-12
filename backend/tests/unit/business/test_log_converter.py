@@ -75,16 +75,16 @@ def test_parsing_warnings():
     "log_line, expected_inputs",
     [
         (
-            r"""{"message":"{\"level\":\"info\",\"msg\":\"handled request\","""
-            r"""\"request\":{\"host\":\"nomad.renaud.test\",\"uri\":\"/\"}}"}""",
+            r"""{"level":"info","msg":"handled request","""
+            r""""request":{"host":"nomad.renaud.test","uri":"/"}}""",
             [ContentHomeVisit(content="Nomad exercices du CP à la 3è")],
         ),
         (
-            r"""{"message":"{\"level\":\"info\",\"msg\":\"handled request\","""
-            r"""\"request\":{\"host\":\"kiwix.renaud.test\","""
-            r"""\"uri\":\"/content/wikipedia_en_all/questions/149/"""
-            r"""1-5-million-lines-of-code-0-tests-where\"},"""
-            r"""\"resp_headers\":{\"Content-Type\":[\"text/html; charset=utf\"]}}"}""",
+            r"""{"level":"info","msg":"handled request","""
+            r""""request":{"host":"kiwix.renaud.test","""
+            r""""uri":"/content/wikipedia_en_all/questions/149/"""
+            r"""1-5-million-lines-of-code-0-tests-where"},"""
+            r""""resp_headers":{"Content-Type":["text/html; charset=utf"]}}""",
             [
                 ContentItemVisit(
                     content="Wikipedia",
@@ -93,9 +93,9 @@ def test_parsing_warnings():
             ],
         ),
         (
-            r"""{"message":"{\"level\":\"info\",\"msg\":\"handled request\","""
-            r"""\"request\":{\"host\":\"kiwix.renaud.test\","""
-            r"""\"uri\":\"/content/wikipedia_en_all/\"}}"}""",
+            r"""{"level":"info","msg":"handled request","""
+            r""""request":{"host":"kiwix.renaud.test","""
+            r""""uri":"/content/wikipedia_en_all/"}}""",
             [ContentHomeVisit(content="Wikipedia")],
         ),
     ],

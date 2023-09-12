@@ -22,8 +22,12 @@ class BackendConf:
     # events regularly and hence do not want to cleanup DB from simulation results
     # The environment variable must hence be explicitely set to True (case-insensitive)
     # all other values will enable the processing.
-    processing_disabled = os.getenv("PROCESSING_DISABLED", "False").lower() == "true"
+    processing_enabled = os.getenv("PROCESSING_DISABLED", "False").lower() != "true"
 
     reverse_proxy_logs_location = os.getenv(
         "REVERSE_PROXY_LOGS_LOCATION", "/reverse-proxy-logs"
+    )
+
+    logwatcher_data_folder = os.getenv(
+        "LOGWATCHER_DATA_FOLDER", f"{src_dir}/logwatcher-data"
     )

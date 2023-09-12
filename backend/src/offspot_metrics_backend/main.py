@@ -35,9 +35,13 @@ logger = logging.getLogger(__name__)
 
 class Main:
     def __init__(self) -> None:
-        self.log_watcher = LogWatcher(
-            path=BackendConf.reverse_proxy_logs_location, handler=self.handle_log_event
-        )
+        self.log_watcher = None
+        if BackendConf.processing_enabled:
+            self.log_watcher = LogWatcher(
+                watched_folder=BackendConf.reverse_proxy_logs_location,
+                handler=self.handle_log_event,
+                data_folder=BackendConf.logwatcher_data_folder,
+            )
         self.processor = Processor()
         self.converter = CaddyLogConverter()
         self.background_tasks = set[Task[Any]]()
@@ -45,7 +49,9 @@ class Main:
     @asynccontextmanager
     async def lifespan(self, _: FastAPI):
         # Startup
-        if not BackendConf.processing_disabled:
+        if BackendConf.processing_enabled:
+            logger.info("Starting processing")
+            self.processor.startup(current_period=Period.now())
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)
             log_watcher_task.add_done_callback(self.background_tasks.discard)
@@ -53,14 +59,19 @@ class Main:
             ticker_task = create_task(self.ticker())
             self.background_tasks.add(ticker_task)
             ticker_task.add_done_callback(self.background_tasks.discard)
+        else:
+            logger.warning("Processing is disabled")
         # Startup complete
         yield
         # Shutdown
-        self.log_watcher.stop()
+        if self.log_watcher:
+            self.log_watcher.stop()
 
     async def start_watcher(self):
         """Start the log watcher as a coroutine"""
-        await self.log_watcher.run()
+        if not self.log_watcher:
+            raise ValueError("Log watcher has not been initialized")
+        await self.log_watcher.run_async()
 
     async def ticker(self):
         """Start a processor tick every minute"""
@@ -70,7 +81,7 @@ class Main:
             self.processor.process_tick(tick_period=Period.now())
 
     def handle_log_event(self, event: NewLineEvent):
-        # logger.debug(f"Log watcher sent: {event.line_content}")
+        logger.debug(f"Log watcher sent: {event.line_content}")
         inputs = self.converter.process(event.line_content)
         for input_ in inputs:
             logger.debug(f"Processing input: {input_}")
@@ -83,12 +94,6 @@ class Main:
             version=__about__.__version__,
             lifespan=self.lifespan,
         )
-
-        if BackendConf.processing_disabled:
-            logger.warning("Processing is disabled")
-        else:
-            logger.info("Starting processing")
-            self.processor.startup(current_period=Period.now())
 
         @self.app.get("/")
         async def landing() -> RedirectResponse:  # pyright: ignore
