@@ -1,6 +1,6 @@
 import logging
-import sys
 from asyncio import Task, create_task, sleep
+from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
@@ -23,6 +23,8 @@ TICK_PERIOD = (
 # - fix this, this is not the same log format as uvicorn logs but are mixed in the same
 #  STDOUT...
 # - read debug level from environment variable
+# - output JSON in production
+# - disable some logs? (Inotify)
 logging.basicConfig(
     level=logging.DEBUG, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
@@ -31,100 +33,101 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def create_app() -> FastAPI:
-    app = FastAPI(
-        title=__about__.__api_title__,
-        description=__about__.__api_description__,
-        version=__about__.__version__,
-    )
-
-    if BackendConf.processing_disabled:
-        logger.warning("Processing is disabled")
-        converter = log_watcher = processor = None
-    else:
-        logger.info("Starting processing")
-        processor = Processor()
-        processor.startup(current_period=Period.now())
-
-        converter = CaddyLogConverter()
-
-        def handle_log_event(event: NewLineEvent):
-            logger.debug(f"Log watcher sent: {event.line_content}")
-            inputs = converter.process(event.line_content)
-            for input_ in inputs:
-                logger.debug(f"Processing input: {input_}")
-                processor.process_input(input_=input_)
-
-        log_watcher = LogWatcher(
-            path=BackendConf.reverse_proxy_logs_location, handler=handle_log_event
+class Main:
+    def __init__(self) -> None:
+        self.log_watcher = LogWatcher(
+            path=BackendConf.reverse_proxy_logs_location, handler=self.handle_log_event
         )
+        self.processor = Processor()
+        self.converter = CaddyLogConverter()
+        self.background_tasks = set[Task[Any]]()
 
-    background_tasks = set[Task[Any]]()
+    @asynccontextmanager
+    async def lifespan(self, _: FastAPI):
+        # Startup
+        if not BackendConf.processing_disabled:
+            log_watcher_task = create_task(self.start_watcher())
+            self.background_tasks.add(log_watcher_task)
+            log_watcher_task.add_done_callback(self.background_tasks.discard)
 
-    @app.on_event("startup")
-    async def app_startup():  # pyright: ignore[reportUnusedFunction]
-        """Start background tasks"""
-        if not BackendConf.processing_disabled and log_watcher and processor:
-            log_watcher_task = create_task(start_watcher(log_watcher))
-            background_tasks.add(log_watcher_task)
-            log_watcher_task.add_done_callback(background_tasks.discard)
+            ticker_task = create_task(self.ticker())
+            self.background_tasks.add(ticker_task)
+            ticker_task.add_done_callback(self.background_tasks.discard)
+        # Startup complete
+        yield
+        # Shutdown
+        self.log_watcher.stop()
 
-            ticker_task = create_task(ticker())
-            background_tasks.add(ticker_task)
-            ticker_task.add_done_callback(background_tasks.discard)
-
-    async def start_watcher(log_watcher: LogWatcher):
+    async def start_watcher(self):
         """Start the log watcher as a coroutine"""
-        log_watcher.start()
+        await self.log_watcher.run()
 
-    async def ticker():
+    async def ticker(self):
         """Start a processor tick every minute"""
         while True:
             await sleep(TICK_PERIOD)
-            if not processor:
-                # This should never happen, but better safe than sorry
-                sys.exit("Processor is not set")
             logger.debug("Processing a clock tick")
-            processor.process_tick(tick_period=Period.now())
+            self.processor.process_tick(tick_period=Period.now())
 
-    @app.get("/")
-    async def landing() -> RedirectResponse:  # pyright: ignore[reportUnusedFunction]
-        """Redirect to root of latest version of the API"""
-        return RedirectResponse(f"/{__about__.__api_version__}/", status_code=308)
+    def handle_log_event(self, event: NewLineEvent):
+        # logger.debug(f"Log watcher sent: {event.line_content}")
+        inputs = self.converter.process(event.line_content)
+        for input_ in inputs:
+            logger.debug(f"Processing input: {input_}")
+            self.processor.process_input(input_=input_)
 
-    api = FastAPI(
-        title=__about__.__api_title__,
-        description=__about__.__api_description__,
-        version=__about__.__version__,
-        docs_url="/",
-        openapi_tags=[
-            {
-                "name": "all",
-                "description": "all APIs",
+    def create_app(self) -> FastAPI:
+        self.app = FastAPI(
+            title=__about__.__api_title__,
+            description=__about__.__api_description__,
+            version=__about__.__version__,
+            lifespan=self.lifespan,
+        )
+
+        if BackendConf.processing_disabled:
+            logger.warning("Processing is disabled")
+        else:
+            logger.info("Starting processing")
+            self.processor.startup(current_period=Period.now())
+
+        @self.app.get("/")
+        async def landing() -> RedirectResponse:  # pyright: ignore
+            """Redirect to root of latest version of the API"""
+            return RedirectResponse(f"/{__about__.__api_version__}/", status_code=308)
+
+        api = FastAPI(
+            title=__about__.__api_title__,
+            description=__about__.__api_description__,
+            version=__about__.__version__,
+            docs_url="/",
+            openapi_tags=[
+                {
+                    "name": "all",
+                    "description": "all APIs",
+                },
+            ],
+            contact={
+                "name": "Kiwix/openZIM Team",
+                "url": "https://www.kiwix.org/en/contact/",
+                "email": "contact+offspot_metrics@kiwix.org",
             },
-        ],
-        contact={
-            "name": "Kiwix/openZIM Team",
-            "url": "https://www.kiwix.org/en/contact/",
-            "email": "contact+offspot_metrics@kiwix.org",
-        },
-        license_info={
-            "name": "GNU General Public License v3.0",
-            "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
-        },
-    )
+            license_info={
+                "name": "GNU General Public License v3.0",
+                "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+            },
+        )
 
-    api.add_middleware(
-        CORSMiddleware,
-        allow_origins=BackendConf.allowed_origins,
-        allow_credentials=False,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+        api.add_middleware(
+            CORSMiddleware,
+            allow_origins=BackendConf.allowed_origins,
+            allow_credentials=False,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
-    api.include_router(router=aggregations.router)
-    api.include_router(router=kpis.router)
+        api.include_router(router=aggregations.router)
+        api.include_router(router=kpis.router)
 
-    app.mount(f"/{__about__.__api_version__}", api)
+        self.app.mount(f"/{__about__.__api_version__}", api)
 
-    return app
+        return self.app

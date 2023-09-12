@@ -1,4 +1,6 @@
+import logging
 import os
+from asyncio import sleep
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +16,12 @@ from watchdog.events import (
     FileSystemMovedEvent,
 )
 from watchdog.observers import Observer
+
+# TODO:
+# - persist current status and reload at startup
+# - shutdown properly when the task is asked to stop (UWSGI reload)
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -125,12 +133,12 @@ class LogWatcher:
         self.path = Path(path)
         self.event_handler = LogWatcherHandler(handler=handler)
         self.recursive = recursive
+        self.observer = Observer()
 
-    def start(self):
-        """Start watching directory"""
+    async def run(self):
+        """Watch directory"""
         self.process_existing_files()
 
-        self.observer = Observer()
         self.observer.schedule(  # pyright: ignore[reportUnknownMemberType]
             self.event_handler, self.path, recursive=self.recursive
         )
@@ -139,12 +147,15 @@ class LogWatcher:
 
         while self.observer.is_alive():
             self.observer.join(1)
+            # perform a very small sleep, just to let the coroutine pause
+            await sleep(0.001)
 
         self.observer.join()
 
     def stop(self):
         """Stop watcher"""
-        self.observer.stop()
+        if self.observer.is_alive():
+            self.observer.stop()
 
     def process_existing_files(self):
         """Process files that are already there at watcher startup"""
