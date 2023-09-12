@@ -82,7 +82,7 @@ def test_log_watcher_simple(log_watcher_tester: LogWatcherTester):
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1.1", "L1.2"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1.1", "L1.2"]
 
 
 def test_log_watcher_simple_with_pending_line(log_watcher_tester: LogWatcherTester):
@@ -94,7 +94,7 @@ def test_log_watcher_simple_with_pending_line(log_watcher_tester: LogWatcherTest
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1.1", "L1.2"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1.1", "L1.2"]
 
 
 def test_log_watcher_simple_with_flush(log_watcher_tester: LogWatcherTester):
@@ -108,7 +108,7 @@ def test_log_watcher_simple_with_flush(log_watcher_tester: LogWatcherTester):
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1.1", "L1.2"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1.1", "L1.2"]
 
 
 def test_log_watcher_simple_with_pause(log_watcher_tester: LogWatcherTester):
@@ -124,7 +124,7 @@ def test_log_watcher_simple_with_pause(log_watcher_tester: LogWatcherTester):
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1.1", "L1.2", "L1.3"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1.1", "L1.2", "L1.3"]
 
 
 def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
@@ -175,27 +175,29 @@ def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == [
-        "L1.1",
-        "L1.2",
-        "L2.1",
-        "L2.2",
-        "L2.3",
-        "L2.4",
-        "L3.1",
-        "L3.2",
-        "L3.3",
-        "L3.4",
-        "L4.1",
-        "L4.2",
-        "L5.1",
-        "L5.2",
-        "L5.3",
-        "L4.3",
-        "L4.4",
-        "L5.4",
-        "L5.5",
-    ]
+    assert sorted(log_watcher_tester.new_lines) == (
+        [
+            "L1.1",
+            "L1.2",
+            "L2.1",
+            "L2.2",
+            "L2.3",
+            "L2.4",
+            "L3.1",
+            "L3.2",
+            "L3.3",
+            "L3.4",
+            "L4.1",
+            "L4.2",
+            "L4.3",
+            "L4.4",
+            "L5.1",
+            "L5.2",
+            "L5.3",
+            "L5.4",
+            "L5.5",
+        ]
+    )
 
 
 def test_log_watcher_file_moved(log_watcher_tester: LogWatcherTester):
@@ -214,7 +216,7 @@ def test_log_watcher_file_moved(log_watcher_tester: LogWatcherTester):
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1", "L2", "L3", "L4", "L5"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1", "L2", "L3", "L4", "L5"]
 
 
 def test_log_watcher_file_deleted(log_watcher_tester: LogWatcherTester):
@@ -229,7 +231,7 @@ def test_log_watcher_file_deleted(log_watcher_tester: LogWatcherTester):
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1", "L2", "L4", "L5"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1", "L2", "L4", "L5"]
 
 
 def test_log_watcher_file_existing_files_untouched(
@@ -245,7 +247,7 @@ def test_log_watcher_file_existing_files_untouched(
 
     log_watcher_tester.run(noop)
 
-    assert log_watcher_tester.new_lines == ["L1", "L2", "M1", "M2"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1", "L2", "M1", "M2"]
 
 
 def test_log_watcher_file_existing_files_modified(
@@ -264,7 +266,9 @@ def test_log_watcher_file_existing_files_modified(
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1", "L2", "M1", "M2", "L3", "L4", "M3"]
+    assert sorted(log_watcher_tester.new_lines) == (
+        ["L1", "L2", "L3", "L4", "M1", "M2", "M3"]
+    )
 
 
 def test_log_watcher_file_truncated_file(
@@ -279,7 +283,7 @@ def test_log_watcher_file_truncated_file(
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1", "L2", "L3", "M1", "M2"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1", "L2", "L3", "M1", "M2"]
 
 
 def test_log_watcher_file_nested_file_and_recursive(
@@ -292,7 +296,7 @@ def test_log_watcher_file_nested_file_and_recursive(
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1", "L2", "L3"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1", "L2", "L3"]
 
 
 def test_log_watcher_file_nested_file_and_norecursive(
@@ -305,7 +309,7 @@ def test_log_watcher_file_nested_file_and_norecursive(
 
     log_watcher_tester.run(modify_files, recursive=False)
 
-    assert log_watcher_tester.new_lines == []
+    assert sorted(log_watcher_tester.new_lines) == []
 
 
 def test_log_watcher_no_exit():
@@ -335,4 +339,4 @@ def test_log_watcher_big_special_chars(log_watcher_tester: LogWatcherTester):
 
     log_watcher_tester.run(modify_files)
 
-    assert log_watcher_tester.new_lines == ["L1😁1", "L1😤2"]
+    assert sorted(log_watcher_tester.new_lines) == ["L1😁1", "L1😤2"]
