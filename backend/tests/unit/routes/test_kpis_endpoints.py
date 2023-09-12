@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 from httpx import AsyncClient
 
@@ -25,7 +27,7 @@ async def test_kpis(
     response = await client.get(
         f"{PREFIX}/kpis/{kpi_id}/values?agg_kind={agg_kind}&agg_value={agg_value}"
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     response_json = response.json()
     assert "kpi_id" in response_json
     assert "value" in response_json
@@ -41,7 +43,7 @@ async def test_kpis_not_exist(
     response = await client.get(
         f"{PREFIX}/kpis/whatever/values?agg_kind=W&agg_value=whatever"
     )
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.asyncio
@@ -52,4 +54,4 @@ async def test_kpis_wrong_agg_kind(
     response = await client.get(
         f"{PREFIX}/kpis/whatever/values?agg_kind=whatever&agg_value=whatever"
     )
-    assert response.status_code == 422
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

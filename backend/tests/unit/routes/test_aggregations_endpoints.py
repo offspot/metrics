@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 from httpx import AsyncClient
 
@@ -11,7 +13,7 @@ async def test_aggregations(
     kpis: list[KpiValue],  # noqa: ARG001
 ):
     response = await client.get(f"{PREFIX}/aggregations")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     response_json = response.json()
     assert "aggregations" in response_json
     assert len(response_json["aggregations"]) == 2
