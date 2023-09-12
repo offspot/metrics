@@ -19,13 +19,12 @@ PAUSE_IN_MS = 0.1
 
 
 class LogWatcherTester:
-    def __init__(self) -> None:
+    def __init__(self, tmp_path: Path) -> None:
         self.new_lines: list[str]
         self.stop = False
-        self.tempdir = TemporaryDirectory()
-        self.watched_path = Path(self.tempdir.name).joinpath("watched")
+        self.watched_path = tmp_path.joinpath("watched")
         self.watched_path.mkdir()
-        self.data_path = Path(self.tempdir.name).joinpath("data")
+        self.data_path = tmp_path.joinpath("data")
         self.data_path.mkdir()
 
     def new_line_handler(self, event: NewLineEvent):
@@ -57,13 +56,11 @@ class LogWatcherTester:
         func(self.watched_path)  # Perform test modifications
         time.sleep(PAUSE_IN_MS)  # Provide some slack time for watcher to complete
         watcher.stop()
-        # task.cancel()
-        self.tempdir.cleanup()
 
 
 @pytest.fixture
-def log_watcher_tester() -> LogWatcherTester:
-    return LogWatcherTester()
+def log_watcher_tester(tmp_path: Path) -> LogWatcherTester:
+    return LogWatcherTester(tmp_path=tmp_path)
 
 
 def test_log_watcher_noop(log_watcher_tester: LogWatcherTester):

@@ -23,15 +23,18 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class NewLineEvent:
-    file_path: str
+    file_path: Path
     line_content: str
+
+
+ENCODING = "utf-8"
 
 
 class LogWatcherHandler(FileSystemEventHandler):
     """Handler of watchdog events"""
 
     def __init__(self, data_folder: str, handler: Callable[[NewLineEvent], None]):
-        self.file_pointers: dict[str, int] = {}
+        self.file_positions_map: dict[str, int] = {}
         self.line_process_func = handler
         if not Path(data_folder).exists():
             raise ValueError(f"Logwatcher data folder is missing: {data_folder}")
@@ -40,7 +43,7 @@ class LogWatcherHandler(FileSystemEventHandler):
             return  # This is ok on first startup
         with open(self.state_file_path) as fh:
             state = json.load(fh)
-            self.file_pointers = state["file_pointers"]
+            self.file_positions_map = state["file_pointers"]
 
     def _is_moved_event(
         self, event: FileSystemEvent
@@ -48,15 +51,15 @@ class LogWatcherHandler(FileSystemEventHandler):
         """TypeGuard to help type checker detect moved event class"""
         return event.event_type == EVENT_TYPE_MOVED
 
-    def process_new_lines(self, file_path: str):
+    def process_new_lines(self, file_path: Path):
         """Process file to detect new lines appended"""
 
         # Reset position if it looks like file has been truncated
-        if os.path.getsize(file_path) < self.file_pointers[file_path]:
-            self.file_pointers[file_path] = 0
+        if os.path.getsize(file_path) < self.file_positions_map[str(file_path)]:
+            self.file_positions_map[str(file_path)] = 0
 
-        with open(file_path) as file:
-            file.seek(self.file_pointers[file_path])
+        with open(file_path, encoding=ENCODING) as file:
+            file.seek(self.file_positions_map[str(file_path)])
             new_data = file.read()
             if not new_data:
                 return
@@ -66,9 +69,11 @@ class LogWatcherHandler(FileSystemEventHandler):
                 if not line.endswith("\n"):
                     continue
                 self.line_process_func(
-                    NewLineEvent(file_path=file_path, line_content=line[:-1])
+                    NewLineEvent(file_path=file_path, line_content=line.strip())
                 )
-                self.file_pointers[file_path] += len(line.encode())
+                self.file_positions_map[str(file_path)] += len(
+                    line.encode(encoding=ENCODING)
+                )
 
     def on_any_event(self, event: FileSystemEvent):
         """Function called by watch dog when event occurs"""
@@ -84,34 +89,31 @@ class LogWatcherHandler(FileSystemEventHandler):
             EVENT_TYPE_CREATED,
             EVENT_TYPE_MODIFIED,
         ]:
-            if event.src_path not in self.file_pointers:
-                self.file_pointers[event.src_path] = 0
+            if event.src_path not in self.file_positions_map:
+                self.file_positions_map[event.src_path] = 0
             try:
-                self.process_new_lines(event.src_path)
+                self.process_new_lines(Path(event.src_path))
             except FileNotFoundError:  # pragma: no cover
                 pass
 
         elif self._is_moved_event(event):
-            if event.src_path in self.file_pointers:
-                self.file_pointers[event.dest_path] = self.file_pointers[event.src_path]
-                del self.file_pointers[event.src_path]
+            if event.src_path in self.file_positions_map:
+                self.file_positions_map[event.dest_path] = self.file_positions_map[
+                    event.src_path
+                ]
+                del self.file_positions_map[event.src_path]
             try:
-                self.process_new_lines(event.dest_path)
+                self.process_new_lines(Path(event.dest_path))
             except FileNotFoundError:  # pragma: no cover
                 pass
 
         elif event.event_type == EVENT_TYPE_DELETED:
             # Cleanup to limit memory footprint + allow file name to be reused
-            if event.src_path in self.file_pointers:
-                del self.file_pointers[event.src_path]
-
-        else:
-            # we should never get there except if something bad happens when modiying
-            # code above
-            raise AttributeError  # pragma: no cover
+            if event.src_path in self.file_positions_map:
+                del self.file_positions_map[event.src_path]
 
         with open(self.state_file_path, "w") as fh:
-            json.dump({"file_pointers": self.file_pointers}, fh)
+            json.dump({"file_pointers": self.file_positions_map}, fh)
 
 
 class LogWatcher:
@@ -183,12 +185,10 @@ class LogWatcher:
 
     def process_existing_files(self):
         """Process files that are already there at watcher startup"""
-        for root, _, files in os.walk(self.watched_folder):
-            for file_name in files:
-                file_path = os.path.join(root, file_name)
-                # Let consider that all existing files have been modified, so that we
-                # process any line that might have apparead since our last execution
-                event = FileSystemEvent(file_path)
-                event.is_directory = False
-                event.event_type = EVENT_TYPE_MODIFIED
-                self.event_handler.on_any_event(event)
+        for files in self.watched_folder.rglob("*"):
+            # Let's consider that all existing files have been modified, so that we
+            # process any line that might have appeared since our last execution
+            event = FileSystemEvent(str(files))
+            event.is_directory = False
+            event.event_type = EVENT_TYPE_MODIFIED
+            self.event_handler.on_any_event(event)

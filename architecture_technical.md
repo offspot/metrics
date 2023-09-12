@@ -35,7 +35,7 @@ A Vue.JS application serves dashboards of the KPI data.
 
 The `backend` assumes that:
 - a Caddy reverse proxy is used, and the folder where its logs are output is mounted in the `/reverse-proxy-logs` folder
-    - we assume that logs are written in JSON ; we support rotated log files ; we do not supported compressed rotated files
+    - we assume that logs are written in JSON ; we assume files are encoded with utf-8, without BOM; we support rotated log files ; we do not supported compressed rotated files
 - some data is persisted accross process restarts:
   - an SQLite database, location based on `DATABASE_URL` environment variable
   - one JSON file currently used by the log watcher, stored in the folder located at `LOGWATCHER_DATA_FOLDER` environment variable
