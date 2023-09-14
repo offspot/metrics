@@ -1,3 +1,6 @@
+from collections.abc import Callable
+from typing import Any
+
 import sqlalchemy as sa
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
@@ -114,11 +117,17 @@ class Persister:
 
     @classmethod
     def get_kpi_values(
-        cls, kpi_id: int, agg_kind: AggKind, session: Session
+        cls,
+        kpi_id: int,
+        agg_kind: AggKind,
+        value_load_fn: Callable[[str], Any],
+        session: Session,
     ) -> list[Value]:
         """Return all KPI values for a given KPI and a given kind of period"""
         return [
-            Value(agg_value=dbValue.agg_value, kpi_value=dbValue.kpi_value)
+            Value(
+                agg_value=dbValue.agg_value, kpi_value=value_load_fn(dbValue.kpi_value)
+            )
             for dbValue in session.execute(
                 sa.select(KpiValueDb)
                 .where(KpiValueDb.kpi_id == kpi_id)
@@ -144,7 +153,8 @@ class Persister:
         kpi_id: int,
         agg_kind: AggKind,
         agg_value: str,
-        kpi_value: str,
+        kpi_value: Any,
+        value_dump_fn: Callable[[Any], str],
         session: Session,
     ) -> None:
         """Update a KPI value for a given KPI, kind of period and period"""
@@ -154,7 +164,7 @@ class Persister:
             .where(KpiValueDb.agg_kind == agg_kind.value)
             .where(KpiValueDb.agg_value == agg_value)
         ).scalar_one()
-        obj.kpi_value = kpi_value
+        obj.kpi_value = value_dump_fn(kpi_value)
 
     @classmethod
     def add_kpi_value(
@@ -162,7 +172,8 @@ class Persister:
         kpi_id: int,
         agg_kind: AggKind,
         agg_value: str,
-        kpi_value: str,
+        kpi_value: Any,
+        value_dump_fn: Callable[[Any], str],
         session: Session,
     ) -> None:
         """Add a KPI value for a given KPI, kind of period and period"""
@@ -171,7 +182,7 @@ class Persister:
                 kpi_id=kpi_id,
                 agg_kind=agg_kind.value,
                 agg_value=agg_value,
-                kpi_value=kpi_value,
+                kpi_value=value_dump_fn(kpi_value),
             )
         )
 

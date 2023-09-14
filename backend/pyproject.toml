@@ -23,6 +23,7 @@ dependencies = [
     "fastapi-pagination == 0.12.9",
     "marshmallow == 3.20.1",
     "marshmallow-sqlalchemy == 0.29.0",
+    "marshmallow-dataclass == 8.5.14",
     "psutil ==5.9.5",
     "python-dateutil == 2.8.2",
     "PyYAML == 6.0.1",

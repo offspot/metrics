@@ -12,20 +12,20 @@ from offspot_metrics_backend.db import count_from_stmt
 from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
 from offspot_metrics_backend.db.models import KpiValue
 
-init_datetime_day_dummyvalue = "D - 1686182400 - 1686268800"
-init_datetime_day_minus_one_dummyvalue = "D - 1686096000 - 1686182400"
-init_datetime_day_plus_one_dummyvalue = "D - 1686268800 - 1686355200"
-init_datetime_day_plus_two_dummyvalue = "D - 1686355200 - 1686441600"
-init_datetime_day_plus_three_dummyvalue = "D - 1686787200 - 1686873600"
-init_datetime_week_dummyvalue = "W - 1685923200 - 1686528000"
-init_datetime_week_plus_one_dummyvalue = "W - 1686528000 - 1687132800"
-init_datetime_month_dummyvalue = "M - 1685577600 - 1688169600"
-init_datetime_year_dummyvalue = "Y - 1672531200 - 1704067200"
+init_datetime_day_dummyvalue = '{"value": "D - 1686182400 - 1686268800"}'
+init_datetime_day_minus_one_dummyvalue = '{"value": "D - 1686096000 - 1686182400"}'
+init_datetime_day_plus_one_dummyvalue = '{"value": "D - 1686268800 - 1686355200"}'
+init_datetime_day_plus_two_dummyvalue = '{"value": "D - 1686355200 - 1686441600"}'
+init_datetime_day_plus_three_dummyvalue = '{"value": "D - 1686787200 - 1686873600"}'
+init_datetime_week_dummyvalue = '{"value": "W - 1685923200 - 1686528000"}'
+init_datetime_week_plus_one_dummyvalue = '{"value": "W - 1686528000 - 1687132800"}'
+init_datetime_month_dummyvalue = '{"value": "M - 1685577600 - 1688169600"}'
+init_datetime_year_dummyvalue = '{"value": "Y - 1672531200 - 1704067200"}'
 
-previous_datetime_day_dummyvalue = "D - 1672704000 - 1672790400"
-previous_datetime_week_dummyvalue = "W - 1672617600 - 1673222400"
-previous_datetime_month_dummyvalue = "M - 1672531200 - 1675209600"
-previous_datetime_year_dummyvalue = "Y - 1672531200 - 1704067200"
+previous_datetime_day_dummyvalue = '{"value": "D - 1672704000 - 1672790400"}'
+previous_datetime_week_dummyvalue = '{"value": "W - 1672617600 - 1673222400"}'
+previous_datetime_month_dummyvalue = '{"value": "M - 1672531200 - 1675209600"}'
+previous_datetime_year_dummyvalue = '{"value": "Y - 1672531200 - 1704067200"}'
 
 
 @pytest.mark.parametrize(
@@ -256,7 +256,7 @@ def test_restore_kpis_from_filled_db(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.YEAR.value,
             agg_value="2023",
-            kpi_value="whatever",
+            kpi_value='{"value": "whatever"}',
         )
     )
 
@@ -265,7 +265,7 @@ def test_restore_kpis_from_filled_db(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.MONTH.value,
             agg_value="2023-01",
-            kpi_value="whatever",
+            kpi_value='{"value": "whatever"}',
         )
     )
     dbsession.add(
@@ -273,7 +273,7 @@ def test_restore_kpis_from_filled_db(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.WEEK.value,
             agg_value="2023 W01",
-            kpi_value="whatever",
+            kpi_value='{"value": "whatever"}',
         )
     )
     dbsession.add(
@@ -281,7 +281,7 @@ def test_restore_kpis_from_filled_db(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.DAY.value,
             agg_value="2023-01-03",
-            kpi_value="whatever",
+            kpi_value='{"value": "whatever"}',
         )
     )
 

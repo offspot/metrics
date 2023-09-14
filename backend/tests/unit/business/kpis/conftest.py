@@ -1,9 +1,10 @@
 from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TypeAlias
+from typing import TypeAlias, cast
 
 import pytest
+from marshmallow_dataclass import class_schema as schema
 from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.business.agg_kind import AggKind
@@ -32,21 +33,44 @@ def processor(init_datetime: datetime) -> ProcessorGenerator:
     yield Processor(Period(init_datetime))
 
 
+@dataclass
+class DummyKpiValue:
+    value: str
+
+
 class DummyKpi(Kpi):
     """A dummy KPI which is not using indicators at all to simplify testing"""
 
     unique_id = -2001  # this ID is unique to each kind of kpi
 
-    def get_value(
+    def compute_value_from_indicators(
         self,
         agg_kind: AggKind,
         start_ts: int,
         stop_ts: int,
         session: Session,  # noqa: ARG002
-    ) -> str:
+    ) -> DummyKpiValue:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
-        return f"{agg_kind.value} - {start_ts} - {stop_ts}"
+        return DummyKpiValue(value=f"{agg_kind.value} - {start_ts} - {stop_ts}")
+
+    def loads_value(self, value: str) -> DummyKpiValue:
+        """Loads the KPI value from a serialized string"""
+        return cast(
+            DummyKpiValue,
+            schema(DummyKpiValue)().loads(  # pyright: ignore[reportUnknownMemberType]
+                value, many=False
+            ),
+        )
+
+    def dumps_value(self, value: list[DummyKpiValue]) -> str:
+        """Dump the KPI value into a serialized string"""
+        return cast(
+            str,
+            schema(DummyKpiValue)().dumps(  # pyright: ignore[reportUnknownMemberType]
+                value, many=False
+            ),
+        )
 
 
 @pytest.fixture()
