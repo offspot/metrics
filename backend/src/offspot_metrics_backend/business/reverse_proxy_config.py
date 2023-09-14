@@ -6,7 +6,7 @@ import yaml
 
 try:
     from yaml import CSafeLoader as SafeLoader
-except ImportError:
+except ImportError:  # pragma: no cover
     # we don't NEED cython ext but it's faster so use it if avail.
     from yaml import SafeLoader
 
