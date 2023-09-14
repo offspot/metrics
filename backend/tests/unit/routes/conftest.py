@@ -9,6 +9,7 @@ from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
+from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
 from offspot_metrics_backend.db.models import KpiValue
 from offspot_metrics_backend.main import Main
 
@@ -25,8 +26,8 @@ def event_loop():
 
 
 @pytest.fixture()
-def app(set_package_conf_file_location: Callable[[str], None]):
-    set_package_conf_file_location("conf_routes.yaml")
+def app(reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]):
+    reverse_proxy_config("conf_no_packages.yaml")
     return Main().create_app()
 
 

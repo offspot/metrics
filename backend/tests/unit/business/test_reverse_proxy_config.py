@@ -8,28 +8,29 @@ from offspot_metrics_backend.business.reverse_proxy_config import (
 )
 
 
-def test_parsing_missing_file_provided():
+def test_parsing_missing_file_provided(
+    reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]
+):
     with pytest.raises(FileNotFoundError, match="/conf/packages.yml"):
-        ReverseProxyConfig()
+        reverse_proxy_config(None)
 
 
-def test_parsing_empty_conf(set_package_conf_file_location: Callable[[str], None]):
-    set_package_conf_file_location("conf_empty.yaml")
+def test_parsing_empty_conf(
+    reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]
+):
     with pytest.raises(IncorrectConfigurationError):
-        ReverseProxyConfig()
+        reverse_proxy_config("conf_empty.yaml")
 
 
 def test_parsing_missing_packages(
-    set_package_conf_file_location: Callable[[str], None]
+    reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]
 ):
-    set_package_conf_file_location("conf_missing_packages.yaml")
     with pytest.raises(IncorrectConfigurationError):
-        ReverseProxyConfig()
+        reverse_proxy_config("conf_missing_packages.yaml")
 
 
-def test_parsing_ok(set_package_conf_file_location: Callable[[str], None]):
-    set_package_conf_file_location("conf_ok.yaml")
-    config = ReverseProxyConfig()
+def test_parsing_ok(reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]):
+    config = reverse_proxy_config("conf_ok.yaml")
     assert config.warnings == []
     assert config.files == {
         "nomad.renaud.test": {"title": "Nomad exercices du CP à la 3è"},
@@ -43,9 +44,10 @@ def test_parsing_ok(set_package_conf_file_location: Callable[[str], None]):
     assert config.zim_host == "kiwix.renaud.test"
 
 
-def test_parsing_warnings(set_package_conf_file_location: Callable[[str], None]):
-    set_package_conf_file_location("conf_with_warnings.yaml")
-    config = ReverseProxyConfig()
+def test_parsing_warnings(
+    reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]
+):
+    config = reverse_proxy_config("conf_with_warnings.yaml")
     assert config.warnings == [
         "Package with missing 'url' ignored",
         "Package with missing 'title' ignored",

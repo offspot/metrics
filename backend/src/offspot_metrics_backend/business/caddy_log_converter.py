@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 class CaddyLogConverter:
     """Converts logs received from Caddy reverse proxy into inputs to process"""
 
-    def __init__(self) -> None:
-        self.config = ReverseProxyConfig()
+    def __init__(self, config: ReverseProxyConfig) -> None:
+        self.config = config
 
     def process(self, line: str) -> list[Input]:
         """Transform one Caddy log line into corresponding inputs"""

@@ -12,6 +12,7 @@ from offspot_metrics_backend.business.caddy_log_converter import CaddyLogConvert
 from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEvent
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
+from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
 from offspot_metrics_backend.constants import BackendConf
 from offspot_metrics_backend.db.initializer import Initializer
 from offspot_metrics_backend.routes import aggregations, kpis
@@ -44,7 +45,8 @@ class Main:
                 data_folder=BackendConf.logwatcher_data_folder,
             )
         self.processor = Processor()
-        self.converter = CaddyLogConverter()
+        self.config = ReverseProxyConfig()
+        self.converter = CaddyLogConverter(self.config)
         self.background_tasks = set[Task[Any]]()
 
     @asynccontextmanager
@@ -54,6 +56,7 @@ class Main:
         Initializer.upgrade_db_schema()
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
+            self.config.parse_configuration()
             self.processor.startup(current_period=Period.now())
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)

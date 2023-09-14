@@ -11,6 +11,7 @@ from offspot_metrics_backend.business.inputs.content_visit import (
     ContentItemVisit,
 )
 from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
 
 
 @pytest.mark.parametrize(
@@ -45,17 +46,15 @@ from offspot_metrics_backend.business.inputs.input import Input
 def test_process_ok(
     log_line: str,
     expected_inputs: list[Input],
-    set_package_conf_file_location: Callable[[str], None],
+    reverse_proxy_config: Callable[[str], ReverseProxyConfig],
 ):
-    set_package_conf_file_location("conf_ok.yaml")
-    converter = CaddyLogConverter()
+    converter = CaddyLogConverter(reverse_proxy_config("conf_ok.yaml"))
     inputs = converter.process(log_line)
     assert inputs == expected_inputs
 
 
-def test_process_nok(set_package_conf_file_location: Callable[[str], None]):
-    set_package_conf_file_location("processing_conf.yaml")
-    converter = CaddyLogConverter()
+def test_process_nok(reverse_proxy_config: Callable[[str], ReverseProxyConfig]):
+    converter = CaddyLogConverter(reverse_proxy_config("processing_conf.yaml"))
     path = pathlib.Path(__file__).parent.absolute().joinpath("processing_nok.txt")
     with open(path) as fp:
         for line in fp:

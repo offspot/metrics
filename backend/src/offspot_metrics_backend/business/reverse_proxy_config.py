@@ -25,6 +25,12 @@ class ReverseProxyConfig:
     """Holds the reverse proxy config, extracted from PACKAGE_CONF_FILE"""
 
     def __init__(self) -> None:
+        self.files: dict[str, Any] = {}
+        self.zim_host: str | None = None
+        self.zims: dict[str, Any] = {}
+        self.warnings: list[str] = []
+
+    def parse_configuration(self):
         """Parse packages.yml configuration based on provided file"""
         logger.info("Parsing PACKAGE_CONF_FILE")
 
@@ -45,10 +51,6 @@ class ReverseProxyConfig:
 
     def _parse_package_configuration_data(self, conf_data: dict[str, Any]):
         """Parse configuration based on dictionary of configuration data"""
-        self.files: dict[str, Any] = {}
-        self.zim_host: str | None = None
-        self.zims: dict[str, Any] = {}
-        self.warnings: list[str] = []
 
         if not conf_data:
             raise IncorrectConfigurationError("configuration is missing or empty")
