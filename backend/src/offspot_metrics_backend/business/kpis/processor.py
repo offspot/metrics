@@ -98,7 +98,9 @@ class Processor:
         Existing KPI values are updated in DB. New ones are created.
         Old ones are deleted"""
         values: list[Value] = Persister.get_kpi_values(
-            kpi_id=kpi.unique_id, agg_kind=agg_kind, session=session
+            kpi_id=kpi.unique_id,
+            agg_kind=agg_kind,
+            session=session,
         )
         current_agg_value = now.get_truncated_value(agg_kind)
         aggregations_to_keep = Processor.get_aggregations_to_keep(agg_kind, now)
@@ -116,7 +118,7 @@ class Processor:
             if value.agg_value == current_agg_value:
                 # update the existing KPI value
                 value_updated = True
-                value.kpi_value = kpi.get_value(
+                value.kpi_value = kpi.compute_value_from_indicators(
                     agg_kind=agg_kind,
                     start_ts=timestamps.start,
                     stop_ts=timestamps.stop,
@@ -133,7 +135,7 @@ class Processor:
             # create a new KPI value since there is no existing one
             value = Value(
                 agg_value=current_agg_value,
-                kpi_value=kpi.get_value(
+                kpi_value=kpi.compute_value_from_indicators(
                     agg_kind=agg_kind,
                     start_ts=timestamps.start,
                     stop_ts=timestamps.stop,

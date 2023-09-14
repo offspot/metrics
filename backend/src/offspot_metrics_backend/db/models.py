@@ -1,7 +1,19 @@
+import json
 from datetime import datetime
 from types import MappingProxyType
+from typing import Any, cast
 
-from sqlalchemy import DateTime, ForeignKey, Index, UniqueConstraint, select
+from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
+from sqlalchemy import (
+    DateTime,
+    Dialect,
+    ForeignKey,
+    Index,
+    UniqueConstraint,
+    select,
+    types,
+)
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -16,6 +28,58 @@ from offspot_metrics_backend.business.indicators.dimensions import DimensionsVal
 from offspot_metrics_backend.business.period import Period
 
 
+@dataclass
+class KpiValue:
+    pass
+
+
+class SerializedData(BaseModel):
+    module: str
+    name: str
+    data: Any
+
+
+class KpiValueType(types.TypeDecorator[KpiValue]):
+    """Handle KpiValue serialization/deserialization in a transparent way."""
+
+    impl = types.String
+
+    cache_ok = True
+
+    def process_bind_param(
+        self,
+        value: KpiValue | None,
+        dialect: Dialect,  # noqa: ARG002
+    ) -> str | None:
+        if not value:
+            return None  # pragma: no cover (value cannot be null in DB)
+        return SerializedData(
+            module=value.__class__.__module__,
+            name=value.__class__.__name__,
+            data=cast(BaseModel, value).model_dump(),
+        ).model_dump_json()
+
+    def process_result_value(
+        self,
+        value: Any | None,
+        dialect: Dialect,  # noqa: ARG002
+    ) -> KpiValue | None:
+        ser_info = SerializedData.model_validate(json.loads(cast(str, value)))
+        clazz: type[KpiValue] | None = None
+        for subclass in KpiValue.__subclasses__():
+            if (
+                subclass.__module__ == ser_info.module
+                and subclass.__name__ == ser_info.name
+            ):
+                clazz = subclass
+        if clazz is None:  # pragma: no cover (very difficult to simulate in a test)
+            raise ValueError(
+                f"Class not found for module {ser_info.module}"
+                f" and name {ser_info.name}"
+            )
+        return cast(KpiValue, cast(BaseModel, clazz).model_validate(ser_info.data))
+
+
 class Base(MappedAsDataclass, DeclarativeBase):
     # This map details the specific transformation of types between Python and
     # SQLite. This is only needed for the case where a specific SQLite
@@ -27,6 +91,7 @@ class Base(MappedAsDataclass, DeclarativeBase):
             datetime: DateTime(
                 timezone=False
             ),  # transform Python datetime into SQLAlchemy Datetime without timezone
+            KpiValue: KpiValueType,
         }
     )
 
@@ -144,7 +209,7 @@ class IndicatorState(Base):
     __table_args__ = (UniqueConstraint("indicator_id", "period_id", "dimension_id"),)
 
 
-class KpiValue(Base):
+class KpiRecord(Base):
     """The value of a KPI of a given aggregation kind and value
 
     The kind of aggregration is either D (day), W (week), M (month) or Y (year)"""
@@ -154,7 +219,7 @@ class KpiValue(Base):
     kpi_id: Mapped[int] = mapped_column(index=True)
     agg_kind: Mapped[str]
     agg_value: Mapped[str]
-    kpi_value: Mapped[str]
+    kpi_value: Mapped[KpiValue]
 
     __table_args__ = (
         UniqueConstraint("kpi_id", "agg_value"),
