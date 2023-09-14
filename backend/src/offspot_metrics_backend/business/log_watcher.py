@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from asyncio import sleep
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -55,7 +54,7 @@ class LogWatcherHandler(FileSystemEventHandler):
         """Process file to detect new lines appended"""
 
         # Reset position if it looks like file has been truncated
-        if os.path.getsize(file_path) < self.file_positions_map[str(file_path)]:
+        if file_path.stat().st_size < self.file_positions_map[str(file_path)]:
             self.file_positions_map[str(file_path)] = 0
 
         with open(file_path, encoding=ENCODING) as file:
@@ -185,10 +184,12 @@ class LogWatcher:
 
     def process_existing_files(self):
         """Process files that are already there at watcher startup"""
-        for files in self.watched_folder.rglob("*"):
+        for file in self.watched_folder.rglob("*"):
+            if not file.is_file():
+                continue
             # Let's consider that all existing files have been modified, so that we
             # process any line that might have appeared since our last execution
-            event = FileSystemEvent(str(files))
+            event = FileSystemEvent(str(file))
             event.is_directory = False
             event.event_type = EVENT_TYPE_MODIFIED
             self.event_handler.on_any_event(event)
