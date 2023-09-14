@@ -26,8 +26,6 @@ def setup_db_and_test(ctx: Context, cmd: str, args: str):
             NamedTemporaryFile(suffix=".db", prefix="test_", delete=False).name
         ).resolve()
         test_db_url = f"sqlite+pysqlite:////{temp_db_path}"
-    with ctx.cd("src"):
-        ctx.run("alembic upgrade head", pty=use_pty, env={"DATABASE_URL": test_db_url})
     try:
         ctx.run(
             f"{cmd} {args}",
@@ -48,7 +46,7 @@ def test(ctx: Context, args: str = ""):
 @task(optional=["args"], help={"args": "pytest additional arguments"})
 def test_cov(ctx: Context, args: str = ""):
     """run test vith coverage"""
-    setup_db_and_test(ctx=ctx, cmd="pytest --cov=offspot_metrics_backend", args=args)
+    setup_db_and_test(ctx=ctx, cmd="coverage run -m pytest", args=args)
 
 
 def call_alembic(ctx: Context, cmd: str, *, test_db: bool = False):
@@ -133,106 +131,92 @@ def db_list(ctx: Context, *, test_db: bool = False):
     call_alembic(ctx=ctx, cmd="history -i", test_db=test_db)
 
 
-@task(optional=["no-html"], help={"no-html": "flag to not export html report"})
-def report_cov(ctx: Context, *, no_html: bool = False):
+@task(optional=["html"], help={"html": "flag to export html report"})
+def report_cov(ctx: Context, *, html: bool = False):
     """report test coverage"""
     ctx.run("coverage combine", warn=True, pty=use_pty)
     ctx.run("coverage report --show-missing", pty=use_pty)
-    if not no_html:
+    ctx.run("coverage xml", pty=use_pty)
+    if html:
         ctx.run("coverage html", pty=use_pty)
 
 
 @task(
-    optional=["args", "no-html"],
+    optional=["args", "html"],
     help={
         "args": "pytest additional arguments",
-        "no-html": "flag to not export html report",
+        "html": "flag to export html report",
     },
 )
-def coverage(ctx: Context, args: str = "", *, no_html: bool = False):
+def coverage(ctx: Context, args: str = "", *, html: bool = False):
     """run tests and report coverage"""
-    test_cov(ctx, args=args + " --cov-report xml")
-    report_cov(ctx, no_html=no_html)
+    test_cov(ctx, args=args)
+    report_cov(ctx, html=html)
 
 
-@task(
-    optional=["args"], help={"args": "linting tools (black, ruff) additional arguments"}
-)
+@task(optional=["args"], help={"args": "black additional arguments"})
 def lint_black(ctx: Context, args: str = "."):
+    args = args or "."  # needed for hatch script
     ctx.run("black --version", pty=use_pty)
     ctx.run(f"black --check --diff {args}", pty=use_pty)
 
 
-@task(
-    optional=["args"], help={"args": "linting tools (black, ruff) additional arguments"}
-)
+@task(optional=["args"], help={"args": "ruff additional arguments"})
 def lint_ruff(ctx: Context, args: str = "."):
+    args = args or "."  # needed for hatch script
     ctx.run("ruff --version", pty=use_pty)
     ctx.run(f"ruff check {args}", pty=use_pty)
 
 
 @task(
-    optional=["black_args", "ruff_args"],
+    optional=["args"],
     help={
-        "black_args": "linting (fix mode) black arguments",
-        "ruff_args": "linting (fix mode) ruff arguments",
+        "args": "linting tools (black, ruff) additional arguments, typically a path",
     },
 )
-def lintall(ctx: Context, black_args: str = ".", ruff_args: str = "."):
+def lintall(ctx: Context, args: str = "."):
     """Check linting"""
-    lint_black(ctx, black_args)
-    lint_ruff(ctx, ruff_args)
+    args = args or "."  # needed for hatch script
+    lint_black(ctx, args)
+    lint_ruff(ctx, args)
 
 
 @task(optional=["args"], help={"args": "check tools (pyright) additional arguments"})
 def check_pyright(ctx: Context, args: str = ""):
-    """Check static types with pyright"""
+    """check static types with pyright"""
     ctx.run("pyright --version")
     ctx.run(f"pyright {args}", pty=use_pty)
 
 
 @task(optional=["args"], help={"args": "check tools (pyright) additional arguments"})
 def checkall(ctx: Context, args: str = ""):
-    """Check static types"""
+    """check static types"""
     check_pyright(ctx, args)
 
 
-@task(optional=["args"], help={"args": "black arguments"})
+@task(optional=["args"], help={"args": "black additional arguments"})
 def fix_black(ctx: Context, args: str = "."):
-    """Fix black formatting"""
+    """fix black formatting"""
+    args = args or "."  # needed for hatch script
     ctx.run(f"black {args}", pty=use_pty)
 
 
-@task(optional=["args"], help={"args": "ruff arguments"})
+@task(optional=["args"], help={"args": "ruff additional arguments"})
 def fix_ruff(ctx: Context, args: str = "."):
-    """Fix ruff rules"""
+    """fix all ruff rules"""
+    args = args or "."  # needed for hatch script
     ctx.run(f"ruff --fix {args}", pty=use_pty)
 
 
 @task(
-    optional=["black_args", "ruff_args"],
+    optional=["args"],
     help={
-        "black_args": "linting (fix mode) black arguments",
-        "ruff_args": "linting (fix mode) ruff arguments",
+        "args": "linting tools (black, ruff) additional arguments, typically a path",
     },
 )
-def fixall(ctx: Context, black_args: str = ".", ruff_args: str = "."):
+def fixall(ctx: Context, args: str = "."):
     """Fix everything automatically"""
-    fix_black(ctx, black_args)
-    fix_ruff(ctx, ruff_args)
-    lintall(ctx, black_args=black_args, ruff_args=ruff_args)
-
-
-@task(
-    optional=["args"],
-    help={"args": "optional uvicorn additional arguments"},
-)
-def serve(c: Context, args: str = ""):
-    """Run development HTTP server locally with uvicorn.
-
-    Use --args to specify additional uvicorn args"""
-    with c.cd("src"):
-        c.run(
-            f"uvicorn offspot_metrics_backend.entrypoint:app --reload {args}",
-            pty=True,
-        )
+    args = args or "."  # needed for hatch script
+    fix_black(ctx, args)
+    fix_ruff(ctx, args)
+    lintall(ctx, args)

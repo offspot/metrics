@@ -1,0 +1,30 @@
+:80, *:80 {
+    file_server {
+        root /file-browser-data/home
+    }
+    log {
+        output file caddy_access_logs.json {
+            roll_size 1MiB
+            roll_keep 2
+            roll_uncompressed
+            roll_keep_for 48h
+        }
+        format json
+    }
+}
+
+mathews.localhost:80 {
+    file_server {
+        root /file-browser-data/mathews
+    }
+}
+
+nomad.localhost:80 {
+    file_server {
+        root /file-browser-data/nomad
+    }
+}
+
+kiwix.localhost:80 {
+    reverse_proxy om_kiwix:80
+}

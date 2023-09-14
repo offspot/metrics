@@ -7,11 +7,15 @@ Metrics
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![codecov](https://codecov.io/gh/offspot/metrics/branch/main/graph/badge.svg)](https://codecov.io/gh/offspot/metrics)
 
-The `metrics` subsystem is responsible to transform raw data (e.g. web server logs) available on the offspot into business-oriented KPIs displayed on web dashboards.
+The `metrics` subsystem of Kiwix `offspot` is responsible to transform raw data (e.g. web server logs) available on the `offspot` into business-oriented KPIs displayed on web dashboards.
 
-The whole system is runing locally on the offspot. Dashboards are hence only presenting local offspot data.
+The whole system is runing locally on the `offspot`. Dashboards are hence only presenting local `offspot` data.
 
 At some point in the future, the system is meant to centralize data in a Cloud for aggregating multiple offspots. An intermediate data format is hence present, between raw data and KPIs.
+
+## Glossary
+
+There is a [glossary](glossary.md) of business terms that are used in the `metrics` subsystem.
 
 ## Documentation
 

@@ -10,15 +10,18 @@ RUN python -m pip install --no-cache-dir -U \
       pip
 
 # to set to your clients' origins
-ENV ALLOWED_ORIGINS http://localhost
-ENV DATABASE_URL sqlite+pysqlite:///local.db
+ENV ALLOWED_ORIGINS http://localhost:8003|http://127.0.0.1:8003
+ENV DATABASE_URL sqlite+pysqlite:////data/database.db
+ENV LOGWATCHER_DATA_FOLDER /data/logwatcher
 
 # Copy code + associated artifacts
 COPY src /src/src
 COPY pyproject.toml *.md /src/
 
-# Install project (including dependencies) + cleanup afterwards
+# Install project (including dependencies) + install empty DB + cleanup afterwards
 RUN pip install --no-cache-dir /src \
+ && mkdir -p /data/logwatcher \
+ && cd /src/src \
  && rm -rf /src
 
 EXPOSE 80

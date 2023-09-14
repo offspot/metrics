@@ -25,6 +25,7 @@ class Processor:
 
     @property
     def has_records_for_our_indicators(self) -> bool:
+        """Returns true if there is at least one indicator with a record"""
         for indicator in self.indicators:
             if next(indicator.get_records(), None):
                 return True

@@ -1,0 +1,37 @@
+---
+packages:
+
+# one correct zim
+- kind: zim
+  title: Wikipedia
+  description: The free encyclopedia
+  url: //kiwix.renaud.test/viewer#wikipedia_en_all
+
+# missing url
+- toto: tata
+
+# missing title
+- url: tata
+
+# incorrect url
+- url: tata
+  title: toto
+
+# missing kind
+- url: //kiwix.renaud.test/viewer#wikipedia_en_all
+  title: toto
+
+# second host ignored
+- kind: zim
+  url: //kaka.renaud.test/viewer#toto
+  title: toto
+
+# incorrect ZIM URL
+- kind: zim
+  url: //kiwix.renaud.test/kkkk#toto
+  title: toto
+
+# Unsupported kind
+- kind: ooo
+  url: //kiwix.renaud.test/ssss
+  title: toto

@@ -26,13 +26,13 @@ class Indicator(abc.ABC):
     @abc.abstractmethod
     def can_process_input(self, input_: Input) -> bool:
         """Indicates if this indicator can process a given kind of input"""
-        ...  # pragma: nocover
+        ...  # pragma: no cover
 
     @abc.abstractmethod
     def get_dimensions_values(self, input_: Input) -> DimensionsValues:
         """For a given input (which can be processed), returns the values of each
         indicator dimensions as a tuple (or an empty tuple)."""
-        ...  # pragma: nocover
+        ...  # pragma: no cover
 
     @abc.abstractmethod
     def get_new_recorder(self) -> Recorder:
@@ -40,7 +40,7 @@ class Indicator(abc.ABC):
 
         Appropriate record type depends on the indicator implementation.
         """
-        ...  # pragma: nocover
+        ...  # pragma: no cover
 
     def get_or_create_recorder(self, input_: Input) -> Recorder:
         """Get or create a recorder whose dimensions are matching the given input.

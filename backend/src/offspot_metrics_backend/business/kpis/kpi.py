@@ -16,4 +16,4 @@ class Kpi(abc.ABC):
     ) -> str:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
-        ...  # pragma: nocover
+        ...  # pragma: no cover

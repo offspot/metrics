@@ -54,6 +54,12 @@ class Processor:
     def get_aggregations_to_keep(
         cls, agg_kind: AggKind, now: Period
     ) -> list[str] | None:
+        """Return the list of list of aggregations that do not have to be purged
+
+        Aggregations are purged once too old (older than 7 days for daily aggregations,
+        4 weeks for weekly aggregations, ...). This function returns the list of
+        aggregation values that have to be kept (i.e. others have to be purged).
+        """
         if agg_kind == AggKind.DAY:
             return [
                 now.get_shifted(relativedelta(days=-delta)).get_truncated_value(
@@ -77,7 +83,10 @@ class Processor:
             ]
         if agg_kind == AggKind.YEAR:
             return None  # Special value meaning that all values are kept
-        raise AttributeError
+
+        # we should never get there except if the enum is modified and we
+        # forget to modify this function
+        raise AttributeError  # pragma: no cover
 
     @classmethod
     def compute_kpi_values_for_aggregation_kind(

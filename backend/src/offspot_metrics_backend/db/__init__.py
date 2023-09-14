@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from typing import Any
 
 from sqlalchemy import SelectBase, create_engine, event, func, select
@@ -20,6 +20,7 @@ def set_sqlite_pragma(
     dbapi_connection: DBAPIConnection,
     connection_record: ConnectionPoolEntry,  # noqa: ARG001
 ):
+    """Helper function to activate SQLite foreign keys pragma at first connection"""
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
@@ -39,6 +40,12 @@ def dbsession(func: Callable[..., Any]) -> Callable[..., Any]:
             return func(*args, **kwargs)
 
     return inner
+
+
+def gen_dbsession() -> Generator[OrmSession, None, None]:
+    """FastAPI's Depends() compatible helper to provide a began DB Session"""
+    with Session.begin() as session:
+        yield session
 
 
 def count_from_stmt(session: OrmSession, stmt: SelectBase) -> int:

@@ -2,6 +2,13 @@ This is a docker-compose configuration to be used **only** for development purpo
 
 It is recommended to use it in combination with Mutagen to effeciently sync data from your machine to the Docker containers.
 
+## List of URLS
+
+- Reverse proxy ("fake"): http://localhost:8000
+- Kiwix-serve ("fake"): http://localhost:8001
+- Backend API: http://localhost:8002
+- Dev Frontend: http://localhost:8003
+
 ## List of containers
 
 ### backend
@@ -18,26 +25,43 @@ Context is setup with appropriate environment variables:
 - DATABASE_URL points to the database used by the backend
 - TEST_DATABASE_URL points to the test database
 
-### backend-tests
+### frontend-tools
 
-This container is simply a Python stack with all backend requirements but no web server. Context is
-setup with appropriate environment variables for tests (i.e. it uses the test DB). Usefull to run
-tests locally.
+This container hosts the development frontend UI (i.e. `yarn dev`).
 
-### frontend-ui
+It is not the statically compiled version.
 
-This container hosts the frontend UI for end-users.
+### kiwix-serve
+
+This is a kiwix server, serving zim files placed in the `zims` subfolder.
+
+See below for recommended ZIMs in the [Instructions](#instructions) section.
+
+### reverse-proxy
+
+This is the reverse proxy, simulating what is used on the offspot to expose multiple contents.
+
+It is configured with a sample sets of contents :
+- `kiwix-serve` contents
+- a fake `nomad` content from `file-browser-data/nomad`
+- a fake `mathews` content from `file-browser-data/mathews`
 
 ## Instructions
 
-First start the Docker-Compose stack:
+Download the ZIMs you want to use for tests in the `zims` folder.
+
+Caddy is configured to use these two zims:
+- https://download.kiwix.org/zim/stack_exchange/sqa.stackexchange.com_en_all_2023-05.zim
+- https://download.kiwix.org/zim/stack_exchange/devops.stackexchange.com_en_all_2023-05.zim
+
+Start the Docker-Compose stack:
 
 ```sh
 cd dev
 docker compose -p offspot_metrics up -d
 ```
 
-## Setup DB
+### Setup DB
 
 If this is your first run or if you made any schema change, you need to set/update the DB schema before having all containers OK.
 
@@ -50,13 +74,32 @@ docker exec -it om_backend-tools invoke db-upgrade
 You can also check that everything is ok:
 
 ```sh
-docker exec -it om_backend-tools invoke alembic --args "check"
+docker exec -it om_backend-tools invoke alembic check
 ```
 
-Note that to run integration tests, we use a separate DB, you hence have to set/update the DB schema as well.
-Just do the same as above with the backend-tests container (instead of the backend-tools)
+### Run a simulation to inject synthetic data
 
-## Restart the backend
+In order to inject synthetic data into the database, a simulation script can be run
+
+```sh
+docker exec -it om_backend-tools python src/simulator.py
+```
+
+### Create real data
+
+You can test the whole integration suite (i.e. with landing page, kiwix-serve and Filebeat).
+
+**Nota:** this is not compatible with simulator data which will progressively be erased by new live data.
+
+You first have to enable processing in `docker-compose.yml`: set `PROCESSING_DISABLED: "False"` (or just remove the environment variable).
+
+```
+docker compose -p om up -d --force-recreate backend
+```
+
+You can then browse packages at http://127.0.0.1:8000/ and statistics will show up after up to 1 hour in the web UI at http://127.0.0.1:8003/
+
+### Restart the backend
 
 The backend might typically fail if the DB schema is not up-to-date, or if you create some nasty bug while modifying the code.
 
@@ -68,12 +111,17 @@ docker restart om_backend
 
 Other containers might be restarted the same way.
 
-## Run tests
+### Run tests
 
 Create + upgrade test DB schema if needed:
 
 ```sh
 docker exec -it om_backend-tools invoke db-upgrade --test-db
+```
+
+Check that schema is up to date:
+```sh
+docker exec -it om_backend-tools invoke alembic check --test-db
 ```
 
 Run all tests:

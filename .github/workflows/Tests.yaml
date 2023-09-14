@@ -26,7 +26,9 @@ jobs:
 
       - name: Run the tests
         working-directory: backend
-        run: inv coverage --no-html --args "-vvv"
+        env:
+          PROCESSING_DISABLED: "True"
+        run: inv coverage --args "-vvv"
 
       - name: Upload coverage report to codecov
         uses: codecov/codecov-action@v3
@@ -46,7 +48,14 @@ jobs:
 
       - name: Ensure we can start the Docker image
         run: |
-          docker run -d --rm --name test_container offspot_metrics_backend
+          echo "Starting the container"
+          docker run -d --name test_container -e PROCESSING_DISABLED='True' offspot_metrics_backend
+          echo "Waiting 5 seconds"
           sleep 5
+          echo "Checking container logs"
+          docker logs test_container
+          echo "Checking the container is still there"
           docker ps | grep test_container
+          echo "Cleanup"
           docker stop test_container
+          docker rm test_container

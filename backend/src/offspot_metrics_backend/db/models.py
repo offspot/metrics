@@ -1,4 +1,5 @@
 from datetime import datetime
+from types import MappingProxyType
 
 from sqlalchemy import DateTime, ForeignKey, Index, UniqueConstraint, select
 from sqlalchemy.orm import (
@@ -19,12 +20,15 @@ class Base(MappedAsDataclass, DeclarativeBase):
     # This map details the specific transformation of types between Python and
     # SQLite. This is only needed for the case where a specific SQLite
     # type has to be used or when we want to ensure a specific setting (like the
-    # timezone below)
-    type_annotation_map = {
-        datetime: DateTime(
-            timezone=False
-        ),  # transform Python datetime into SQLAlchemy Datetime without timezone
-    }
+    # timezone below). It uses a MappingProxyType to make the dict immutable and
+    # avoid strange side-effects (RUF012)
+    type_annotation_map = MappingProxyType(
+        {
+            datetime: DateTime(
+                timezone=False
+            ),  # transform Python datetime into SQLAlchemy Datetime without timezone
+        }
+    )
 
     # This metadata specifies some naming conventions that will be used by
     # alembic to generate constraints names (indexes, unique constraints, ...)

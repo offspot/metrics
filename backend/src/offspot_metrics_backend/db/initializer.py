@@ -1,19 +1,14 @@
 import logging
-import os
+import subprocess
 from pathlib import Path
-
-from alembic import config
-from alembic.command import check
 
 logger = logging.getLogger(__name__)
 
 
 class Initializer:
     @staticmethod
-    def ensure_schema_is_up_to_date(src_dir: Path | None = None):
+    def upgrade_db_schema():
         """Checks if Alembic schema has been applied to the DB"""
-        logger.info("Checking database schema")
-        if src_dir:
-            os.chdir(src_dir)
-        cfg = config.Config("alembic.ini")
-        check(cfg)
+        src_dir = Path(__file__).parent.parent
+        logger.info(f"Upgrading database schema with config in {src_dir}")
+        subprocess.check_output(args=["alembic", "upgrade", "head"], cwd=src_dir)
