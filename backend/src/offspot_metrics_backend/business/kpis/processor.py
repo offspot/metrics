@@ -100,7 +100,6 @@ class Processor:
         values: list[Value] = Persister.get_kpi_values(
             kpi_id=kpi.unique_id,
             agg_kind=agg_kind,
-            value_load_fn=kpi.loads_value,
             session=session,
         )
         current_agg_value = now.get_truncated_value(agg_kind)
@@ -149,7 +148,6 @@ class Processor:
                 agg_kind=agg_kind,
                 agg_value=value.agg_value,
                 kpi_value=value.kpi_value,
-                value_dump_fn=kpi.dumps_value,
                 session=session,
             )
 

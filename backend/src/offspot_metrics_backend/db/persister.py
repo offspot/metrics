@@ -13,7 +13,7 @@ from offspot_metrics_backend.db.models import IndicatorDimension as DimensionDb
 from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
 from offspot_metrics_backend.db.models import IndicatorRecord as RecordDb
 from offspot_metrics_backend.db.models import IndicatorState as StateDb
-from offspot_metrics_backend.db.models import KpiValue as KpiValueDb
+from offspot_metrics_backend.db.models import KpiValue, KpiRecord
 
 
 class Persister:
@@ -120,18 +120,15 @@ class Persister:
         cls,
         kpi_id: int,
         agg_kind: AggKind,
-        value_load_fn: Callable[[str], Any],
         session: Session,
     ) -> list[Value]:
         """Return all KPI values for a given KPI and a given kind of period"""
         return [
-            Value(
-                agg_value=dbValue.agg_value, kpi_value=value_load_fn(dbValue.kpi_value)
-            )
+            Value(agg_value=dbValue.agg_value, kpi_value=dbValue.kpi_value)
             for dbValue in session.execute(
-                sa.select(KpiValueDb)
-                .where(KpiValueDb.kpi_id == kpi_id)
-                .where(KpiValueDb.agg_kind == agg_kind.value)
+                sa.select(KpiRecord)
+                .where(KpiRecord.kpi_id == kpi_id)
+                .where(KpiRecord.agg_kind == agg_kind.value)
             ).scalars()
         ]
 
@@ -141,10 +138,10 @@ class Persister:
     ) -> None:
         """Delete a KPI value for a given KPI, kind of period and period"""
         session.execute(
-            sa.delete(KpiValueDb)
-            .where(KpiValueDb.kpi_id == kpi_id)
-            .where(KpiValueDb.agg_kind == agg_kind.value)
-            .where(KpiValueDb.agg_value == agg_value)
+            sa.delete(KpiRecord)
+            .where(KpiRecord.kpi_id == kpi_id)
+            .where(KpiRecord.agg_kind == agg_kind.value)
+            .where(KpiRecord.agg_value == agg_value)
         )
 
     @classmethod
@@ -153,18 +150,18 @@ class Persister:
         kpi_id: int,
         agg_kind: AggKind,
         agg_value: str,
-        kpi_value: Any,
+        kpi_value: KpiValue,
         value_dump_fn: Callable[[Any], str],
         session: Session,
     ) -> None:
         """Update a KPI value for a given KPI, kind of period and period"""
         obj = session.execute(
-            sa.select(KpiValueDb)
-            .where(KpiValueDb.kpi_id == kpi_id)
-            .where(KpiValueDb.agg_kind == agg_kind.value)
-            .where(KpiValueDb.agg_value == agg_value)
+            sa.select(KpiRecord)
+            .where(KpiRecord.kpi_id == kpi_id)
+            .where(KpiRecord.agg_kind == agg_kind.value)
+            .where(KpiRecord.agg_value == agg_value)
         ).scalar_one()
-        obj.kpi_value = value_dump_fn(kpi_value)
+        obj.kpi_value = kpi_value
 
     @classmethod
     def add_kpi_value(
@@ -172,17 +169,16 @@ class Persister:
         kpi_id: int,
         agg_kind: AggKind,
         agg_value: str,
-        kpi_value: Any,
-        value_dump_fn: Callable[[Any], str],
+        kpi_value: KpiValue,
         session: Session,
     ) -> None:
         """Add a KPI value for a given KPI, kind of period and period"""
         session.add(
-            KpiValueDb(
+            KpiRecord(
                 kpi_id=kpi_id,
                 agg_kind=agg_kind.value,
                 agg_value=agg_value,
-                kpi_value=value_dump_fn(kpi_value),
+                kpi_value=kpi_value,
             )
         )
 

@@ -10,7 +10,7 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
-from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.db.models import KpiRecord, DummyKpiValue
 from offspot_metrics_backend.main import Main
 
 
@@ -38,12 +38,24 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, Any]:
 
 
 @pytest_asyncio.fixture()  # pyright: ignore
-async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiValue], Any]:
-    dbsession.execute(delete(KpiValue))
+async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
+    dbsession.execute(delete(KpiRecord))
     kpis = [
-        KpiValue(kpi_id=1, agg_kind="D", agg_value="2023-03-01", kpi_value="165"),
-        KpiValue(kpi_id=2, agg_kind="D", agg_value="2023-03-01", kpi_value="123"),
-        KpiValue(kpi_id=1, agg_kind="W", agg_value="2023 W10", kpi_value="199"),
+        KpiRecord(
+            kpi_id=1,
+            agg_kind="D",
+            agg_value="2023-03-01",
+            kpi_value=DummyKpiValue("165"),
+        ),
+        KpiRecord(
+            kpi_id=2,
+            agg_kind="D",
+            agg_value="2023-03-01",
+            kpi_value=DummyKpiValue("123"),
+        ),
+        KpiRecord(
+            kpi_id=1, agg_kind="W", agg_value="2023 W10", kpi_value=DummyKpiValue("199")
+        ),
     ]
     for kpi in kpis:
         dbsession.add(kpi)

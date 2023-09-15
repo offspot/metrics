@@ -3,7 +3,7 @@ from http import HTTPStatus
 import pytest
 from httpx import AsyncClient
 
-from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.main import PREFIX
 
 
@@ -22,7 +22,7 @@ async def test_kpis(
     agg_value: str,
     expected_value: str,
     client: AsyncClient,
-    kpis: list[KpiValue],  # noqa: ARG001
+    kpis: list[KpiRecord],  # noqa: ARG001
 ):
     response = await client.get(
         f"{PREFIX}/kpis/{kpi_id}/values?agg_kind={agg_kind}&agg_value={agg_value}"
@@ -32,13 +32,13 @@ async def test_kpis(
     assert "kpi_id" in response_json
     assert "value" in response_json
     assert response_json["kpi_id"] == kpi_id
-    assert response_json["value"] == expected_value
+    assert response_json["value"] == {"dummy": expected_value}
 
 
 @pytest.mark.asyncio
 async def test_kpis_not_exist(
     client: AsyncClient,
-    kpis: list[KpiValue],  # noqa: ARG001
+    kpis: list[KpiRecord],  # noqa: ARG001
 ):
     response = await client.get(
         f"{PREFIX}/kpis/whatever/values?agg_kind=W&agg_value=whatever"
@@ -49,7 +49,7 @@ async def test_kpis_not_exist(
 @pytest.mark.asyncio
 async def test_kpis_wrong_agg_kind(
     client: AsyncClient,
-    kpis: list[KpiValue],  # noqa: ARG001
+    kpis: list[KpiRecord],  # noqa: ARG001
 ):
     response = await client.get(
         f"{PREFIX}/kpis/whatever/values?agg_kind=whatever&agg_value=whatever"

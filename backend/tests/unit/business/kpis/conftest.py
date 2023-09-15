@@ -20,6 +20,7 @@ from offspot_metrics_backend.db.models import (
     IndicatorDimension,
     IndicatorPeriod,
     IndicatorRecord,
+    DummyKpiValue,
 )
 
 ProcessorGenerator: TypeAlias = Generator[Processor, None, None]
@@ -31,11 +32,6 @@ NoneGenerator: TypeAlias = Generator[None, None, None]
 @pytest.fixture()
 def processor(init_datetime: datetime) -> ProcessorGenerator:
     yield Processor(Period(init_datetime))
-
-
-@dataclass
-class DummyKpiValue:
-    value: str
 
 
 class DummyKpi(Kpi):
@@ -52,7 +48,7 @@ class DummyKpi(Kpi):
     ) -> DummyKpiValue:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
-        return DummyKpiValue(value=f"{agg_kind.value} - {start_ts} - {stop_ts}")
+        return DummyKpiValue(f"{agg_kind.value} - {start_ts} - {stop_ts}")
 
     def loads_value(self, value: str) -> DummyKpiValue:
         """Loads the KPI value from a serialized string"""

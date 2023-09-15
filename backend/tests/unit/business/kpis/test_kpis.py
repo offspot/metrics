@@ -10,22 +10,22 @@ from offspot_metrics_backend.business.kpis.processor import Processor
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.db import count_from_stmt
 from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
-from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.db.models import KpiRecord, DummyKpiValue
 
-init_datetime_day_dummyvalue = '{"value": "D - 1686182400 - 1686268800"}'
-init_datetime_day_minus_one_dummyvalue = '{"value": "D - 1686096000 - 1686182400"}'
-init_datetime_day_plus_one_dummyvalue = '{"value": "D - 1686268800 - 1686355200"}'
-init_datetime_day_plus_two_dummyvalue = '{"value": "D - 1686355200 - 1686441600"}'
-init_datetime_day_plus_three_dummyvalue = '{"value": "D - 1686787200 - 1686873600"}'
-init_datetime_week_dummyvalue = '{"value": "W - 1685923200 - 1686528000"}'
-init_datetime_week_plus_one_dummyvalue = '{"value": "W - 1686528000 - 1687132800"}'
-init_datetime_month_dummyvalue = '{"value": "M - 1685577600 - 1688169600"}'
-init_datetime_year_dummyvalue = '{"value": "Y - 1672531200 - 1704067200"}'
+init_datetime_day_dummyvalue = DummyKpiValue("D - 1686182400 - 1686268800")
+init_datetime_day_minus_one_dummyvalue = DummyKpiValue("D - 1686096000 - 1686182400")
+init_datetime_day_plus_one_dummyvalue = DummyKpiValue("D - 1686268800 - 1686355200")
+init_datetime_day_plus_two_dummyvalue = DummyKpiValue("D - 1686355200 - 1686441600")
+init_datetime_day_plus_three_dummyvalue = DummyKpiValue("D - 1686787200 - 1686873600")
+init_datetime_week_dummyvalue = DummyKpiValue("W - 1685923200 - 1686528000")
+init_datetime_week_plus_one_dummyvalue = DummyKpiValue("W - 1686528000 - 1687132800")
+init_datetime_month_dummyvalue = DummyKpiValue("M - 1685577600 - 1688169600")
+init_datetime_year_dummyvalue = DummyKpiValue("Y - 1672531200 - 1704067200")
 
-previous_datetime_day_dummyvalue = '{"value": "D - 1672704000 - 1672790400"}'
-previous_datetime_week_dummyvalue = '{"value": "W - 1672617600 - 1673222400"}'
-previous_datetime_month_dummyvalue = '{"value": "M - 1672531200 - 1675209600"}'
-previous_datetime_year_dummyvalue = '{"value": "Y - 1672531200 - 1704067200"}'
+previous_datetime_day_dummyvalue = DummyKpiValue("D - 1672704000 - 1672790400")
+previous_datetime_week_dummyvalue = DummyKpiValue("W - 1672617600 - 1673222400")
+previous_datetime_month_dummyvalue = DummyKpiValue("M - 1672531200 - 1675209600")
+previous_datetime_year_dummyvalue = DummyKpiValue("Y - 1672531200 - 1704067200")
 
 
 @pytest.mark.parametrize(
@@ -89,19 +89,19 @@ def test_process_tick(
     processor: Processor, dummy_kpi: Kpi, init_datetime: datetime, dbsession: Session
 ) -> None:
     processor.kpis = [dummy_kpi]
-    dbsession.execute(delete(KpiValue))
+    dbsession.execute(delete(KpiRecord))
     processor.process_tick(tick_period=Period(init_datetime), session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiValue)) == 0
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 0
     processor.process_tick(
         tick_period=Period(init_datetime + timedelta(minutes=1)),
         session=dbsession,
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 0
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 0
     processor.process_tick(
         tick_period=Period(init_datetime + timedelta(hours=1)), session=dbsession
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 3
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 3
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -111,8 +111,8 @@ def test_process_tick(
     processor.process_tick(
         tick_period=Period(init_datetime + timedelta(hours=4)), session=dbsession
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 3
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 3
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -122,8 +122,8 @@ def test_process_tick(
     processor.process_tick(
         tick_period=Period(init_datetime + timedelta(days=1)), session=dbsession
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 4
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -135,8 +135,8 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(days=1) + timedelta(hours=1)),
         session=dbsession,
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 5
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 5
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -148,8 +148,8 @@ def test_process_tick(
     processor.process_tick(
         tick_period=Period(init_datetime + timedelta(days=2)), session=dbsession
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 5
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 5
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -162,8 +162,8 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(days=2) + timedelta(hours=1)),
         session=dbsession,
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 6
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 6
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -176,8 +176,8 @@ def test_process_tick(
     processor.process_tick(
         tick_period=Period(init_datetime + timedelta(days=7)), session=dbsession
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 6
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 6
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_dummyvalue,
             init_datetime_day_plus_one_dummyvalue,
@@ -191,8 +191,8 @@ def test_process_tick(
         tick_period=Period(init_datetime + timedelta(days=7) + timedelta(hours=1)),
         session=dbsession,
     )
-    assert count_from_stmt(dbsession, select(KpiValue)) == 7
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 7
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_plus_one_dummyvalue,
             init_datetime_day_plus_two_dummyvalue,
@@ -209,29 +209,29 @@ def test_restore_kpis_from_almost_empty_db(
     processor: Processor, dummy_kpi: Kpi, init_datetime: datetime, dbsession: Session
 ) -> None:
     processor.kpis = [dummy_kpi]
-    dbsession.execute(delete(KpiValue))
+    dbsession.execute(delete(KpiRecord))
     dbsession.execute(delete(PeriodDb))
 
     processor.restore_from_db(session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiValue)) == 0
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 0
 
     init_period = PeriodDb.from_datetime(init_datetime)
     dbsession.add(init_period)
     processor.restore_from_db(session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiValue)) == 0
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 0
     dbsession.delete(init_period)
 
     minus_1_hour = PeriodDb.from_datetime(init_datetime - timedelta(hours=1))
     dbsession.add(minus_1_hour)
     processor.restore_from_db(session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiValue)) == 3
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 3
     dbsession.delete(minus_1_hour)
 
     minus_1_day = PeriodDb.from_datetime(init_datetime - timedelta(days=1))
     dbsession.add(minus_1_day)
     processor.restore_from_db(session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 4
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             init_datetime_day_minus_one_dummyvalue,
             init_datetime_week_dummyvalue,
@@ -248,48 +248,48 @@ def test_restore_kpis_from_filled_db(
     dbsession: Session,
 ) -> None:
     processor.kpis = [dummy_kpi]
-    dbsession.execute(delete(KpiValue))
+    dbsession.execute(delete(KpiRecord))
     dbsession.execute(delete(PeriodDb))
 
     dbsession.add(
-        KpiValue(
+        KpiRecord(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.YEAR.value,
             agg_value="2023",
-            kpi_value='{"value": "whatever"}',
+            kpi_value=DummyKpiValue("whatever"),
         )
     )
 
     dbsession.add(
-        KpiValue(
+        KpiRecord(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.MONTH.value,
             agg_value="2023-01",
-            kpi_value='{"value": "whatever"}',
+            kpi_value=DummyKpiValue("whatever"),
         )
     )
     dbsession.add(
-        KpiValue(
+        KpiRecord(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.WEEK.value,
             agg_value="2023 W01",
-            kpi_value='{"value": "whatever"}',
+            kpi_value=DummyKpiValue("whatever"),
         )
     )
     dbsession.add(
-        KpiValue(
+        KpiRecord(
             kpi_id=dummy_kpi.unique_id,
             agg_kind=AggKind.DAY.value,
             agg_value="2023-01-03",
-            kpi_value='{"value": "whatever"}',
+            kpi_value=DummyKpiValue("whatever"),
         )
     )
 
     dbsession.add(PeriodDb.from_datetime(previous_datetime))
 
     processor.restore_from_db(session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiValue)) == 4
-    assert sorted(dbsession.execute(select(KpiValue.kpi_value)).scalars()) == sorted(
+    assert count_from_stmt(dbsession, select(KpiRecord)) == 4
+    assert sorted(dbsession.execute(select(KpiRecord.kpi_value)).scalars()) == sorted(
         [
             previous_datetime_day_dummyvalue,
             previous_datetime_week_dummyvalue,

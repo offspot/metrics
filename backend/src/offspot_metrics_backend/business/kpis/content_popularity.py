@@ -76,7 +76,7 @@ class ContentPopularity(Kpi):
             ContentPopularityValue(
                 content=record.content,
                 count=record.content_count,
-                percentage=round(int(str(record.content_count)) * 100 / total_count, 2),
+                percentage=round(record.content_count * 100 / total_count, 2),
             )
             for record in session.execute(query)
         ]
@@ -167,7 +167,7 @@ class ContentObjectPopularity(Kpi):
                 content=record.content,
                 item=record.item,
                 count=record.item_count,
-                percentage=round(int(str(record.item_count)) * 100 / total_count, 2),
+                percentage=round(record.item_count * 100 / total_count, 2),
             )
             for record in session.execute(query)
         ]
