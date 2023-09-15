@@ -55,7 +55,7 @@ def call_alembic(ctx: Context, cmd: str, *, test_db: bool = False):
     # this won't be needed once https://github.com/pyinvoke/invoke/issues/170 will be
     # implemented and we will be able to call alembic task from other related tasks
 
-    with ctx.cd("src"):
+    with ctx.cd("src/offspot_metrics_backend"):
         ctx.run(
             f"alembic {cmd}",
             pty=use_pty,
