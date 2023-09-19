@@ -1,11 +1,11 @@
-from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic.dataclasses import dataclass
 from sqlalchemy import select
 
 from offspot_metrics_backend.business.agg_kind import AggKind
-from offspot_metrics_backend.db.models import KpiRecord, KpiValue as DbKpiValue
+from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.routes import DbSession
 
 router = APIRouter(
@@ -19,7 +19,7 @@ class KpiValue:
     """A KPI value with its ID"""
 
     kpi_id: int
-    value: DbKpiValue
+    value: Any
 
 
 @router.get(
@@ -36,7 +36,7 @@ async def kpi_values(
     agg_kind: Annotated[str, Query(pattern=AggKind.pattern())],
     agg_value: Annotated[str, Query()],
     session: DbSession,
-) -> KpiValue:
+) -> Any:
     query = (
         select(KpiRecord.kpi_id, KpiRecord.kpi_value)
         .where(KpiRecord.kpi_id == kpi_id)

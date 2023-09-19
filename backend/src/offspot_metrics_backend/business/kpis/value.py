@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 
 from offspot_metrics_backend.db.models import KpiValue
 

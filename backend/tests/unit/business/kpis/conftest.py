@@ -1,13 +1,12 @@
 from collections.abc import Generator
-from dataclasses import dataclass
 from datetime import datetime
-from typing import TypeAlias, cast
+from typing import TypeAlias
 
 import pytest
-from marshmallow_dataclass import class_schema as schema
+from pydantic.dataclasses import dataclass
 from sqlalchemy.orm import Session
+from tests.unit.conftest import DummyKpi
 
-from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.business.indicators.content_visit import (
     ContentHomeVisit,
     ContentItemVisit,
@@ -20,7 +19,6 @@ from offspot_metrics_backend.db.models import (
     IndicatorDimension,
     IndicatorPeriod,
     IndicatorRecord,
-    DummyKpiValue,
 )
 
 ProcessorGenerator: TypeAlias = Generator[Processor, None, None]
@@ -32,46 +30,6 @@ NoneGenerator: TypeAlias = Generator[None, None, None]
 @pytest.fixture()
 def processor(init_datetime: datetime) -> ProcessorGenerator:
     yield Processor(Period(init_datetime))
-
-
-class DummyKpi(Kpi):
-    """A dummy KPI which is not using indicators at all to simplify testing"""
-
-    unique_id = -2001  # this ID is unique to each kind of kpi
-
-    def compute_value_from_indicators(
-        self,
-        agg_kind: AggKind,
-        start_ts: int,
-        stop_ts: int,
-        session: Session,  # noqa: ARG002
-    ) -> DummyKpiValue:
-        """For a kind of aggregation (daily, weekly, ...) and a given period, return
-        the KPI value."""
-        return DummyKpiValue(f"{agg_kind.value} - {start_ts} - {stop_ts}")
-
-    def loads_value(self, value: str) -> DummyKpiValue:
-        """Loads the KPI value from a serialized string"""
-        return cast(
-            DummyKpiValue,
-            schema(DummyKpiValue)().loads(  # pyright: ignore[reportUnknownMemberType]
-                value, many=False
-            ),
-        )
-
-    def dumps_value(self, value: list[DummyKpiValue]) -> str:
-        """Dump the KPI value into a serialized string"""
-        return cast(
-            str,
-            schema(DummyKpiValue)().dumps(  # pyright: ignore[reportUnknownMemberType]
-                value, many=False
-            ),
-        )
-
-
-@pytest.fixture()
-def dummy_kpi() -> KpiGenerator:
-    yield DummyKpi()
 
 
 @dataclass
@@ -194,3 +152,8 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
     dbsession.flush()
 
     yield None
+
+
+@pytest.fixture()
+def dummy_kpi() -> KpiGenerator:
+    yield DummyKpi()

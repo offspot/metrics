@@ -2,10 +2,10 @@ import json
 import logging
 from asyncio import sleep
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeGuard
 
+from pydantic.dataclasses import dataclass
 from watchdog.events import (
     EVENT_TYPE_CREATED,
     EVENT_TYPE_DELETED,

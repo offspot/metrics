@@ -1,5 +1,6 @@
-from dataclasses import dataclass
 from typing import Generic, TypeVar
+
+from pydantic.dataclasses import dataclass
 
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 

@@ -1,6 +1,5 @@
-from dataclasses import dataclass
-
 from fastapi import APIRouter
+from pydantic.dataclasses import dataclass
 from sqlalchemy import select
 
 from offspot_metrics_backend.db.models import KpiRecord

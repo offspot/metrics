@@ -8,9 +8,18 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
+from tests.unit.conftest import DummyKpi, DummyKpiValue
 
+from offspot_metrics_backend.business.kpis.content_popularity import (
+    ContentObjectPopularity,
+    ContentObjectPopularityItem,
+    ContentObjectPopularityValue,
+    ContentPopularity,
+    ContentPopularityItem,
+    ContentPopularityValue,
+)
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
-from offspot_metrics_backend.db.models import KpiRecord, DummyKpiValue
+from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.main import Main
 
 
@@ -42,19 +51,30 @@ async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
     dbsession.execute(delete(KpiRecord))
     kpis = [
         KpiRecord(
-            kpi_id=1,
+            kpi_id=ContentObjectPopularity.unique_id,
             agg_kind="D",
             agg_value="2023-03-01",
-            kpi_value=DummyKpiValue("165"),
+            kpi_value=ContentObjectPopularityValue.model_validate(
+                [
+                    ContentObjectPopularityItem(
+                        content="onecontent", item="oneitem", count=12, percentage=23.2
+                    )
+                ]
+            ),
         ),
         KpiRecord(
-            kpi_id=2,
+            kpi_id=ContentPopularity.unique_id,
             agg_kind="D",
             agg_value="2023-03-01",
-            kpi_value=DummyKpiValue("123"),
+            kpi_value=ContentPopularityValue.model_validate(
+                [ContentPopularityItem(content="onecontent", count=34, percentage=33.2)]
+            ),
         ),
         KpiRecord(
-            kpi_id=1, agg_kind="W", agg_value="2023 W10", kpi_value=DummyKpiValue("199")
+            kpi_id=DummyKpi.unique_id,
+            agg_kind="W",
+            agg_value="2023 W10",
+            kpi_value=DummyKpiValue.model_validate("199"),
         ),
     ]
     for kpi in kpis:

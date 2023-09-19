@@ -1,8 +1,5 @@
-from dataclasses import dataclass
-from typing import cast
-
-# from desert import schema
-from marshmallow_dataclass import class_schema as schema
+from pydantic import RootModel
+from pydantic.dataclasses import dataclass
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
@@ -16,14 +13,19 @@ from offspot_metrics_backend.db.models import (
     IndicatorDimension,
     IndicatorPeriod,
     IndicatorRecord,
+    KpiValue,
 )
 
 
 @dataclass
-class ContentPopularityValue:
+class ContentPopularityItem:
     content: str
     count: int
     percentage: float
+
+
+class ContentPopularityValue(RootModel[list[ContentPopularityItem]], KpiValue):
+    pass
 
 
 class ContentPopularity(Kpi):
@@ -41,7 +43,7 @@ class ContentPopularity(Kpi):
         start_ts: int,
         stop_ts: int,
         session: Session,
-    ) -> list[ContentPopularityValue]:
+    ) -> ContentPopularityValue:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
 
@@ -72,44 +74,30 @@ class ContentPopularity(Kpi):
             desc(subquery.c.content_count), subquery.c.content
         )
 
-        return [
-            ContentPopularityValue(
-                content=record.content,
-                count=record.content_count,
-                percentage=round(record.content_count * 100 / total_count, 2),
-            )
-            for record in session.execute(query)
-        ]
-
-    def loads_value(self, value: str) -> list[ContentPopularityValue]:
-        """Loads the KPI value from a serialized string"""
-        return cast(
-            list[ContentPopularityValue],
-            schema(
-                ContentPopularityValue
-            )().loads(  # pyright: ignore[reportUnknownMemberType]
-                value, many=True
-            ),
-        )
-
-    def dumps_value(self, value: list[ContentPopularityValue]) -> str:
-        """Dump the KPI value into a serialized string"""
-        return cast(
-            str,
-            schema(
-                ContentPopularityValue
-            )().dumps(  # pyright: ignore[reportUnknownMemberType]
-                value, many=True
-            ),
+        return ContentPopularityValue.model_validate(
+            [
+                ContentPopularityItem(
+                    content=record.content,
+                    count=record.content_count,
+                    percentage=round(record.content_count * 100 / total_count, 2),
+                )
+                for record in session.execute(query)
+            ]
         )
 
 
 @dataclass
-class ContentObjectPopularityValue:
+class ContentObjectPopularityItem:
     content: str
     item: str
     count: int
     percentage: float
+
+
+class ContentObjectPopularityValue(
+    KpiValue, RootModel[list[ContentObjectPopularityItem]]
+):
+    pass
 
 
 class ContentObjectPopularity(Kpi):
@@ -120,7 +108,6 @@ class ContentObjectPopularity(Kpi):
     """
 
     unique_id = 2002
-    value_schema = schema(ContentObjectPopularityValue)
 
     def compute_value_from_indicators(
         self,
@@ -128,7 +115,7 @@ class ContentObjectPopularity(Kpi):
         start_ts: int,
         stop_ts: int,
         session: Session,
-    ) -> list[ContentObjectPopularityValue]:
+    ) -> ContentObjectPopularityValue:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
 
@@ -162,34 +149,14 @@ class ContentObjectPopularity(Kpi):
             .limit(50)
         )
 
-        return [
-            ContentObjectPopularityValue(
-                content=record.content,
-                item=record.item,
-                count=record.item_count,
-                percentage=round(record.item_count * 100 / total_count, 2),
-            )
-            for record in session.execute(query)
-        ]
-
-    def loads_value(self, value: str) -> list[ContentObjectPopularityValue]:
-        """Loads the KPI value from a serialized string"""
-        return cast(
-            list[ContentObjectPopularityValue],
-            schema(
-                ContentObjectPopularityValue
-            )().loads(  # pyright: ignore[reportUnknownMemberType]
-                value, many=True
-            ),
-        )
-
-    def dumps_value(self, value: list[ContentObjectPopularityValue]) -> str:
-        """Dump the KPI value into a serialized string"""
-        return cast(
-            str,
-            schema(
-                ContentObjectPopularityValue
-            )().dumps(  # pyright: ignore[reportUnknownMemberType]
-                value, many=True
-            ),
+        return ContentObjectPopularityValue.model_validate(
+            [
+                ContentObjectPopularityItem(
+                    content=record.content,
+                    item=record.item,
+                    count=record.item_count,
+                    percentage=round(record.item_count * 100 / total_count, 2),
+                )
+                for record in session.execute(query)
+            ]
         )

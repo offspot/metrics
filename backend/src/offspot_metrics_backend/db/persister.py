@@ -1,6 +1,3 @@
-from collections.abc import Callable
-from typing import Any
-
 import sqlalchemy as sa
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
@@ -13,7 +10,7 @@ from offspot_metrics_backend.db.models import IndicatorDimension as DimensionDb
 from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
 from offspot_metrics_backend.db.models import IndicatorRecord as RecordDb
 from offspot_metrics_backend.db.models import IndicatorState as StateDb
-from offspot_metrics_backend.db.models import KpiValue, KpiRecord
+from offspot_metrics_backend.db.models import KpiRecord, KpiValue
 
 
 class Persister:
@@ -151,7 +148,6 @@ class Persister:
         agg_kind: AggKind,
         agg_value: str,
         kpi_value: KpiValue,
-        value_dump_fn: Callable[[Any], str],
         session: Session,
     ) -> None:
         """Update a KPI value for a given KPI, kind of period and period"""

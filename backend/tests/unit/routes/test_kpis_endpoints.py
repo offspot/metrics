@@ -11,12 +11,29 @@ from offspot_metrics_backend.main import PREFIX
 @pytest.mark.parametrize(
     "kpi_id, agg_kind, agg_value, expected_value",
     [
-        (1, "D", "2023-03-01", "165"),
-        (1, "W", "2023 W10", "199"),
-        (2, "D", "2023-03-01", "123"),
+        (
+            2001,
+            "D",
+            "2023-03-01",
+            [{"content": "onecontent", "count": 34, "percentage": 33.2}],
+        ),
+        (
+            2002,
+            "D",
+            "2023-03-01",
+            [
+                {
+                    "content": "onecontent",
+                    "count": 12,
+                    "item": "oneitem",
+                    "percentage": 23.2,
+                }
+            ],
+        ),
+        (-2001, "W", "2023 W10", "199"),
     ],
 )
-async def test_kpis(
+async def test_kpis_get(
     kpi_id: int,
     agg_kind: str,
     agg_value: str,
@@ -32,7 +49,7 @@ async def test_kpis(
     assert "kpi_id" in response_json
     assert "value" in response_json
     assert response_json["kpi_id"] == kpi_id
-    assert response_json["value"] == {"dummy": expected_value}
+    assert response_json["value"] == expected_value
 
 
 @pytest.mark.asyncio

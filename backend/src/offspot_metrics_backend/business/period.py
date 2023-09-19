@@ -1,7 +1,7 @@
 import datetime
-from dataclasses import dataclass
 
 from dateutil.relativedelta import relativedelta
+from pydantic.dataclasses import dataclass
 
 from offspot_metrics_backend.business.agg_kind import AggKind
 

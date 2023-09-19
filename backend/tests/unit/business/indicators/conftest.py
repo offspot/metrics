@@ -1,9 +1,9 @@
 from collections.abc import Generator
-from dataclasses import dataclass
 from datetime import datetime
 from typing import TypeAlias, cast
 
 import pytest
+from pydantic.dataclasses import dataclass
 
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.indicators.indicator import Indicator

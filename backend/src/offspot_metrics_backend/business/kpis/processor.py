@@ -129,7 +129,6 @@ class Processor:
                     agg_kind=agg_kind,
                     agg_value=value.agg_value,
                     kpi_value=value.kpi_value,
-                    value_dump_fn=kpi.dumps_value,
                     session=session,
                 )
         if not value_updated:

@@ -1,16 +1,18 @@
+import json
 from datetime import datetime
 from types import MappingProxyType
 from typing import Any, cast
-import json
+
+from pydantic.dataclasses import dataclass
 from sqlalchemy import (
     DateTime,
+    Dialect,
     ForeignKey,
     Index,
     UniqueConstraint,
     select,
-    Dialect,
+    types,
 )
-from sqlalchemy import types
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -20,24 +22,14 @@ from sqlalchemy.orm import (
     relationship,
 )
 from sqlalchemy.sql.schema import MetaData
-from marshmallow_dataclass import class_schema as schema
 
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.period import Period
-from dataclasses import dataclass
 
 
 @dataclass
 class KpiValue:
     pass
-
-
-@dataclass
-class DummyKpiValue(KpiValue):
-    dummy: str
-
-    def __lt__(self, other: "DummyKpiValue") -> bool:
-        return self.dummy < other.dummy
 
 
 @dataclass
@@ -55,7 +47,9 @@ class KpiValueType(types.TypeDecorator[KpiValue]):
     cache_ok = True
 
     def process_bind_param(
-        self, value: KpiValue | None, dialect: Dialect
+        self,
+        value: KpiValue | None,
+        dialect: Dialect,  # noqa: ARG002
     ) -> str | None:
         if not value:
             return None
@@ -63,22 +57,14 @@ class KpiValueType(types.TypeDecorator[KpiValue]):
             {
                 "module_name": value.__class__.__module__,
                 "class_name": value.__class__.__name__,
-                "serialized": json.loads(
-                    cast(
-                        str,
-                        schema(
-                            value.__class__
-                        )().dumps(  # pyright: ignore[reportUnknownMemberType]
-                            value,
-                            many=False,
-                        ),
-                    )
-                ),
+                "serialized": value.model_dump(),  # type: ignore
             }
         )
 
     def process_result_value(
-        self, value: Any | None, dialect: Dialect
+        self,
+        value: Any | None,
+        dialect: Dialect,  # noqa: ARG002
     ) -> KpiValue | None:
         value_str = cast(str, value)
         value_dict = json.loads(value_str)
@@ -91,12 +77,11 @@ class KpiValueType(types.TypeDecorator[KpiValue]):
                 clazz = subclass
         if clazz is None:
             raise ValueError(
-                f"Class not found for module {value_dict['module_name']} and class {value_dict['class_name']}"
+                f"Class not found for module {value_dict['module_name']}"
+                f" and class {value_dict['class_name']}"
             )
         else:
-            return schema(clazz)().loads(  # pyright: ignore[reportUnknownMemberType]
-                cast(str, json.dumps(value_dict["serialized"])), many=False
-            )
+            return clazz.model_validate(value_dict["serialized"])  # type: ignore
 
 
 class Base(MappedAsDataclass, DeclarativeBase):

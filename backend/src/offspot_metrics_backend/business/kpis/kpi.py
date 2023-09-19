@@ -18,13 +18,3 @@ class Kpi(abc.ABC):
         """For a kind of aggregation (daily, weekly, ...) and a given period, compute
         the KPI value based on indicators present in DB."""
         ...  # pragma: no cover
-
-    @abc.abstractmethod
-    def loads_value(self, value: str) -> Any:
-        """Loads the KPI value from a serialized string"""
-        ...  # pragma: no cover
-
-    @abc.abstractmethod
-    def dumps_value(self, value: Any) -> str:
-        """Dump the KPI value into a serialized string"""
-        ...  # pragma: no cover
