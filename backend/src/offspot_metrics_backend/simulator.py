@@ -101,7 +101,7 @@ def clear_db():
             session.execute(delete(dbm.IndicatorState))
             session.execute(delete(dbm.IndicatorDimension))
             session.execute(delete(dbm.IndicatorPeriod))
-            session.execute(delete(dbm.KpiValue))
+            session.execute(delete(dbm.KpiRecord))
 
 
 def rand_sim_update_now(now: datetime) -> datetime:

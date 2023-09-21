@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.routes import DbSession
 
 router = APIRouter(
@@ -42,7 +42,7 @@ class Aggregations:
 def aggregations(
     session: DbSession,
 ) -> Aggregations:
-    query = select(KpiValue.agg_kind, KpiValue.agg_value).distinct()
+    query = select(KpiRecord.agg_kind, KpiRecord.agg_value).distinct()
 
     return Aggregations(
         aggregations=[

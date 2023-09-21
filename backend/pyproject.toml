@@ -21,9 +21,8 @@ dependencies = [
     "alembic == 1.11.3",
     "fastapi[all] == 0.101.1",
     "fastapi-pagination == 0.12.9",
-    "marshmallow == 3.20.1",
-    "marshmallow-sqlalchemy == 0.29.0",
-    "psutil ==5.9.5",
+    "psutil == 5.9.5",
+    "pydantic == 2.3.0", # this is also a sub-dep of fastapi but we rely a lot on it
     "python-dateutil == 2.8.2",
     "PyYAML == 6.0.1",
     "SQLAlchemy == 2.0.20",
@@ -40,7 +39,7 @@ lint = [
     "ruff == 0.0.285",
 ]
 check = [
-    "pyright == 1.1.325",
+    "pyright == 1.1.327",
 ]
 test = [
     "coverage == 7.2.7",

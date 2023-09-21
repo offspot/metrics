@@ -3,14 +3,14 @@ from http import HTTPStatus
 import pytest
 from httpx import AsyncClient
 
-from offspot_metrics_backend.db.models import KpiValue
+from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.main import PREFIX
 
 
 @pytest.mark.asyncio
 async def test_aggregations(
     client: AsyncClient,
-    kpis: list[KpiValue],  # noqa: ARG001
+    kpis: list[KpiRecord],  # noqa: ARG001
 ):
     response = await client.get(f"{PREFIX}/aggregations")
     assert response.status_code == HTTPStatus.OK
