@@ -8,8 +8,8 @@ packages:
   title: StackExchange - Software Quality Assurance and Testing
   url: //kiwix.localhost:8000/viewer/viewer#sqa.stackexchange.com_en_all_2023-05
 - kind: files
-  title: "Nomad exercices du CP \xE0 la 3\xE8"
+  title: Nomad exercices du CP \xE0 la 3\xE8
   url: //nomad.localhost:8000/
 - kind: files
-  title: "Chasse au tr\xE9sor Math Mathews"
+  title: Chasse au tr\xE9sor Math Mathews
   url: //mathews.localhost:8000/

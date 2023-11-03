@@ -90,8 +90,7 @@ class ReverseProxyConfig:
                 self.zim_host = host
             elif self.zim_host != host:
                 self.warnings.append(
-                    f"Ignoring second zim host '{self.zim_host}', only one host"
-                    " supported"
+                    f"Ignoring second zim host '{host}', only one host supported"
                 )
                 return
 
