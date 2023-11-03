@@ -15,6 +15,7 @@ from offspot_metrics_backend.business.indicators.indicator import Indicator
 from offspot_metrics_backend.business.indicators.shared_files import (
     SharedFilesOperations,
 )
+from offspot_metrics_backend.business.indicators.uptime import Uptime
 from offspot_metrics_backend.business.inputs.shared_files import (
     SharedFilesOperationKind,
 )
@@ -47,7 +48,7 @@ def dummy_kpi() -> KpiGenerator:
 class DataRecord:
     indicator: type[Indicator]
     value: int
-    dimension_value0: str | None
+    dimension_value0: str | None = None
     dimension_value1: str | None = None
     dimension_value2: str | None = None
 
@@ -86,6 +87,10 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     value=33,
                     dimension_value0=SharedFilesOperationKind.FILE_CREATED,
                 ),
+                DataRecord(
+                    indicator=Uptime,
+                    value=57,
+                ),
             ],
         ),
         Data(
@@ -107,6 +112,10 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     indicator=SharedFilesOperations,
                     value=11,
                     dimension_value0=SharedFilesOperationKind.FILE_DELETED,
+                ),
+                DataRecord(
+                    indicator=Uptime,
+                    value=43,
                 ),
             ],
         ),
@@ -151,6 +160,10 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     indicator=SharedFilesOperations,
                     value=14,
                     dimension_value0=SharedFilesOperationKind.FILE_DELETED,
+                ),
+                DataRecord(
+                    indicator=Uptime,
+                    value=11,
                 ),
             ],
         ),

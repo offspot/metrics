@@ -9,6 +9,7 @@ from fastapi.responses import RedirectResponse
 
 from offspot_metrics_backend import __about__
 from offspot_metrics_backend.business.caddy_log_converter import CaddyLogConverter
+from offspot_metrics_backend.business.inputs.clock_tick import ClockTick
 from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEvent
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
@@ -57,7 +58,7 @@ class Main:
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
             self.config.parse_configuration()
-            self.processor.startup(current_period=Period.now())
+            self.processor.startup(current_period=Period.now()[0])
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)
             log_watcher_task.add_done_callback(self.background_tasks.discard)
@@ -84,7 +85,9 @@ class Main:
         while True:
             await sleep(TICK_PERIOD)
             logger.debug("Processing a clock tick")
-            self.processor.process_tick(tick_period=Period.now())
+            now_period, now_datetime = Period.now()
+            self.processor.process_input(ClockTick(now=now_datetime))
+            self.processor.process_tick(tick_period=now_period)
 
     def handle_log_event(self, event: NewLineEvent):
         logger.debug(f"Log watcher sent: {event.line_content}")

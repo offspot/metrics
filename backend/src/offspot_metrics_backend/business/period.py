@@ -140,6 +140,7 @@ class Period:
         raise AttributeError  # pragma: no cover
 
     @classmethod
-    def now(cls) -> "Period":
-        """Returns current period based on current datetime"""
-        return Period(datetime.datetime.now())  # noqa: DTZ005
+    def now(cls) -> tuple["Period", datetime.datetime]:
+        """Returns current datetime and corresponding period"""
+        now = datetime.datetime.now()  # noqa: DTZ005
+        return (Period(now), now)
