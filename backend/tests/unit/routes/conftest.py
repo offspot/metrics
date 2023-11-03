@@ -18,6 +18,10 @@ from offspot_metrics_backend.business.kpis.content_popularity import (
     ContentPopularityItem,
     ContentPopularityValue,
 )
+from offspot_metrics_backend.business.kpis.shared_files import (
+    SharedFiles,
+    SharedFilesValue,
+)
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
 from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.main import Main
@@ -75,6 +79,12 @@ async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
             agg_kind="W",
             agg_value="2023 W10",
             kpi_value=DummyKpiValue.model_validate("199"),
+        ),
+        KpiRecord(
+            kpi_id=SharedFiles.unique_id,
+            agg_kind="W",
+            agg_value="2023 W10",
+            kpi_value=SharedFilesValue(files_created=65, files_deleted=45),
         ),
     ]
     for kpi in kpis:

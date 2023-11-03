@@ -13,3 +13,7 @@ packages:
 - kind: files
   title: Chasse au tr\xE9sor Math Mathews
   url: //mathews.localhost:8000/
+- kind: app
+  title: Shared files
+  url: //edupi.localhost:8000/
+  ident: edupi.offspot.kiwix.org

@@ -55,3 +55,11 @@ packages:
   tags:
   - android
   url: //mathews.renaud.test/
+- kind: app
+  ident: edupi.offspot.kiwix.org
+  title: Shared files 1
+  url: //edupi1.renaud.test/
+- kind: app
+  ident: edupi.offspot.kiwix.org
+  title: Shared files 2
+  url: //edupi2.renaud.test/
