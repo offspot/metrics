@@ -1,7 +1,8 @@
-import json
 import logging
 import re
 from http import HTTPStatus
+
+from pydantic import BaseModel, Field, ValidationError
 
 from offspot_metrics_backend.business.inputs.content_visit import (
     ContentHomeVisit,
@@ -17,6 +18,24 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
 logger = logging.getLogger(__name__)
 
 
+class CaddyLogRequest(BaseModel):
+    host: str
+    uri: str
+    method: str
+
+
+class CaddyLogResponseHeaders(BaseModel):
+    content_type: list[str] | None = Field(alias="Content-Type", default=None)
+
+
+class CaddyLog(BaseModel):
+    level: str
+    msg: str
+    request: CaddyLogRequest
+    status: int
+    resp_headers: CaddyLogResponseHeaders
+
+
 class CaddyLogConverter:
     """Converts logs received from Caddy reverse proxy into inputs to process"""
 
@@ -25,38 +44,29 @@ class CaddyLogConverter:
 
     def process(self, line: str) -> list[Input]:
         """Transform one Caddy log line into corresponding inputs"""
+
         try:
-            message = json.loads(line)
-        except json.JSONDecodeError:
-            return []
-        if "level" not in message or message["level"] != "info":
-            return []
-        if "msg" not in message or message["msg"] != "handled request":
+            log = CaddyLog.model_validate_json(line)
+        except ValidationError:
             return []
 
-        if "request" not in message:
-            return []
-        if "host" not in message["request"]:
-            return []
-        if "uri" not in message["request"]:
-            return []
-        if "method" not in message["request"]:
-            return []
-        if "status" not in message:
+        if log.level != "info" or log.msg != "handled request":
             return []
 
-        host: str = message["request"]["host"]
-        uri: str = message["request"]["uri"]
-        method: str = message["request"]["method"]
-        status: int = int(message["status"])
-        content_type: str | None = message.get("resp_headers", {}).get("Content-Type")
+        content_type = (
+            log.resp_headers.content_type[0]
+            if log.resp_headers.content_type and len(log.resp_headers.content_type) > 0
+            else None
+        )
 
-        if host == self.config.zim_host:
-            return self._process_zim(uri=uri, content_type=content_type)
-        elif host in self.config.edupi_hosts:
-            return self._process_edupi(uri=uri, status=status, method=method)
-        elif host in self.config.files:
-            return self._process_file(uri=uri, host=host)
+        if log.request.host == self.config.zim_host:
+            return self._process_zim(uri=log.request.uri, content_type=content_type)
+        elif log.request.host in self.config.edupi_hosts:
+            return self._process_edupi(
+                uri=log.request.uri, status=log.status, method=log.request.method
+            )
+        elif log.request.host in self.config.files:
+            return self._process_file(uri=log.request.uri, host=log.request.host)
         else:
             return []
 
