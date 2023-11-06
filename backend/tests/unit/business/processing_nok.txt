@@ -12,7 +12,10 @@
 {"level":"info","msg":"handled request","request":{"host":"nomad.renaud.test","uri":"/","method":"GET"}}
 {"level":"info","msg":"handled request","request":{"host":"nomad.renaud.test","uri":"/","method":"GET"},"status":200}
 {"level":"info","msg":"handled request","request":{"host":"nomad.renaud.test","uri":"/page2.html","method":"GET"},"status":200, "resp_headers": {}}
+{"level":"info","msg":"something else","request":{"host":"nomad.renaud.test","uri":"/","method":"GET"},"status":200, "resp_headers": {}}
+{"level":"error","msg":"handled request","request":{"host":"nomad.renaud.test","uri":"/","method":"GET"},"status":200, "resp_headers": {}}
 {"level":"info","msg":"handled request","request":{"host":"kiwix.renaud.test","uri":"/something.html","method":"GET"},"status":200, "resp_headers": {}}
+{"level":"info","msg":"handled request","request":{"host":"unknown.renaud.test","uri":"/","method":"GET"},"status":200, "resp_headers": {}}
 {"level":"info","msg":"handled request","request":{"host":"kiwix.renaud.test","uri":"/content/unknown_zim/questions/149/1-5-million-lines-of-code-0-tests-where-should-we-start","method":"GET"},"status":200, "resp_headers": {}}
 {"level":"info","msg":"handled request","request":{"host":"kiwix.renaud.test","uri":"/content/wikipedia_en_all/questions/149/1-5-million-lines-of-code-0-tests-where-should-we-start","method":"GET"},"status":200, "resp_headers": {}}
 {"level":"info","msg":"handled request","request":{"host":"kiwix.renaud.test","uri":"/content/wikipedia_en_all/assets/image.png","method":"GET"},"resp_headers":{"Content-Type":["image/png"]},"status":200}

@@ -60,6 +60,12 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED)],
         ),
         (
+            r"""{"level":"info","msg":"handled request","status":"204","""
+            r""""request":{"host":"edupi2.renaud.test","method":"GET","""
+            r""""uri":"/api/documents/123"},"resp_headers":{}}""",
+            [],
+        ),
+        (
             r"""{"level":"info","msg":"handled request","status":"400","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
             r""""uri":"/api/documents/"}},resp_headers={}""",
