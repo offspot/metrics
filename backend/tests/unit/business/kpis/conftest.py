@@ -12,6 +12,12 @@ from offspot_metrics_backend.business.indicators.content_visit import (
     ContentItemVisit,
 )
 from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.shared_files import (
+    SharedFilesOperations,
+)
+from offspot_metrics_backend.business.inputs.shared_files import (
+    SharedFilesOperationKind,
+)
 from offspot_metrics_backend.business.kpis.kpi import Kpi
 from offspot_metrics_backend.business.kpis.processor import Processor
 from offspot_metrics_backend.business.period import Period
@@ -75,6 +81,11 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     dimension_value0="value1",
                     dimension_value1="value2",
                 ),
+                DataRecord(
+                    indicator=SharedFilesOperations,
+                    value=33,
+                    dimension_value0=SharedFilesOperationKind.FILE_CREATED,
+                ),
             ],
         ),
         Data(
@@ -91,6 +102,11 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     value=16,
                     dimension_value0="value1",
                     dimension_value1="value2",
+                ),
+                DataRecord(
+                    indicator=SharedFilesOperations,
+                    value=11,
+                    dimension_value0=SharedFilesOperationKind.FILE_DELETED,
                 ),
             ],
         ),
@@ -125,6 +141,16 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     value=36,
                     dimension_value0="value1",
                     dimension_value1="value4",
+                ),
+                DataRecord(
+                    indicator=SharedFilesOperations,
+                    value=16,
+                    dimension_value0=SharedFilesOperationKind.FILE_CREATED,
+                ),
+                DataRecord(
+                    indicator=SharedFilesOperations,
+                    value=14,
+                    dimension_value0=SharedFilesOperationKind.FILE_DELETED,
                 ),
             ],
         ),

@@ -18,7 +18,7 @@ services:
       - --reload-dir
       - /usr/local/lib/python3.11/site-packages/offspot_metrics_backend
     ports:
-      - 8002:80
+      - 127.0.0.1:8002:80
     environment:
       PACKAGE_CONF_FILE: /conf/packages.yml
       PROCESSING_DISABLED: "True"
@@ -33,6 +33,7 @@ services:
       - ../backend/pyproject.toml:/src/pyproject.toml
       - ../backend/htmlcov:/src/htmlcov
       - ../backend/tasks.py:/src/tasks.py
+      - ../backend/dev_tools:/src/dev_tools
       - ../backend/tests:/src/tests
     environment:
       PROCESSING_DISABLED: "True"
@@ -46,7 +47,7 @@ services:
     volumes:
       - ../frontend:/work
     ports:
-      - 8003:5173
+      - 127.0.0.1:8003:5173
   kiwix-serve:
     container_name: om_kiwix
     image: ghcr.io/offspot/kiwix-serve:3.5.0-2 # there is no more latest/dev version
@@ -57,7 +58,7 @@ services:
       - /data/devops.stackexchange.com_en_all_2023-05.zim
       - /data/sqa.stackexchange.com_en_all_2023-05.zim
     ports:
-      - 8001:80
+      - 127.0.0.1:8001:80
   reverse-proxy:
     container_name: om_reverse-proxy
     image: caddy:2.6.1-alpine
@@ -66,7 +67,18 @@ services:
       - ./file-browser-data:/file-browser-data
       - reverse-proxy-srv:/srv
     ports:
-      - 8000:80
+      - 127.0.0.1:8000:80
+  edupi:
+    container_name: om_edupi
+    image: ghcr.io/offspot/edupi:dev
+    ports:
+      - 127.0.0.1:8004:80
+    volumes:
+      - edupi-data:/data
+    environment:
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin
 volumes:
   reverse-proxy-srv:
   logwatcher-data:
+  edupi-data:

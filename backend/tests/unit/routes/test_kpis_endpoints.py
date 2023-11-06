@@ -30,6 +30,12 @@ from offspot_metrics_backend.main import PREFIX
                 }
             ],
         ),
+        (
+            2005,
+            "W",
+            "2023 W10",
+            {"files_created": 65, "files_deleted": 45},
+        ),
         (-2001, "W", "2023 W10", "199"),
     ],
 )

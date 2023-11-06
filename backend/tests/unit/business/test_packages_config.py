@@ -42,6 +42,7 @@ def test_parsing_ok(reverse_proxy_config: Callable[[str | None], ReverseProxyCon
         "wikipedia_en_all": {"title": "Wikipedia"},
     }
     assert config.zim_host == "kiwix.renaud.test"
+    assert config.edupi_hosts == ["edupi1.renaud.test", "edupi2.renaud.test"]
 
 
 def test_parsing_warnings(
@@ -53,12 +54,14 @@ def test_parsing_warnings(
         "Package with missing 'title' ignored",
         "Unsupported URL: tata",
         "Package with missing 'kind' ignored",
-        "Ignoring second zim host 'kiwix.renaud.test', only one host supported",
+        "Ignoring second zim host 'kaka.renaud.test', only one host supported",
         "Unsupported ZIM URL: //kiwix.renaud.test/kkkk#toto",
         "Package with unsupported 'kind' : 'ooo' ignored",
+        "Ignoring unknown app ident 'wikifundi-en.offspot.kiwix.org'",
     ]
     assert config.files == {}
     assert config.zims == {
         "wikipedia_en_all": {"title": "Wikipedia"},
     }
     assert config.zim_host == "kiwix.renaud.test"
+    assert config.edupi_hosts == ["edupi.renaud.test", "edupi2.renaud.test"]

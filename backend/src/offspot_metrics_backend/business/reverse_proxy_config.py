@@ -27,6 +27,7 @@ class ReverseProxyConfig:
     def __init__(self) -> None:
         self.files: dict[str, Any] = {}
         self.zim_host: str | None = None
+        self.edupi_hosts: list[str] = []
         self.zims: dict[str, Any] = {}
         self.warnings: list[str] = []
 
@@ -40,6 +41,9 @@ class ReverseProxyConfig:
 
         for warning in self.warnings:
             logger.warning(warning)
+
+        for host in self.edupi_hosts:
+            logger.info(f"Found EduPi host in {host}")
 
         for host, file in self.files.items():
             logger.info(f"Found File {file} in {host}")
@@ -82,7 +86,16 @@ class ReverseProxyConfig:
         host = match.group("host")
 
         kind = package.get("kind")
-        if kind == "files":
+
+        ident = package.get("ident", None)
+
+        if kind == "app":
+            if ident == "edupi.offspot.kiwix.org":
+                self.edupi_hosts.append(host)
+            else:
+                self.warnings.append(f"Ignoring unknown app ident '{ident}'")
+            return
+        elif kind == "files":
             self.files[host] = {"title": title}
             return
         elif kind == "zim":
@@ -90,8 +103,7 @@ class ReverseProxyConfig:
                 self.zim_host = host
             elif self.zim_host != host:
                 self.warnings.append(
-                    f"Ignoring second zim host '{self.zim_host}', only one host"
-                    " supported"
+                    f"Ignoring second zim host '{host}', only one host supported"
                 )
                 return
 

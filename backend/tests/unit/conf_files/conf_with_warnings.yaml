@@ -21,7 +21,7 @@ packages:
 - url: //kiwix.renaud.test/viewer#wikipedia_en_all
   title: toto
 
-# second host ignored
+# second ZIM host ignored
 - kind: zim
   url: //kaka.renaud.test/viewer#toto
   title: toto
@@ -35,3 +35,21 @@ packages:
 - kind: ooo
   url: //kiwix.renaud.test/ssss
   title: toto
+
+# One edupi ok
+- kind: app
+  ident: edupi.offspot.kiwix.org
+  title: Shared files
+  url: //edupi.renaud.test/
+
+# Second edupi ok
+- kind: app
+  ident: edupi.offspot.kiwix.org
+  title: Shared files 2
+  url: //edupi2.renaud.test/
+
+# Unknown app ident
+- kind: app
+  ident: wikifundi-en.offspot.kiwix.org
+  title: Wikifundi
+  url: //wikifundi.renaud.test/

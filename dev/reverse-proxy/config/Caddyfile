@@ -28,3 +28,7 @@ nomad.localhost:80 {
 kiwix.localhost:80 {
     reverse_proxy om_kiwix:80
 }
+
+edupi.localhost:80 {
+    reverse_proxy om_edupi:80
+}
