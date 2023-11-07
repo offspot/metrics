@@ -31,6 +31,12 @@ from offspot_metrics_backend.main import PREFIX
             ],
         ),
         (
+            2004,
+            "W",
+            "2023 W10",
+            {"nb_minutes_on": 654},
+        ),
+        (
             2005,
             "W",
             "2023 W10",

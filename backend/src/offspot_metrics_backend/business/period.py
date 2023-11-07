@@ -1,5 +1,6 @@
 import datetime
 from dataclasses import dataclass
+from typing import NamedTuple
 
 from dateutil.relativedelta import relativedelta
 
@@ -140,6 +141,14 @@ class Period:
         raise AttributeError  # pragma: no cover
 
     @classmethod
-    def now(cls) -> "Period":
-        """Returns current period based on current datetime"""
-        return Period(datetime.datetime.now())  # noqa: DTZ005
+    def now(
+        cls,
+    ) -> "PeriodNow":
+        """Returns current datetime and corresponding period"""
+        now = datetime.datetime.now()  # noqa: DTZ005
+        return PeriodNow(period=Period(now), datetime=now)
+
+
+class PeriodNow(NamedTuple):
+    period: "Period"
+    datetime: datetime.datetime

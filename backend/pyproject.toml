@@ -223,6 +223,7 @@ omit = [
   "src/offspot_metrics_backend/business/processor.py", # glue logic
   "src/offspot_metrics_backend/business/indicators/content_visit.py", # straightforward implementation, pointless to test
   "src/offspot_metrics_backend/business/indicators/shared_files.py", # straightforward implementation, pointless to test
+  "src/offspot_metrics_backend/business/indicators/uptime.py", # straightforward implementation, pointless to test
   "src/offspot_metrics_backend/simulator.py", # developer tool
 ]
 
