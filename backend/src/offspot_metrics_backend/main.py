@@ -91,8 +91,8 @@ class Main:
 
     def handle_log_event(self, event: NewLineEvent):
         logger.debug(f"Log watcher sent: {event.line_content}")
-        inputs = self.converter.process(event.line_content)
-        for input_ in inputs:
+        result = self.converter.process(event.line_content)
+        for input_ in result.inputs:
             logger.debug(f"Processing input: {input_}")
             self.processor.process_input(input_=input_)
 

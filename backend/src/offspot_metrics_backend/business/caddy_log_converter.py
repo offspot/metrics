@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import NamedTuple
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -41,6 +42,11 @@ class CaddyLog(BaseModel):
     ts: float
 
 
+class ProcessingResult(NamedTuple):
+    inputs: list[Input]
+    warning: str | None
+
+
 class CaddyLogConverter:
     """Converts logs received from Caddy reverse proxy into inputs to process"""
 
@@ -58,16 +64,19 @@ class CaddyLogConverter:
             if app.ident == "edupi.offspot.kiwix.org":
                 self.generators.append(EdupiInputGenerator(host=app.host))
 
-    def process(self, line: str) -> list[Input]:
+    def process(self, line: str) -> ProcessingResult:
         """Transform one Caddy log line into corresponding inputs"""
 
         try:
             log = CaddyLog.model_validate_json(line)
         except ValidationError:
-            return []
+            return ProcessingResult(inputs=[], warning="JSON parsing failed")
 
-        if log.level != "info" or log.msg != "handled request":
-            return []
+        if log.level != "info":
+            return ProcessingResult(inputs=[], warning="Unexpected log level")
+
+        if log.msg != "handled request":
+            return ProcessingResult(inputs=[], warning="Unexpected log msg")
 
         log_data = LogData(
             content_type=log.resp_headers.content_type[0]
@@ -84,4 +93,4 @@ class CaddyLogConverter:
                 # ignore logs whose host are not matching the generator host
                 continue
             inputs.extend(generator.process(log_data))
-        return inputs
+        return ProcessingResult(inputs=inputs, warning=None)
