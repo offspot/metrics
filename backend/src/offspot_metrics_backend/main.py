@@ -58,7 +58,7 @@ class Main:
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
             self.config.parse_configuration()
-            self.processor.startup(current_period=Period.now()[0])
+            self.processor.startup(current_period=Period.now().period)
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)
             log_watcher_task.add_done_callback(self.background_tasks.discard)

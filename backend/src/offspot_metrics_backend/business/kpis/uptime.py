@@ -44,4 +44,4 @@ class Uptime(Kpi):
             .where(IndicatorPeriod.timestamp <= stop_ts)
         ).scalar_one_or_none()
 
-        return UptimeValue(nb_minutes_on=uptime if uptime else 0)
+        return UptimeValue(nb_minutes_on=uptime or 0)
