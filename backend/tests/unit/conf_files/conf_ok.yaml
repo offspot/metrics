@@ -63,3 +63,7 @@ packages:
   ident: edupi.offspot.kiwix.org
   title: Shared files 2
   url: //edupi2.renaud.test/
+- kind: app
+  ident: wikifundi-en.offspot.kiwix.org
+  title: Wikifundi
+  url: //wikifundi.renaud.test/

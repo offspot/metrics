@@ -25,7 +25,7 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
         (
             r"""{"level":"info","msg":"handled request","status":"200","""
             r""""request":{"host":"nomad.renaud.test","uri":"/","method":"GET"},"""
-            r""""resp_headers":{}}""",
+            r""""resp_headers":{},"ts":1688459792.8632474}""",
             [ContentHomeVisit(content="Nomad exercices du CP à la 3è")],
         ),
         (
@@ -33,7 +33,8 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r""""request":{"host":"kiwix.renaud.test","method":"GET","""
             r""""uri":"/content/wikipedia_en_all/questions/149/"""
             r"""1-5-million-lines-of-code-0-tests-where"},"""
-            r""""resp_headers":{"Content-Type":["text/html; charset=utf"]}}""",
+            r""""resp_headers":{"Content-Type":["text/html; charset=utf"]},"""
+            r""""ts":1688459792.8632474}""",
             [
                 ContentItemVisit(
                     content="Wikipedia",
@@ -44,73 +45,85 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
         (
             r"""{"level":"info","msg":"handled request","status":"200","""
             r""""request":{"host":"kiwix.renaud.test","method":"GET","""
-            r""""uri":"/content/wikipedia_en_all/"},"resp_headers":{}}""",
+            r""""uri":"/content/wikipedia_en_all/"},"resp_headers":{},"""
+            r""""ts":1688459792.8632474}""",
             [ContentHomeVisit(content="Wikipedia")],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
-            r""""uri":"/api/documents/"},"resp_headers":{}}""",
+            r""""uri":"/api/documents/"},"resp_headers":{},"""
+            r""""ts":1688459792.8632474}""",
             [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED)],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"DELETE","""
-            r""""uri":"/api/documents/123"},"resp_headers":{}}""",
+            r""""uri":"/api/documents/123"},"resp_headers":{},"""
+            r""""ts":1688459792.8632474}""",
             [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED)],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"GET","""
-            r""""uri":"/api/documents/123"},"resp_headers":{}}""",
+            r""""uri":"/api/documents/123"},"resp_headers":{},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"400","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
-            r""""uri":"/api/documents/"}},resp_headers={}""",
+            r""""uri":"/api/documents/"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"400","""
             r""""request":{"host":"edupi2.renaud.test","method":"DELETE","""
-            r""""uri":"/api/documents/123"}}""",
+            r""""uri":"/api/documents/123"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"edupi1.renaud.test","method":"GET","""
-            r""""uri":"/api/documents/"}},resp_headers={}""",
+            r""""uri":"/api/documents/"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"GET","""
-            r""""uri":"/api/documents/123"}},resp_headers={}""",
+            r""""uri":"/api/documents/123"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
-            r""""uri":"/api/documents/1"}},resp_headers={}""",
+            r""""uri":"/api/documents/1"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"DELETE","""
-            r""""uri":"/api/documents/"}},resp_headers={}""",
+            r""""uri":"/api/documents/"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"imnotedupi.renaud.test","method":"POST","""
-            r""""uri":"/api/documents/"}},resp_headers={}""",
+            r""""uri":"/api/documents/"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"imnotedupi.renaud.test","method":"DELETE","""
-            r""""uri":"/api/documents/123"}},resp_headers={}""",
+            r""""uri":"/api/documents/123"},resp_headers={},"""
+            r""""ts":1688459792.8632474}""",
             [],
         ),
     ],

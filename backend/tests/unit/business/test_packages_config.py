@@ -3,8 +3,11 @@ from collections.abc import Callable
 import pytest
 
 from offspot_metrics_backend.business.reverse_proxy_config import (
+    AppConfig,
+    FileConfig,
     IncorrectConfigurationError,
     ReverseProxyConfig,
+    ZimConfig,
 )
 
 
@@ -32,17 +35,48 @@ def test_parsing_missing_packages(
 def test_parsing_ok(reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]):
     config = reverse_proxy_config("conf_ok.yaml")
     assert config.warnings == []
-    assert config.files == {
-        "nomad.renaud.test": {"title": "Nomad exercices du CP à la 3è"},
-        "mathews.renaud.test": {"title": "Chasse au trésor Math Mathews"},
+    assert set(config.files) == {
+        FileConfig(
+            title="Nomad exercices du CP à la 3è",
+            host="nomad.renaud.test",
+        ),
+        FileConfig(
+            title="Chasse au trésor Math Mathews",
+            host="mathews.renaud.test",
+        ),
     }
-    assert config.zims == {
-        "super.zim_2023-05": {"title": "Super content"},
-        "wikipedia_en_ray_charles": {"title": "Ray Charles"},
-        "wikipedia_en_all": {"title": "Wikipedia"},
+    assert set(config.zims) == {
+        ZimConfig(
+            title="Super content",
+            host="kiwix.renaud.test",
+            zim_name="super.zim_2023-05",
+        ),
+        ZimConfig(
+            title="Ray Charles",
+            host="kiwix.renaud.test",
+            zim_name="wikipedia_en_ray_charles",
+        ),
+        ZimConfig(
+            title="Wikipedia", host="kiwix.renaud.test", zim_name="wikipedia_en_all"
+        ),
     }
-    assert config.zim_host == "kiwix.renaud.test"
-    assert config.edupi_hosts == ["edupi1.renaud.test", "edupi2.renaud.test"]
+    assert set(config.apps) == {
+        AppConfig(
+            title="Shared files 1",
+            host="edupi1.renaud.test",
+            ident="edupi.offspot.kiwix.org",
+        ),
+        AppConfig(
+            title="Shared files 2",
+            host="edupi2.renaud.test",
+            ident="edupi.offspot.kiwix.org",
+        ),
+        AppConfig(
+            title="Wikifundi",
+            host="wikifundi.renaud.test",
+            ident="wikifundi-en.offspot.kiwix.org",
+        ),
+    }
 
 
 def test_parsing_warnings(
@@ -54,14 +88,30 @@ def test_parsing_warnings(
         "Package with missing 'title' ignored",
         "Unsupported URL: tata",
         "Package with missing 'kind' ignored",
-        "Ignoring second zim host 'kaka.renaud.test', only one host supported",
         "Unsupported ZIM URL: //kiwix.renaud.test/kkkk#toto",
         "Package with unsupported 'kind' : 'ooo' ignored",
-        "Ignoring unknown app ident 'wikifundi-en.offspot.kiwix.org'",
     ]
-    assert config.files == {}
-    assert config.zims == {
-        "wikipedia_en_all": {"title": "Wikipedia"},
+    assert config.files == []
+    assert set(config.zims) == {
+        ZimConfig(
+            title="Wikipedia", host="kiwix.renaud.test", zim_name="wikipedia_en_all"
+        ),
+        ZimConfig(title="toto title", host="kaka.renaud.test", zim_name="toto"),
     }
-    assert config.zim_host == "kiwix.renaud.test"
-    assert config.edupi_hosts == ["edupi.renaud.test", "edupi2.renaud.test"]
+    assert set(config.apps) == {
+        AppConfig(
+            title="Shared files",
+            host="edupi.renaud.test",
+            ident="edupi.offspot.kiwix.org",
+        ),
+        AppConfig(
+            title="Shared files 2",
+            host="edupi2.renaud.test",
+            ident="edupi.offspot.kiwix.org",
+        ),
+        AppConfig(
+            title="Wikifundi",
+            host="wikifundi.renaud.test",
+            ident="wikifundi-en.offspot.kiwix.org",
+        ),
+    }

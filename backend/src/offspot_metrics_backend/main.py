@@ -86,7 +86,7 @@ class Main:
             await sleep(TICK_PERIOD)
             logger.debug("Processing a clock tick")
             now_period, now_datetime = Period.now()
-            self.processor.process_input(ClockTick(now=now_datetime))
+            self.processor.process_input(ClockTick(ts=now_datetime))
             self.processor.process_tick(tick_period=now_period)
 
     def handle_log_event(self, event: NewLineEvent):

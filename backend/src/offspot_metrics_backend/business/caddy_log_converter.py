@@ -1,46 +1,62 @@
+import datetime
 import logging
-import re
-from http import HTTPStatus
 
 from pydantic import BaseModel, Field, ValidationError
 
-from offspot_metrics_backend.business.inputs.content_visit import (
-    ContentHomeVisit,
-    ContentItemVisit,
+from offspot_metrics_backend.business.input_generator import (
+    EdupiInputGenerator,
+    FilesInputGenerator,
+    InputGenerator,
+    ZimInputGenerator,
 )
 from offspot_metrics_backend.business.inputs.input import Input
-from offspot_metrics_backend.business.inputs.shared_files import (
-    SharedFilesOperation,
-    SharedFilesOperationKind,
-)
+from offspot_metrics_backend.business.log_data import LogData
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
 
 logger = logging.getLogger(__name__)
 
 
 class CaddyLogRequest(BaseModel):
+    """Sub-model class for parsing the request in a JSON log line of Caddy"""
+
     host: str
     uri: str
     method: str
 
 
 class CaddyLogResponseHeaders(BaseModel):
+    """Sub-model class for parsing the response headers in a JSON log line of Caddy"""
+
     content_type: list[str] | None = Field(alias="Content-Type", default=None)
 
 
 class CaddyLog(BaseModel):
+    """Base model class for parsing a JSON log line of Caddy reverse proxy"""
+
     level: str
     msg: str
     request: CaddyLogRequest
     status: int
     resp_headers: CaddyLogResponseHeaders
+    ts: float
 
 
 class CaddyLogConverter:
     """Converts logs received from Caddy reverse proxy into inputs to process"""
 
     def __init__(self, config: ReverseProxyConfig) -> None:
-        self.config = config
+        self.generators: list[InputGenerator] = []
+        for file in config.files:
+            self.generators.append(
+                FilesInputGenerator(host=file.host, title=file.title)
+            )
+        for zim in config.zims:
+            self.generators.append(
+                ZimInputGenerator(host=zim.host, zim_name=zim.zim_name, title=zim.title)
+            )
+        for app in config.apps:
+            if app.ident == "edupi.offspot.kiwix.org":
+                self.generators.append(EdupiInputGenerator(host=app.host))
 
     def process(self, line: str) -> list[Input]:
         """Transform one Caddy log line into corresponding inputs"""
@@ -53,73 +69,19 @@ class CaddyLogConverter:
         if log.level != "info" or log.msg != "handled request":
             return []
 
-        content_type = (
-            log.resp_headers.content_type[0]
+        log_data = LogData(
+            content_type=log.resp_headers.content_type[0]
             if log.resp_headers.content_type and len(log.resp_headers.content_type) > 0
-            else None
+            else None,
+            status=log.status,
+            uri=log.request.uri,
+            method=log.request.method,
+            ts=datetime.datetime.fromtimestamp(log.ts),
         )
-
-        if log.request.host == self.config.zim_host:
-            return self._process_zim(uri=log.request.uri, content_type=content_type)
-        elif log.request.host in self.config.edupi_hosts:
-            return self._process_edupi(
-                uri=log.request.uri, status=log.status, method=log.request.method
-            )
-        elif log.request.host in self.config.files:
-            return self._process_file(uri=log.request.uri, host=log.request.host)
-        else:
-            return []
-
-    def _process_zim(self, uri: str, content_type: str | None) -> list[Input]:
-        """Transform one log event identified as ZIM into inputs"""
-        match = re.match(r"^/content/(?P<zim>.+?)(?P<item>/.*)?$", uri)
-        if not match:
-            return []
-
-        zim = match.group("zim")
-        item = match.group("item")
-
-        if zim not in self.config.zims:
-            return []
-
-        title = self.config.zims[zim]["title"]
-        if item is None or item == "/":
-            return [ContentHomeVisit(content=title)]
-        else:
-            if content_type is None:
-                return []
-            content_type = str(content_type)
-
-            if (
-                "html" in content_type
-                or "epub" in content_type
-                or "pdf" in content_type
-            ):
-                return [ContentItemVisit(content=title, item=item)]
-            else:
-                return []
-
-    def _process_edupi(self, uri: str, status: int, method: str) -> list[Input]:
-        """Transform one log event identified as edupi into inputs"""
-        if (
-            method == "POST"
-            and status == HTTPStatus.CREATED
-            and uri == "/api/documents/"
-        ):
-            return [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED)]
-        elif (
-            method == "DELETE"
-            and status == HTTPStatus.NO_CONTENT
-            and uri.startswith("/api/documents/")
-            and len(uri) > len("/api/documents/")
-        ):
-            return [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED)]
-        else:
-            return []
-
-    def _process_file(self, uri: str, host: str) -> list[Input]:
-        """Transform one log event identified as static file into inputs"""
-        if uri == "/":
-            return [ContentHomeVisit(content=self.config.files[host]["title"])]
-        else:
-            return []
+        inputs: list[Input] = []
+        for generator in self.generators:
+            if generator.host != log.request.host:
+                # ignore logs whose host are not matching the generator host
+                continue
+            inputs.extend(generator.process(log_data))
+        return inputs

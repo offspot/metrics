@@ -3,6 +3,7 @@ import re
 from typing import Any
 
 import yaml
+from pydantic.dataclasses import dataclass
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -21,14 +22,34 @@ class IncorrectConfigurationError(Exception):
     pass
 
 
+@dataclass(eq=True, frozen=True)
+class Config:
+    title: str
+    host: str
+
+
+@dataclass(eq=True, frozen=True)
+class ZimConfig(Config):
+    zim_name: str
+
+
+@dataclass(eq=True, frozen=True)
+class AppConfig(Config):
+    ident: str
+
+
+@dataclass(eq=True, frozen=True)
+class FileConfig(Config):
+    pass
+
+
 class ReverseProxyConfig:
     """Holds the reverse proxy config, extracted from PACKAGE_CONF_FILE"""
 
     def __init__(self) -> None:
-        self.files: dict[str, Any] = {}
-        self.zim_host: str | None = None
-        self.edupi_hosts: list[str] = []
-        self.zims: dict[str, Any] = {}
+        self.files: list[FileConfig] = []
+        self.apps: list[AppConfig] = []
+        self.zims: list[ZimConfig] = []
         self.warnings: list[str] = []
 
     def parse_configuration(self):
@@ -42,14 +63,23 @@ class ReverseProxyConfig:
         for warning in self.warnings:
             logger.warning(warning)
 
-        for host in self.edupi_hosts:
-            logger.info(f"Found EduPi host in {host}")
+        for app_config in self.apps:
+            logger.info(
+                f"Found app package with ident {app_config.ident} and title"
+                f" {app_config.title} in {app_config.host}"
+            )
 
-        for host, file in self.files.items():
-            logger.info(f"Found File {file} in {host}")
+        for file_config in self.files:
+            logger.info(
+                f"Found file package with title {file_config.title} in "
+                f"{file_config.host}"
+            )
 
-        for zim, data in self.zims.items():
-            logger.info(f"Found ZIM {zim} with {data} in {self.zim_host}")
+        for zim_config in self.zims:
+            logger.info(
+                f"Found zim package with name {zim_config.zim_name} and title "
+                f"{zim_config.title} in {zim_config.host}"
+            )
 
         logger.info("Parsing PACKAGE_CONF_FILE completed")
 
@@ -87,37 +117,23 @@ class ReverseProxyConfig:
 
         kind = package.get("kind")
 
-        ident = package.get("ident", None)
-
         if kind == "app":
-            if ident == "edupi.offspot.kiwix.org":
-                self.edupi_hosts.append(host)
-            else:
-                self.warnings.append(f"Ignoring unknown app ident '{ident}'")
-            return
+            ident = str(package.get("ident"))
+            self.apps.append(AppConfig(title=title, host=host, ident=ident))
         elif kind == "files":
-            self.files[host] = {"title": title}
+            self.files.append(FileConfig(title=title, host=host))
             return
         elif kind == "zim":
-            if self.zim_host is None:
-                self.zim_host = host
-            elif self.zim_host != host:
-                self.warnings.append(
-                    f"Ignoring second zim host '{host}', only one host supported"
-                )
-                return
-
-            match_viewer = re.match(r"^//.*?/viewer#(?P<zim>.*)$", url)
-            match_content = re.match(r"^//.*?/content/(?P<zim>.+?)(?:/.*)?$", url)
+            match_viewer = re.match(r"^//.*?/viewer#(?P<zim_name>.*)$", url)
+            match_content = re.match(r"^//.*?/content/(?P<zim_name>.+?)(?:/.*)?$", url)
             if match_viewer:
-                zim = match_viewer.group("zim")
+                zim_name = match_viewer.group("zim_name")
             elif match_content:
-                zim = match_content.group("zim")
+                zim_name = match_content.group("zim_name")
             else:
                 self.warnings.append(f"Unsupported ZIM URL: {url}")
                 return
-
-            self.zims[zim] = {"title": title}
+            self.zims.append(ZimConfig(title=title, host=host, zim_name=zim_name))
             return
         elif kind is None:
             self.warnings.append("Package with missing 'kind' ignored")
