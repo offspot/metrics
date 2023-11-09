@@ -40,19 +40,21 @@ class ZimInputGenerator(InputGenerator):
     zim_name: str
     title: str
 
+    zim_re = re.compile(r"^/content/(?P<zim_name>.+?)(?P<zim_path>/.*)?$")
+
     def process(self, log: LogData) -> list[Input]:
         """Process a given log line and generate corresponding inputs"""
-        match = re.match(r"^/content/(?P<zim>.+?)(?P<item>/.*)?$", log.uri)
+        match = self.zim_re.match(log.uri)
         if not match:
             return []
 
-        zim = match.group("zim")
-        item = match.group("item")
+        zim_name = match.group("zim_name")
+        zim_path = match.group("zim_path")
 
-        if zim != self.zim_name:
+        if zim_name != self.zim_name:
             return []
 
-        if item is None or item == "/":
+        if zim_path is None or zim_path == "/":
             return [ContentHomeVisit(content=self.title)]
         else:
             if log.content_type is None:
@@ -63,7 +65,7 @@ class ZimInputGenerator(InputGenerator):
                 or "epub" in log.content_type
                 or "pdf" in log.content_type
             ):
-                return [ContentItemVisit(content=self.title, item=item)]
+                return [ContentItemVisit(content=self.title, item=zim_path)]
             else:
                 return []
 

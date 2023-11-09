@@ -9,7 +9,7 @@ class Input:
 
 
 @dataclass
-class InputWithTime(Input):
+class TimedInput(Input):
     """Input with information about when it happened"""
 
     # moment where the input occured

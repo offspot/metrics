@@ -46,6 +46,10 @@ class FileConfig(Config):
 class ReverseProxyConfig:
     """Holds the reverse proxy config, extracted from PACKAGE_CONF_FILE"""
 
+    host_re = re.compile(r"^//(?P<host>.*?)/.*")
+    viewer_re = re.compile(r"^//.*?/viewer#(?P<zim_name>.*)$")
+    content_re = re.compile(r"^//.*?/content/(?P<zim_name>.+?)(?:/.*)?$")
+
     def __init__(self) -> None:
         self.files: list[FileConfig] = []
         self.apps: list[AppConfig] = []
@@ -109,7 +113,7 @@ class ReverseProxyConfig:
             self.warnings.append("Package with missing 'title' ignored")
             return
 
-        match = re.match(r"^//(?P<host>.*?)/.*", url)
+        match = self.host_re.match(url)
         if not match:
             self.warnings.append(f"Unsupported URL: {url}")
             return
@@ -124,8 +128,8 @@ class ReverseProxyConfig:
             self.files.append(FileConfig(title=title, host=host))
             return
         elif kind == "zim":
-            match_viewer = re.match(r"^//.*?/viewer#(?P<zim_name>.*)$", url)
-            match_content = re.match(r"^//.*?/content/(?P<zim_name>.+?)(?:/.*)?$", url)
+            match_viewer = self.viewer_re.match(url)
+            match_content = self.content_re.match(url)
             if match_viewer:
                 zim_name = match_viewer.group("zim_name")
             elif match_content:

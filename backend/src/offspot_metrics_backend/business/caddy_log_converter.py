@@ -69,6 +69,7 @@ class CaddyLogConverter:
 
         try:
             log = CaddyLog.model_validate_json(line)
+            del line
         except ValidationError:
             return ProcessingResult(inputs=[], warning="JSON parsing failed")
 
