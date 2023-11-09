@@ -86,13 +86,13 @@ class Main:
             await sleep(TICK_PERIOD)
             logger.debug("Processing a clock tick")
             now_period, now_datetime = Period.now()
-            self.processor.process_input(ClockTick(now=now_datetime))
+            self.processor.process_input(ClockTick(ts=now_datetime))
             self.processor.process_tick(tick_period=now_period)
 
     def handle_log_event(self, event: NewLineEvent):
         logger.debug(f"Log watcher sent: {event.line_content}")
-        inputs = self.converter.process(event.line_content)
-        for input_ in inputs:
+        result = self.converter.process(event.line_content)
+        for input_ in result.inputs:
             logger.debug(f"Processing input: {input_}")
             self.processor.process_input(input_=input_)
 

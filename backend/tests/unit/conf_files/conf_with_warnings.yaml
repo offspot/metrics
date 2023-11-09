@@ -21,10 +21,10 @@ packages:
 - url: //kiwix.renaud.test/viewer#wikipedia_en_all
   title: toto
 
-# second ZIM host ignored
+# second ZIM host ok
 - kind: zim
   url: //kaka.renaud.test/viewer#toto
-  title: toto
+  title: toto title
 
 # incorrect ZIM URL
 - kind: zim
@@ -48,7 +48,7 @@ packages:
   title: Shared files 2
   url: //edupi2.renaud.test/
 
-# Unknown app ident
+# Unknown app ident ok
 - kind: app
   ident: wikifundi-en.offspot.kiwix.org
   title: Wikifundi
