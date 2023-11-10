@@ -4,11 +4,12 @@ from http import HTTPStatus
 
 from pydantic.dataclasses import dataclass
 
-from offspot_metrics_backend.business.inputs.content_visit import (
-    ContentHomeVisit,
-    ContentItemVisit,
-)
 from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.inputs.package import (
+    PackageHomeVisit,
+    PackageItemVisit,
+    PackageRequest,
+)
 from offspot_metrics_backend.business.inputs.shared_files import (
     SharedFilesOperation,
     SharedFilesOperationKind,
@@ -38,7 +39,7 @@ class ZimInputGenerator(InputGenerator):
     """A generator for zim packages"""
 
     zim_name: str
-    title: str
+    package_title: str
 
     zim_re = re.compile(r"^/content/(?P<zim_name>.+?)(?P<zim_path>/.*)?$")
 
@@ -55,24 +56,32 @@ class ZimInputGenerator(InputGenerator):
             return []
 
         if zim_path is None or zim_path == "/":
-            return [ContentHomeVisit(content=self.title)]
-        else:
-            if log.content_type is None:
-                return []
+            return [
+                PackageHomeVisit(package_title=self.package_title),
+                PackageRequest(ts=log.ts, package_title=self.package_title),
+            ]
 
-            if (
-                "html" in log.content_type
-                or "epub" in log.content_type
-                or "pdf" in log.content_type
-            ):
-                return [ContentItemVisit(content=self.title, item=zim_path)]
-            else:
-                return []
+        if log.content_type is None:
+            return [PackageRequest(ts=log.ts, package_title=self.package_title)]
+
+        if (
+            "html" in log.content_type
+            or "epub" in log.content_type
+            or "pdf" in log.content_type
+        ):
+            return [
+                PackageRequest(ts=log.ts, package_title=self.package_title),
+                PackageItemVisit(package_title=self.package_title, item_path=zim_path),
+            ]
+        else:
+            return [PackageRequest(ts=log.ts, package_title=self.package_title)]
 
 
 @dataclass
 class EdupiInputGenerator(InputGenerator):
     """A specific generator for edupi package"""
+
+    package_title: str
 
     def process(self, log: LogData) -> list[Input]:
         """Transform one log event identified as edupi into inputs"""
@@ -81,27 +90,47 @@ class EdupiInputGenerator(InputGenerator):
             and log.status == HTTPStatus.CREATED
             and log.uri == "/api/documents/"
         ):
-            return [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED)]
+            return [
+                PackageRequest(ts=log.ts, package_title=self.package_title),
+                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED),
+            ]
         elif (
             log.method == "DELETE"
             and log.status == HTTPStatus.NO_CONTENT
             and log.uri.startswith("/api/documents/")
             and len(log.uri) > len("/api/documents/")
         ):
-            return [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED)]
+            return [
+                PackageRequest(ts=log.ts, package_title=self.package_title),
+                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED),
+            ]
         else:
-            return []
+            return [PackageRequest(ts=log.ts, package_title=self.package_title)]
 
 
 @dataclass
 class FilesInputGenerator(InputGenerator):
     """A generator for file packages"""
 
-    title: str
+    package_title: str
 
     def process(self, log: LogData) -> list[Input]:
         """Process a given log line and generate corresponding inputs"""
         if log.uri == "/":
-            return [ContentHomeVisit(content=self.title)]
+            return [
+                PackageRequest(ts=log.ts, package_title=self.package_title),
+                PackageHomeVisit(package_title=self.package_title),
+            ]
         else:
-            return []
+            return [PackageRequest(ts=log.ts, package_title=self.package_title)]
+
+
+@dataclass
+class CommonInputGenerator(InputGenerator):
+    """A generator cases not covered by other specific generators"""
+
+    package_title: str
+
+    def process(self, log: LogData) -> list[Input]:
+        """Process a given log line and generate corresponding inputs"""
+        return [PackageRequest(ts=log.ts, package_title=self.package_title)]

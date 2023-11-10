@@ -11,7 +11,7 @@ class SharedFilesOperationKind(str, Enum):
     FILE_DELETED = "FILE_DELETED"
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class SharedFilesOperation(Input):
     """Input representing an operation on a shared files software (EduPi for now)"""
 

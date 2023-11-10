@@ -90,4 +90,4 @@ class Indicator(abc.ABC):
         if not self.can_process_input(input_):
             return
         record = self.get_or_create_recorder(input_)
-        record.process_input(input_)
+        record.process_input(input_=input_)

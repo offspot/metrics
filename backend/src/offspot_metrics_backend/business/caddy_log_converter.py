@@ -5,6 +5,7 @@ from typing import NamedTuple
 from pydantic import BaseModel, Field, ValidationError
 
 from offspot_metrics_backend.business.input_generator import (
+    CommonInputGenerator,
     EdupiInputGenerator,
     FilesInputGenerator,
     InputGenerator,
@@ -54,15 +55,23 @@ class CaddyLogConverter:
         self.generators: list[InputGenerator] = []
         for file in config.files:
             self.generators.append(
-                FilesInputGenerator(host=file.host, title=file.title)
+                FilesInputGenerator(host=file.host, package_title=file.title)
             )
         for zim in config.zims:
             self.generators.append(
-                ZimInputGenerator(host=zim.host, zim_name=zim.zim_name, title=zim.title)
+                ZimInputGenerator(
+                    host=zim.host, zim_name=zim.zim_name, package_title=zim.title
+                )
             )
         for app in config.apps:
             if app.ident == "edupi.offspot.kiwix.org":
-                self.generators.append(EdupiInputGenerator(host=app.host))
+                self.generators.append(
+                    EdupiInputGenerator(host=app.host, package_title=app.title),
+                )
+            else:
+                self.generators.append(
+                    CommonInputGenerator(host=app.host, package_title=app.title),
+                )
 
     def process(self, line: str) -> ProcessingResult:
         """Transform one Caddy log line into corresponding inputs"""

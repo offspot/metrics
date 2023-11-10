@@ -10,17 +10,22 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from tests.unit.conftest import DummyKpi, DummyKpiValue
 
-from offspot_metrics_backend.business.kpis.content_popularity import (
-    ContentObjectPopularity,
-    ContentObjectPopularityItem,
-    ContentObjectPopularityValue,
-    ContentPopularity,
-    ContentPopularityItem,
-    ContentPopularityValue,
+from offspot_metrics_backend.business.kpis.popularity import (
+    PackagePopularity,
+    PackagePopularityItem,
+    PackagePopularityValue,
+    PopularPages,
+    PopularPagesItem,
+    PopularPagesValue,
 )
 from offspot_metrics_backend.business.kpis.shared_files import (
     SharedFiles,
     SharedFilesValue,
+)
+from offspot_metrics_backend.business.kpis.total_usage import (
+    TotalUsage,
+    TotalUsageItem,
+    TotalUsageValue,
 )
 from offspot_metrics_backend.business.kpis.uptime import (
     Uptime,
@@ -59,23 +64,23 @@ async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
     dbsession.execute(delete(KpiRecord))
     kpis = [
         KpiRecord(
-            kpi_id=ContentObjectPopularity.unique_id,
+            kpi_id=PopularPages.unique_id,
             agg_kind="D",
             agg_value="2023-03-01",
-            kpi_value=ContentObjectPopularityValue.model_validate(
-                [
-                    ContentObjectPopularityItem(
-                        content="onecontent", item="oneitem", count=12, percentage=23.2
-                    )
-                ]
+            kpi_value=PopularPagesValue(
+                items=[
+                    PopularPagesItem(package="onecontent", item="oneitem", visits=12)
+                ],
+                total_visits=51,
             ),
         ),
         KpiRecord(
-            kpi_id=ContentPopularity.unique_id,
+            kpi_id=PackagePopularity.unique_id,
             agg_kind="D",
             agg_value="2023-03-01",
-            kpi_value=ContentPopularityValue.model_validate(
-                [ContentPopularityItem(content="onecontent", count=34, percentage=33.2)]
+            kpi_value=PackagePopularityValue(
+                items=[PackagePopularityItem(package="onecontent", visits=34)],
+                total_visits=45,
             ),
         ),
         KpiRecord(
@@ -83,6 +88,15 @@ async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
             agg_kind="W",
             agg_value="2023 W10",
             kpi_value=DummyKpiValue.model_validate("199"),
+        ),
+        KpiRecord(
+            kpi_id=TotalUsage.unique_id,
+            agg_kind="W",
+            agg_value="2023 W10",
+            kpi_value=TotalUsageValue(
+                items=[TotalUsageItem(package="othercontent", minutes_activity=98)],
+                total_minutes_activity=143,
+            ),
         ),
         KpiRecord(
             kpi_id=SharedFiles.unique_id,
