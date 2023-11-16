@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from tests.unit.conftest import DummyKpiValue
 
 from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.kpis import get_kpi_name
 from offspot_metrics_backend.business.kpis.kpi import Kpi
 from offspot_metrics_backend.business.kpis.processor import Processor
 from offspot_metrics_backend.business.period import Period
@@ -313,3 +314,22 @@ def test_restore_kpis_from_filled_db(
             previous_datetime_year_dummyvalue,
         ]
     )
+
+
+@pytest.mark.parametrize(
+    "kpi_id, expected_name",
+    [
+        (2001, "PackagePopularity"),
+        (2002, "PopularPages"),
+        (2003, "TotalUsage"),
+        (2004, "Uptime"),
+        (2005, "SharedFiles"),
+    ],
+)
+def test_kpi_names(kpi_id: int, expected_name: str):
+    assert expected_name == get_kpi_name(kpi_id)
+
+
+def test_kpi_names_error():
+    with pytest.raises(ValueError):
+        get_kpi_name(1001)

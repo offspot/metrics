@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 
+import pytest
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from offspot_metrics_backend.business.indicators import get_indicator_name
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.indicators.holder import Record
 from offspot_metrics_backend.business.indicators.indicator import Indicator
@@ -255,3 +257,23 @@ def test_restore_from_db_start_new_period(
     assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
     assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+
+@pytest.mark.parametrize(
+    "kpi_id, expected_name",
+    [
+        (1001, "PackageHomeVisit"),
+        (1002, "PackageItemVisit"),
+        (1003, "SharedFilesOperations"),
+        (1004, "Uptime"),
+        (1005, "TotalUsageOverall"),
+        (1006, "TotalUsageByPackage"),
+    ],
+)
+def test_indicator_names(kpi_id: int, expected_name: str):
+    assert expected_name == get_indicator_name(kpi_id)
+
+
+def test_indicator_names_error():
+    with pytest.raises(ValueError):
+        get_indicator_name(2001)

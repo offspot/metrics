@@ -1,29 +1,12 @@
 from sqlalchemy.orm import Session
 
-from offspot_metrics_backend.business.indicators.package import (
-    PackageHomeVisit,
-    PackageItemVisit,
-)
+from offspot_metrics_backend.business.indicators import ALL_INDICATORS
 from offspot_metrics_backend.business.indicators.processor import (
     Processor as IndicatorProcessor,
 )
-from offspot_metrics_backend.business.indicators.shared_files import (
-    SharedFilesOperations,
-)
-from offspot_metrics_backend.business.indicators.total_usage import (
-    TotalUsageByPackage,
-    TotalUsageOverall,
-)
-from offspot_metrics_backend.business.indicators.uptime import Uptime as UptimeIndicator
 from offspot_metrics_backend.business.inputs.input import Input
-from offspot_metrics_backend.business.kpis.popularity import (
-    PackagePopularity,
-    PopularPages,
-)
+from offspot_metrics_backend.business.kpis import ALL_KPIS
 from offspot_metrics_backend.business.kpis.processor import Processor as KpiProcessor
-from offspot_metrics_backend.business.kpis.shared_files import SharedFiles
-from offspot_metrics_backend.business.kpis.total_usage import TotalUsage
-from offspot_metrics_backend.business.kpis.uptime import Uptime as UptimeKpi
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.db import dbsession
 
@@ -47,21 +30,8 @@ class Processor:
         self.kpi_processor = KpiProcessor(current_period=current_period)
 
         # Assign existing indicators and kpis
-        self.indicator_processor.indicators = [
-            PackageHomeVisit(),
-            PackageItemVisit(),
-            SharedFilesOperations(),
-            TotalUsageOverall(),
-            TotalUsageByPackage(),
-            UptimeIndicator(),
-        ]
-        self.kpi_processor.kpis = [
-            PackagePopularity(),
-            PopularPages(),
-            SharedFiles(),
-            TotalUsage(),
-            UptimeKpi(),
-        ]
+        self.indicator_processor.indicators = ALL_INDICATORS
+        self.kpi_processor.kpis = ALL_KPIS
 
         # Restore data from DB to memory
         self.indicator_processor.restore_from_db(
