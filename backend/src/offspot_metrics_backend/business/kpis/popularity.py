@@ -85,7 +85,7 @@ class PackagePopularity(Kpi):
                 )
                 for record in session.execute(query)
             ],
-            total_visits=total_count,
+            total_visits=total_count or 0,
         )
 
 
@@ -161,5 +161,5 @@ class PopularPages(Kpi):
                 )
                 for record in session.execute(query)
             ],
-            total_visits=total_count,
+            total_visits=total_count or 0,
         )
