@@ -45,9 +45,6 @@ class Main:
                 handler=self.handle_log_event,
                 data_folder=BackendConf.logwatcher_data_folder,
             )
-        self.processor = Processor()
-        self.config = ReverseProxyConfig()
-        self.converter = CaddyLogConverter(self.config)
         self.background_tasks = set[Task[Any]]()
 
     @asynccontextmanager
@@ -57,7 +54,10 @@ class Main:
         Initializer.upgrade_db_schema()
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
+            self.processor = Processor()
+            self.config = ReverseProxyConfig()
             self.config.parse_configuration()
+            self.converter = CaddyLogConverter(self.config)
             self.processor.startup(current_period=Period.now().period)
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)
