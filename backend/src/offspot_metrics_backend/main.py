@@ -1,4 +1,6 @@
+import functools
 import logging
+import sys
 from asyncio import Task, create_task, sleep
 from contextlib import asynccontextmanager
 from typing import Any
@@ -58,11 +60,15 @@ class Main:
             self.processor.startup(current_period=Period.now().period)
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)
-            log_watcher_task.add_done_callback(self.background_tasks.discard)
+            log_watcher_task.add_done_callback(
+                functools.partial(self.task_stopped, "Log Watcher")
+            )
 
             ticker_task = create_task(self.ticker())
             self.background_tasks.add(ticker_task)
-            ticker_task.add_done_callback(self.background_tasks.discard)
+            ticker_task.add_done_callback(
+                functools.partial(self.task_stopped, "Ticker")
+            )
         else:
             logger.warning("Processing is disabled")
         # Startup complete
@@ -77,21 +83,37 @@ class Main:
             raise ValueError("Log watcher has not been initialized")
         await self.log_watcher.run_async()
 
+    def task_stopped(self, task_name: str, task: Task[Any]) -> None:
+        exc = task.exception()
+        self.background_tasks.discard(task)
+        if exc:
+            logger.error(f"{task_name} has stopped anormally", exc_info=exc)
+            sys.exit(1)
+
     async def ticker(self):
         """Start a processor tick every minute"""
         while True:
             await sleep(TICK_PERIOD)
             logger.debug("Processing a clock tick")
-            now_period, now_datetime = Period.now()
-            self.processor.process_input(ClockTick(ts=now_datetime))
-            self.processor.process_tick(tick_period=now_period)
+            try:
+                now_period, now_datetime = Period.now()
+                self.processor.process_input(ClockTick(ts=now_datetime))
+                self.processor.process_tick(tick_period=now_period)
+            except Exception as ex:
+                logger.debug("Exception occured in clock tick", exc_info=ex)
 
     def handle_log_event(self, event: NewLineEvent):
         logger.debug(f"Log watcher sent: {event.line_content}")
-        result = self.converter.process(event.line_content)
-        for input_ in result.inputs:
-            logger.debug(f"Processing input: {input_}")
-            self.processor.process_input(input_=input_)
+        try:
+            result = self.converter.process(event.line_content)
+            for input_ in result.inputs:
+                logger.debug(f"Processing input: {input_}")
+                try:
+                    self.processor.process_input(input_=input_)
+                except Exception as ex:
+                    logger.debug("Error processing input", exc_info=ex)
+        except Exception as ex:
+            logger.debug("Error log event", exc_info=ex)
 
     def create_app(self) -> FastAPI:
         self.app = FastAPI(

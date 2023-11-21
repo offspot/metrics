@@ -65,16 +65,34 @@ class LogWatcherHandler(FileSystemEventHandler):
             # Process all lines but the last one
             for line in new_data.splitlines(keepends=True):
                 if not line.endswith("\n"):
-                    continue
-                self.line_process_func(
-                    NewLineEvent(file_path=file_path, line_content=line.strip())
-                )
+                    break
+                try:
+                    self.line_process_func(
+                        NewLineEvent(file_path=file_path, line_content=line.strip())
+                    )
+                except Exception as ex:
+                    logger.debug(
+                        f"Error occured while processing line in {file_path} at"
+                        f" {self.file_positions_map[str(file_path)]}",
+                        exc_info=ex,
+                    )
                 self.file_positions_map[str(file_path)] += len(
                     line.encode(encoding=ENCODING)
                 )
 
     def on_any_event(self, event: FileSystemEvent):
         """Function called by watch dog when event occurs"""
+        try:
+            self.process_event(event)
+        except Exception as ex:
+            logger.debug(
+                f"Error occured while processing event {event.event_type} on"
+                f" {event.src_path}",
+                exc_info=ex,
+            )
+
+    def process_event(self, event: FileSystemEvent):
+        """Real processing of watch dog events"""
         if event.is_directory or event.event_type not in [
             EVENT_TYPE_CREATED,
             EVENT_TYPE_MODIFIED,
@@ -154,12 +172,18 @@ class LogWatcher:
 
         self.observer.start()
 
+        logger.info("Log watcher has started succesfully")
+
         while self.observer.is_alive():
             self.observer.join(1)
             # perform a very small sleep, just to let the coroutine pause
             await sleep(0.001)
 
+        logger.info("Log watcher run is terminating")
+
         self.observer.join()
+
+        logger.info("Log watcher run has completed")
 
     def run_sync(self):
         """Watch directory"""
@@ -171,24 +195,36 @@ class LogWatcher:
 
         self.observer.start()
 
+        logger.info("Log watcher has started succesfully")
+
         while self.observer.is_alive():
             self.observer.join(1)
 
+        logger.info("Log watcher run is terminating")
+
         self.observer.join()
+
+        logger.info("Log watcher run has completed")
 
     def stop(self):
         """Stop watcher"""
         if self.observer.is_alive():
+            logger.info("Log watcher is stopping")
             self.observer.stop()
+        else:
+            logger.info("Log watcher is already dead")
 
     def process_existing_files(self):
         """Process files that are already there at watcher startup"""
         for file in self.watched_folder.rglob("*"):
-            if not file.is_file():
-                continue
-            # Let's consider that all existing files have been modified, so that we
-            # process any line that might have appeared since our last execution
-            event = FileSystemEvent(str(file))
-            event.is_directory = False
-            event.event_type = EVENT_TYPE_MODIFIED
-            self.event_handler.on_any_event(event)
+            try:
+                if not file.is_file():
+                    continue
+                # Let's consider that all existing files have been modified, so that we
+                # process any line that might have appeared since our last execution
+                event = FileSystemEvent(str(file))
+                event.is_directory = False
+                event.event_type = EVENT_TYPE_MODIFIED
+                self.event_handler.on_any_event(event)
+            except Exception as ex:
+                logger.debug(f"Error processing file {file}", exc_info=ex)

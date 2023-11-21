@@ -17,7 +17,13 @@ class Processor:
     def process_input(self, input_: Input) -> None:
         """Update all indicators for a given input"""
         for indicator in self.indicators:
-            indicator.process_input(input_=input_)
+            try:
+                indicator.process_input(input_=input_)
+            except Exception as ex:
+                logger.debug(
+                    f"Error processing input for indicator {indicator.unique_id}",
+                    exc_info=ex,
+                )
 
     def reset_state(self) -> None:
         """Reset all indicators"""
