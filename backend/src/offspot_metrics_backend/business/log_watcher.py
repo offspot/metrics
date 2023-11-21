@@ -1,5 +1,4 @@
 import json
-import logging
 from asyncio import sleep
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -17,7 +16,7 @@ from watchdog.events import (
 )
 from watchdog.observers import Observer
 
-logger = logging.getLogger(__name__)
+from offspot_metrics_backend.constants import logger
 
 
 @dataclass

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from offspot_metrics_backend.business.indicators.indicator import Indicator
 from offspot_metrics_backend.business.inputs.input import Input
 from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.constants import logger
 from offspot_metrics_backend.db.persister import Persister
 
 

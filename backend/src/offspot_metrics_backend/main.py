@@ -14,7 +14,7 @@ from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEven
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
-from offspot_metrics_backend.constants import BackendConf
+from offspot_metrics_backend.constants import BackendConf, logger
 from offspot_metrics_backend.db.initializer import Initializer
 from offspot_metrics_backend.routes import aggregations, kpis
 
@@ -31,9 +31,6 @@ TICK_PERIOD = (
 logging.basicConfig(
     level=logging.DEBUG, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
-
-
-logger = logging.getLogger(__name__)
 
 
 class Main:
