@@ -37,6 +37,9 @@ class TotalUsage(Kpi):
 
     unique_id = 2003
 
+    # the KPI will hold only the top packages
+    top_count = 10
+
     def compute_value_from_indicators(
         self,
         agg_kind: AggKind,  # noqa: ARG002
@@ -73,7 +76,7 @@ class TotalUsage(Kpi):
         query = (
             select(subquery.c.usage, subquery.c.package)
             .order_by(desc(subquery.c.usage), subquery.c.package)
-            .limit(10)
+            .limit(TotalUsage.top_count)
         )
 
         return TotalUsageValue(

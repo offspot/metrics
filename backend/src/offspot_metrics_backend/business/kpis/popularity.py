@@ -35,6 +35,9 @@ class PackagePopularity(Kpi):
 
     unique_id = 2001
 
+    # the KPI will hold only the top packages
+    top_count = 10
+
     def compute_value_from_indicators(
         self,
         agg_kind: AggKind,  # noqa: ARG002
@@ -71,7 +74,7 @@ class PackagePopularity(Kpi):
         query = (
             select(subquery.c.package_count, subquery.c.package)
             .order_by(desc(subquery.c.package_count), subquery.c.package)
-            .limit(10)
+            .limit(PackagePopularity.top_count)
         )
 
         return PackagePopularityValue(
@@ -105,6 +108,9 @@ class PopularPages(Kpi):
     """
 
     unique_id = 2002
+
+    # the KPI will hold only the top pages
+    top_count = 50
 
     def compute_value_from_indicators(
         self,
@@ -143,7 +149,7 @@ class PopularPages(Kpi):
         query = (
             select(subquery.c.visits, subquery.c.package, subquery.c.item)
             .order_by(desc(subquery.c.visits), subquery.c.package, subquery.c.item)
-            .limit(50)
+            .limit(PopularPages.top_count)
         )
 
         return PopularPagesValue(
