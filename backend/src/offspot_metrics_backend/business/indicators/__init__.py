@@ -12,18 +12,19 @@ from offspot_metrics_backend.business.indicators.total_usage import (
 )
 from offspot_metrics_backend.business.indicators.uptime import Uptime
 
-ALL_INDICATORS: list[Indicator] = [
-    PackageHomeVisit(),
-    PackageItemVisit(),
-    SharedFilesOperations(),
-    TotalUsageOverall(),
-    TotalUsageByPackage(),
-    Uptime(),
+__all__ = [
+    "PackageHomeVisit",
+    "PackageItemVisit",
+    "SharedFilesOperations",
+    "TotalUsageOverall",
+    "TotalUsageByPackage",
+    "Uptime",
 ]
+ALL_INDICATORS: list[Indicator] = [globals()[klass]() for klass in __all__]
 
 
 def get_indicator_name(indicator_id: int) -> str:
     for indicator in ALL_INDICATORS:
         if indicator.unique_id == indicator_id:
-            return indicator.__class__.__name__
+            return type(indicator).__name__
     raise ValueError(f"Unknown indicator id {indicator_id}")
