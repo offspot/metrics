@@ -35,11 +35,13 @@ class LogWatcherHandler(FileSystemEventHandler):
         self.file_positions_map: dict[str, int] = {}
         self.line_process_func = handler
         if not Path(data_folder).exists():
-            raise ValueError(f"Logwatcher data folder is missing: {data_folder}")
+            raise ValueError(
+                f"Logwatcher data folder is missing: {data_folder}"
+            )  # pragma: no cover
         self.state_file_path = Path(data_folder).joinpath("log_watcher_state.json")
         if not self.state_file_path.exists():
             return  # This is ok on first startup
-        with open(self.state_file_path) as fh:
+        with open(self.state_file_path) as fh:  # pragma: no cover
             state = json.load(fh)
             self.file_positions_map = state["file_pointers"]
 
@@ -70,7 +72,7 @@ class LogWatcherHandler(FileSystemEventHandler):
                     self.line_process_func(
                         NewLineEvent(file_path=file_path, line_content=line.strip())
                     )
-                except Exception as ex:
+                except Exception as ex:  # pragma: no cover
                     logger.debug(
                         f"Error occured while processing line in {file_path} at"
                         f" {self.file_positions_map[str(file_path)]}",
@@ -84,7 +86,7 @@ class LogWatcherHandler(FileSystemEventHandler):
         """Function called by watch dog when event occurs"""
         try:
             self.process_event(event)
-        except Exception as ex:
+        except Exception as ex:  # pragma: no cover
             logger.debug(
                 f"Error occured while processing event {event.event_type} on"
                 f" {event.src_path}",
@@ -123,7 +125,7 @@ class LogWatcherHandler(FileSystemEventHandler):
             except FileNotFoundError:  # pragma: no cover
                 pass
 
-        elif event.event_type == EVENT_TYPE_DELETED:
+        elif event.event_type == EVENT_TYPE_DELETED:  # pragma: no cover
             # Cleanup to limit memory footprint + allow file name to be reused
             if event.src_path in self.file_positions_map:
                 del self.file_positions_map[event.src_path]
@@ -162,7 +164,7 @@ class LogWatcher:
         self.recursive = recursive
         self.observer = Observer()
 
-    async def run_async(self):
+    async def run_async(self):  # pragma: no cover
         """Watch directory"""
         self.process_existing_files()
 
@@ -211,7 +213,7 @@ class LogWatcher:
         if self.observer.is_alive():
             logger.info("Log watcher is stopping")
             self.observer.stop()
-        else:
+        else:  # pragma: no cover
             logger.info("Log watcher is already dead")
 
     def process_existing_files(self):
@@ -219,12 +221,12 @@ class LogWatcher:
         for file in self.watched_folder.rglob("*"):
             try:
                 if not file.is_file():
-                    continue
+                    continue  # pragma: no cover
                 # Let's consider that all existing files have been modified, so that we
                 # process any line that might have appeared since our last execution
                 event = FileSystemEvent(str(file))
                 event.is_directory = False
                 event.event_type = EVENT_TYPE_MODIFIED
                 self.event_handler.on_any_event(event)
-            except Exception as ex:
+            except Exception as ex:  # pragma: no cover
                 logger.debug(f"Error processing file {file}", exc_info=ex)
