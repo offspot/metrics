@@ -15,20 +15,31 @@ from offspot_metrics_backend.main import PREFIX
             2001,
             "D",
             "2023-03-01",
-            [{"content": "onecontent", "count": 34, "percentage": 33.2}],
+            {"items": [{"package": "onecontent", "visits": 34}], "total_visits": 45},
         ),
         (
             2002,
             "D",
             "2023-03-01",
-            [
-                {
-                    "content": "onecontent",
-                    "count": 12,
-                    "item": "oneitem",
-                    "percentage": 23.2,
-                }
-            ],
+            {
+                "items": [
+                    {
+                        "package": "onecontent",
+                        "item": "oneitem",
+                        "visits": 12,
+                    }
+                ],
+                "total_visits": 51,
+            },
+        ),
+        (
+            2003,
+            "W",
+            "2023 W10",
+            {
+                "items": [{"package": "othercontent", "minutes_activity": 98}],
+                "total_minutes_activity": 143,
+            },
         ),
         (
             2004,

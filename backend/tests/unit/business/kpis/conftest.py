@@ -7,13 +7,17 @@ import pytest
 from sqlalchemy.orm import Session
 from tests.unit.conftest import DummyKpi
 
-from offspot_metrics_backend.business.indicators.content_visit import (
-    ContentHomeVisit,
-    ContentItemVisit,
-)
 from offspot_metrics_backend.business.indicators.indicator import Indicator
+from offspot_metrics_backend.business.indicators.package import (
+    PackageHomeVisit,
+    PackageItemVisit,
+)
 from offspot_metrics_backend.business.indicators.shared_files import (
     SharedFilesOperations,
+)
+from offspot_metrics_backend.business.indicators.total_usage import (
+    TotalUsageByPackage,
+    TotalUsageOverall,
 )
 from offspot_metrics_backend.business.indicators.uptime import Uptime
 from offspot_metrics_backend.business.inputs.shared_files import (
@@ -74,10 +78,10 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
             period_ts=1,
             records=[
                 DataRecord(
-                    indicator=ContentHomeVisit, value=10, dimension_value0="value1"
+                    indicator=PackageHomeVisit, value=10, dimension_value0="value1"
                 ),
                 DataRecord(
-                    indicator=ContentItemVisit,
+                    indicator=PackageItemVisit,
                     value=12,
                     dimension_value0="value1",
                     dimension_value1="value2",
@@ -91,19 +95,29 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     indicator=Uptime,
                     value=57,
                 ),
+                DataRecord(
+                    indicator=TotalUsageOverall,
+                    value=40,
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=20, dimension_value0="value1"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=30, dimension_value0="value2"
+                ),
             ],
         ),
         Data(
             period_ts=2,
             records=[
                 DataRecord(
-                    indicator=ContentHomeVisit, value=14, dimension_value0="value1"
+                    indicator=PackageHomeVisit, value=14, dimension_value0="value1"
                 ),
                 DataRecord(
-                    indicator=ContentHomeVisit, value=14, dimension_value0="value2"
+                    indicator=PackageHomeVisit, value=14, dimension_value0="value2"
                 ),
                 DataRecord(
-                    indicator=ContentItemVisit,
+                    indicator=PackageItemVisit,
                     value=16,
                     dimension_value0="value1",
                     dimension_value1="value2",
@@ -117,22 +131,62 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     indicator=Uptime,
                     value=43,
                 ),
+                DataRecord(
+                    indicator=TotalUsageOverall,
+                    value=40,
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=20, dimension_value0="value1"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=30, dimension_value0="value2"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=20, dimension_value0="value3"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=30, dimension_value0="value4"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=20, dimension_value0="value5"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=30, dimension_value0="value6"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=20, dimension_value0="value7"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=30, dimension_value0="value8"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=20, dimension_value0="value9"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=30, dimension_value0="value10"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=20, dimension_value0="value11"
+                ),
+                DataRecord(
+                    indicator=TotalUsageByPackage, value=30, dimension_value0="value12"
+                ),
             ],
         ),
         Data(
             period_ts=3,
             records=[
                 DataRecord(
-                    indicator=ContentHomeVisit, value=4, dimension_value0="value1"
+                    indicator=PackageHomeVisit, value=4, dimension_value0="value1"
                 ),
                 DataRecord(
-                    indicator=ContentItemVisit,
+                    indicator=PackageItemVisit,
                     value=6,
                     dimension_value0="value1",
                     dimension_value1="value2",
                 ),
                 DataRecord(
-                    indicator=ContentItemVisit,
+                    indicator=PackageItemVisit,
                     value=8,
                     dimension_value0="value1",
                     dimension_value1="value3",
@@ -143,10 +197,10 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
             period_ts=4,
             records=[
                 DataRecord(
-                    indicator=ContentHomeVisit, value=40, dimension_value0="value1"
+                    indicator=PackageHomeVisit, value=40, dimension_value0="value1"
                 ),
                 DataRecord(
-                    indicator=ContentItemVisit,
+                    indicator=PackageItemVisit,
                     value=36,
                     dimension_value0="value1",
                     dimension_value1="value4",

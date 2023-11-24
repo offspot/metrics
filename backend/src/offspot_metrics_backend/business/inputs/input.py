@@ -8,7 +8,7 @@ class Input:
     ...
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class TimedInput(Input):
     """Input with information about when it happened"""
 

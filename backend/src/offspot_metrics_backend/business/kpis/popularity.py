@@ -1,11 +1,11 @@
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.business.agg_kind import AggKind
-from offspot_metrics_backend.business.indicators.content_visit import (
-    ContentHomeVisit,
-    ContentItemVisit,
+from offspot_metrics_backend.business.indicators.package import (
+    PackageHomeVisit,
+    PackageItemVisit,
 )
 from offspot_metrics_backend.business.kpis.kpi import Kpi
 from offspot_metrics_backend.db.models import (
@@ -16,32 +16,35 @@ from offspot_metrics_backend.db.models import (
 )
 
 
-class ContentPopularityItem(BaseModel):
-    content: str
-    count: int
-    percentage: float
+class PackagePopularityItem(BaseModel):
+    package: str
+    visits: int
 
 
-class ContentPopularityValue(RootModel[list[ContentPopularityItem]], KpiValue):
-    pass
+class PackagePopularityValue(BaseModel, KpiValue):
+    items: list[PackagePopularityItem]
+    total_visits: int
 
 
-class ContentPopularity(Kpi):
-    """A KPI which computes contents popularity
+class PackagePopularity(Kpi):
+    """A KPI which computes package popularity
 
-    Value is the list of all contents, sorted by nb of visits of home url/page of each
+    Value is the list of all packages, sorted by nb of visits of home url/page of each
      content
     """
 
     unique_id = 2001
 
+    # the KPI will hold only the top packages
+    top_count = 10
+
     def compute_value_from_indicators(
         self,
         agg_kind: AggKind,  # noqa: ARG002
         start_ts: int,
         stop_ts: int,
         session: Session,
-    ) -> ContentPopularityValue:
+    ) -> PackagePopularityValue:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
 
@@ -50,69 +53,72 @@ class ContentPopularity(Kpi):
                 func.sum(IndicatorRecord.value).label("count"),
             )
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == ContentHomeVisit.unique_id)
+            .where(IndicatorRecord.indicator_id == PackageHomeVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
         ).scalar_one()
 
         subquery = (
             select(
-                IndicatorDimension.value0.label("content"),
-                func.sum(IndicatorRecord.value).label("content_count"),
+                IndicatorDimension.value0.label("package"),
+                func.sum(IndicatorRecord.value).label("package_count"),
             )
             .join(IndicatorRecord)
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == ContentHomeVisit.unique_id)
+            .where(IndicatorRecord.indicator_id == PackageHomeVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
-            .group_by("content")
-        ).subquery("content_with_count")
+            .group_by("package")
+        ).subquery("packages")
 
-        query = select(subquery.c.content_count, subquery.c.content).order_by(
-            desc(subquery.c.content_count), subquery.c.content
+        query = (
+            select(subquery.c.package_count, subquery.c.package)
+            .order_by(desc(subquery.c.package_count), subquery.c.package)
+            .limit(PackagePopularity.top_count)
         )
 
-        return ContentPopularityValue.model_validate(
-            [
-                ContentPopularityItem(
-                    content=record.content,
-                    count=record.content_count,
-                    percentage=round(record.content_count * 100 / total_count, 2),
+        return PackagePopularityValue(
+            items=[
+                PackagePopularityItem(
+                    package=record.package,
+                    visits=record.package_count,
                 )
                 for record in session.execute(query)
-            ]
+            ],
+            total_visits=total_count,
         )
 
 
-class ContentObjectPopularityItem(BaseModel):
-    content: str
+class PopularPagesItem(BaseModel):
+    package: str
     item: str
-    count: int
-    percentage: float
+    visits: int
 
 
-class ContentObjectPopularityValue(
-    KpiValue, RootModel[list[ContentObjectPopularityItem]]
-):
-    pass
+class PopularPagesValue(BaseModel, KpiValue):
+    items: list[PopularPagesItem]
+    total_visits: int
 
 
-class ContentObjectPopularity(Kpi):
+class PopularPages(Kpi):
     """A KPI which computes content objects popularity
 
     Value is the top 50 list of all objects (content name + object name), sorted by nb
-    of visits
+    of visits + total number of visits
     """
 
     unique_id = 2002
 
+    # the KPI will hold only the top pages
+    top_count = 50
+
     def compute_value_from_indicators(
         self,
         agg_kind: AggKind,  # noqa: ARG002
         start_ts: int,
         stop_ts: int,
         session: Session,
-    ) -> ContentObjectPopularityValue:
+    ) -> PopularPagesValue:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
 
@@ -121,39 +127,39 @@ class ContentObjectPopularity(Kpi):
                 func.sum(IndicatorRecord.value).label("count"),
             )
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == ContentItemVisit.unique_id)
+            .where(IndicatorRecord.indicator_id == PackageItemVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
         ).scalar_one()
 
         subquery = (
             select(
-                IndicatorDimension.value0.label("content"),
+                IndicatorDimension.value0.label("package"),
                 IndicatorDimension.value1.label("item"),
-                func.sum(IndicatorRecord.value).label("item_count"),
+                func.sum(IndicatorRecord.value).label("visits"),
             )
             .join(IndicatorRecord)
             .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == ContentItemVisit.unique_id)
+            .where(IndicatorRecord.indicator_id == PackageItemVisit.unique_id)
             .where(IndicatorPeriod.timestamp >= start_ts)
             .where(IndicatorPeriod.timestamp <= stop_ts)
-            .group_by("content", "item")
-        ).subquery("content_with_count")
+            .group_by("package", "item")
+        ).subquery("packages")
 
         query = (
-            select(subquery.c.item_count, subquery.c.content, subquery.c.item)
-            .order_by(desc(subquery.c.item_count), subquery.c.content, subquery.c.item)
-            .limit(50)
+            select(subquery.c.visits, subquery.c.package, subquery.c.item)
+            .order_by(desc(subquery.c.visits), subquery.c.package, subquery.c.item)
+            .limit(PopularPages.top_count)
         )
 
-        return ContentObjectPopularityValue.model_validate(
-            [
-                ContentObjectPopularityItem(
-                    content=record.content,
+        return PopularPagesValue(
+            items=[
+                PopularPagesItem(
+                    package=record.package,
                     item=record.item,
-                    count=record.item_count,
-                    percentage=round(record.item_count * 100 / total_count, 2),
+                    visits=record.visits,
                 )
                 for record in session.execute(query)
-            ]
+            ],
+            total_visits=total_count,
         )

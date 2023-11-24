@@ -1,3 +1,4 @@
+import datetime
 import pathlib
 from collections.abc import Callable
 
@@ -7,11 +8,12 @@ from offspot_metrics_backend.business.caddy_log_converter import (
     CaddyLog,
     CaddyLogConverter,
 )
-from offspot_metrics_backend.business.inputs.content_visit import (
-    ContentHomeVisit,
-    ContentItemVisit,
-)
 from offspot_metrics_backend.business.inputs.input import Input
+from offspot_metrics_backend.business.inputs.package import (
+    PackageHomeVisit,
+    PackageItemVisit,
+    PackageRequest,
+)
 from offspot_metrics_backend.business.inputs.shared_files import (
     SharedFilesOperation,
     SharedFilesOperationKind,
@@ -26,7 +28,13 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r"""{"level":"info","msg":"handled request","status":"200","""
             r""""request":{"host":"nomad.renaud.test","uri":"/","method":"GET"},"""
             r""""resp_headers":{},"ts":1688459792.8632474}""",
-            [ContentHomeVisit(content="Nomad exercices du CP à la 3è")],
+            [
+                PackageHomeVisit(package_title="Nomad exercices du CP à la 3è"),
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Nomad exercices du CP à la 3è",
+                ),
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"200","""
@@ -36,10 +44,14 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r""""resp_headers":{"Content-Type":["text/html; charset=utf"]},"""
             r""""ts":1688459792.8632474}""",
             [
-                ContentItemVisit(
-                    content="Wikipedia",
-                    item="/questions/149/1-5-million-lines-of-code-0-tests-where",
-                )
+                PackageItemVisit(
+                    package_title="Wikipedia",
+                    item_path="/questions/149/1-5-million-lines-of-code-0-tests-where",
+                ),
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Wikipedia",
+                ),
             ],
         ),
         (
@@ -47,70 +59,123 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r""""request":{"host":"kiwix.renaud.test","method":"GET","""
             r""""uri":"/content/wikipedia_en_all/"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [ContentHomeVisit(content="Wikipedia")],
+            [
+                PackageHomeVisit(package_title="Wikipedia"),
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Wikipedia",
+                ),
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
             r""""uri":"/api/documents/"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED)],
+            [
+                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED),
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 1",
+                ),
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"DELETE","""
             r""""uri":"/api/documents/123"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED)],
+            [
+                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED),
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 2",
+                ),
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"GET","""
             r""""uri":"/api/documents/123"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [],
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 2",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"400","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
             r""""uri":"/api/documents/"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [],
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 1",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"400","""
             r""""request":{"host":"edupi2.renaud.test","method":"DELETE","""
             r""""uri":"/api/documents/123"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [],
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 2",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"edupi1.renaud.test","method":"GET","""
             r""""uri":"/api/documents/"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [],
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 1",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"GET","""
             r""""uri":"/api/documents/123"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [],
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 2",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
             r""""uri":"/api/documents/1"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [],
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 1",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"204","""
             r""""request":{"host":"edupi2.renaud.test","method":"DELETE","""
             r""""uri":"/api/documents/"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
-            [],
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files 2",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
@@ -126,6 +191,53 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r""""ts":1688459792.8632474}""",
             [],
         ),
+        (
+            r"""{"level":"info","msg":"handled request","request":{"host":"""
+            r""""nomad.renaud.test","uri":"/page2.html","method":"GET"},"status":"""
+            r"""200, "resp_headers": {},"ts":1688459792.8632474}""",
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Nomad exercices du CP à la 3è",
+                )
+            ],
+        ),
+        (
+            r"""{"level":"info","msg":"handled request","request":{"host":"""
+            r""""kiwix.renaud.test","uri":"/content/wikipedia_en_all/questions/149/"""
+            r"""1-5-million-lines-of-code-0-tests-where-should-we-start","method":"""
+            r""""GET"},"status":200, "resp_headers": {},"ts":1688459792.8632474}""",
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Wikipedia",
+                )
+            ],
+        ),
+        (
+            r"""{"level":"info","msg":"handled request","request":{"host":"kiwix."""
+            r"""renaud.test","uri":"/content/wikipedia_en_all/assets/image.png","""
+            r""""method":"GET"},"resp_headers":{"Content-Type":["image/png"]},"""
+            r""""status":200,"ts":1688459792.8632474}""",
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Wikipedia",
+                )
+            ],
+        ),
+        (
+            r"""{"level":"info","msg":"handled request","request":{"host":"wikifundi."""
+            r"""renaud.test","uri":"/something/anywhere.html","""
+            r""""method":"GET"},"resp_headers":{"Content-Type":["image/png"]},"""
+            r""""status":200,"ts":1688459792.8632474}""",
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Wikifundi",
+                )
+            ],
+        ),
     ],
 )
 def test_process_ok(
@@ -136,7 +248,7 @@ def test_process_ok(
     converter = CaddyLogConverter(reverse_proxy_config("conf_ok.yaml"))
     result = converter.process(log_line)
     assert result.warning is None
-    assert result.inputs == expected_inputs
+    assert set(result.inputs) == set(expected_inputs)
 
 
 def test_process_nok(reverse_proxy_config: Callable[[str], ReverseProxyConfig]):
