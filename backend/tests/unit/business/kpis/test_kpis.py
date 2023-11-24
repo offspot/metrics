@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import cast
 
@@ -16,24 +17,103 @@ from offspot_metrics_backend.db.models import IndicatorPeriod as PeriodDb
 from offspot_metrics_backend.db.models import KpiRecord, KpiValue
 
 
-def get_dummy_value(value: str) -> DummyKpiValue:
-    return DummyKpiValue.model_validate(value)
+@pytest.fixture
+def get_dummy_value() -> Callable[[str], DummyKpiValue]:
+    def func(value: str) -> DummyKpiValue:
+        return DummyKpiValue.model_validate(value)
+
+    return func
 
 
-init_datetime_day_dummyvalue = get_dummy_value("D - 1686182400 - 1686268800")
-init_datetime_day_minus_one_dummyvalue = get_dummy_value("D - 1686096000 - 1686182400")
-init_datetime_day_plus_one_dummyvalue = get_dummy_value("D - 1686268800 - 1686355200")
-init_datetime_day_plus_two_dummyvalue = get_dummy_value("D - 1686355200 - 1686441600")
-init_datetime_day_plus_three_dummyvalue = get_dummy_value("D - 1686787200 - 1686873600")
-init_datetime_week_dummyvalue = get_dummy_value("W - 1685923200 - 1686528000")
-init_datetime_week_plus_one_dummyvalue = get_dummy_value("W - 1686528000 - 1687132800")
-init_datetime_month_dummyvalue = get_dummy_value("M - 1685577600 - 1688169600")
-init_datetime_year_dummyvalue = get_dummy_value("Y - 1672531200 - 1704067200")
+@pytest.fixture
+def init_datetime_day_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("D - 1686182400 - 1686268800")
 
-previous_datetime_day_dummyvalue = get_dummy_value("D - 1672704000 - 1672790400")
-previous_datetime_week_dummyvalue = get_dummy_value("W - 1672617600 - 1673222400")
-previous_datetime_month_dummyvalue = get_dummy_value("M - 1672531200 - 1675209600")
-previous_datetime_year_dummyvalue = get_dummy_value("Y - 1672531200 - 1704067200")
+
+@pytest.fixture
+def init_datetime_day_minus_one_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("D - 1686096000 - 1686182400")
+
+
+@pytest.fixture
+def init_datetime_day_plus_one_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("D - 1686268800 - 1686355200")
+
+
+@pytest.fixture
+def init_datetime_day_plus_two_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("D - 1686355200 - 1686441600")
+
+
+@pytest.fixture
+def init_datetime_day_plus_three_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("D - 1686787200 - 1686873600")
+
+
+@pytest.fixture
+def init_datetime_week_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("W - 1685923200 - 1686528000")
+
+
+@pytest.fixture
+def init_datetime_week_plus_one_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("W - 1686528000 - 1687132800")
+
+
+@pytest.fixture
+def init_datetime_month_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("M - 1685577600 - 1688169600")
+
+
+@pytest.fixture
+def init_datetime_year_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("Y - 1672531200 - 1704067200")
+
+
+@pytest.fixture
+def previous_datetime_day_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("D - 1672704000 - 1672790400")
+
+
+@pytest.fixture
+def previous_datetime_week_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("W - 1672617600 - 1673222400")
+
+
+@pytest.fixture
+def previous_datetime_month_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("M - 1672531200 - 1675209600")
+
+
+@pytest.fixture
+def previous_datetime_year_dummyvalue(
+    get_dummy_value: Callable[[str], DummyKpiValue]
+) -> DummyKpiValue:
+    return get_dummy_value("Y - 1672531200 - 1704067200")
 
 
 @pytest.mark.parametrize(
@@ -103,7 +183,18 @@ def get_kpi_values(dbsession: Session):
 
 
 def test_process_tick(
-    processor: Processor, dummy_kpi: Kpi, init_datetime: datetime, dbsession: Session
+    init_datetime_day_dummyvalue: DummyKpiValue,
+    init_datetime_week_dummyvalue: DummyKpiValue,
+    init_datetime_month_dummyvalue: DummyKpiValue,
+    init_datetime_year_dummyvalue: DummyKpiValue,
+    init_datetime_day_plus_one_dummyvalue: DummyKpiValue,
+    init_datetime_day_plus_two_dummyvalue: DummyKpiValue,
+    init_datetime_day_plus_three_dummyvalue: DummyKpiValue,
+    init_datetime_week_plus_one_dummyvalue: DummyKpiValue,
+    processor: Processor,
+    dummy_kpi: Kpi,
+    init_datetime: datetime,
+    dbsession: Session,
 ) -> None:
     processor.kpis = [dummy_kpi]
     dbsession.execute(delete(KpiRecord))
@@ -223,7 +314,14 @@ def test_process_tick(
 
 
 def test_restore_kpis_from_almost_empty_db(
-    processor: Processor, dummy_kpi: Kpi, init_datetime: datetime, dbsession: Session
+    init_datetime_week_dummyvalue: DummyKpiValue,
+    init_datetime_month_dummyvalue: DummyKpiValue,
+    init_datetime_year_dummyvalue: DummyKpiValue,
+    init_datetime_day_minus_one_dummyvalue: DummyKpiValue,
+    processor: Processor,
+    dummy_kpi: Kpi,
+    init_datetime: datetime,
+    dbsession: Session,
 ) -> None:
     processor.kpis = [dummy_kpi]
     dbsession.execute(delete(KpiRecord))
@@ -259,6 +357,11 @@ def test_restore_kpis_from_almost_empty_db(
 
 
 def test_restore_kpis_from_filled_db(
+    get_dummy_value: Callable[[str], DummyKpiValue],
+    previous_datetime_day_dummyvalue: DummyKpiValue,
+    previous_datetime_week_dummyvalue: DummyKpiValue,
+    previous_datetime_month_dummyvalue: DummyKpiValue,
+    previous_datetime_year_dummyvalue: DummyKpiValue,
     processor: Processor,
     dummy_kpi: Kpi,
     previous_datetime: datetime,
