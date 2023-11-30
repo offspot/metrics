@@ -7,6 +7,54 @@ packages:
 - kind: zim
   title: StackExchange - Software Quality Assurance and Testing
   url: //kiwix.localhost:8000/viewer/viewer#sqa.stackexchange.com_en_all_2023-05
+- kind: zim
+  title: Wikipedia FR
+  url: //kiwix.localhost:8000/viewer/viewer#wikipedia_fr_all_maxi_2023-09
+- kind: zim
+  title: Wikipedia EN
+  url: //kiwix.localhost:8000/viewer/viewer#wikipedia_en_all_maxi_2023-09
+- kind: zim
+  title: iFixit Guides FR
+  url: //kiwix.localhost:8000/viewer/viewer#ifixit_fr_all_2023-08
+- kind: zim
+  title: Khan Academy
+  url: //kiwix.localhost:8000/viewer/viewer#khanacademy_fr_all_2023-03
+- kind: zim
+  title: Movies and TV
+  url: //kiwix.localhost:8000/viewer/viewer#movies.stackexchange.com_en_all_2023-11
+- kind: zim
+  title: WikiMed Medical Encyclopedia FR
+  url: //kiwix.localhost:8000/viewer/viewer#wikipedia_fr_medicine_maxi_2023-11
+- kind: zim
+  title: TED MED
+  url: //kiwix.localhost:8000/viewer/viewer#ted_en_playlist-the-future-of-medicine_2021-12
+- kind: zim
+  title: 3D Printing
+  url: //kiwix.localhost:8000/viewer/viewer#3dprinting.stackexchange.com_en_all_2023-07
+- kind: zim
+  title: African Storybooks
+  url: //kiwix.localhost:8000/viewer/viewer#africanstorybook.org_mul_all_2023-10
+- kind: zim
+  title: Harnessing the future of data
+  url: //kiwix.localhost:8000/viewer/viewer#ted_en_playlist-harnessing-the-future-of-data_2021-12
+- kind: zim
+  title: Project Gutenberg Library
+  url: //kiwix.localhost:8000/viewer/viewer#gutenberg_mul_all_2023-08
+- kind: zim
+  title: MathOverflow
+  url: //kiwix.localhost:8000/viewer/viewer#mathoverflow.net_en_all_2023-01
+- kind: zim
+  title: Chess
+  url: //kiwix.localhost:8000/viewer/viewer#chess.stackexchange.com_en_all_2023-11
+- kind: zim
+  title: WikiMed Medical Encyclopedia EN
+  url: //kiwix.localhost:8000/viewer/viewer#wikipedia_en_medicine_maxi_2023-11
+- kind: zim
+  title: The quest to end poverty
+  url: //kiwix.localhost:8000/viewer/viewer#ted_en_playlist-the-quest-to-end-poverty_2021-01
+- kind: zim
+  title: TED Talks - Entertainment
+  url: //kiwix.localhost:8000/viewer/viewer#ed_en_entertainment_2023-09
 - kind: files
   title: Nomad exercices du CP \xE0 la 3\xE8
   url: //nomad.localhost:8000/
@@ -17,3 +65,7 @@ packages:
   title: Shared files
   url: //edupi.localhost:8000/
   ident: edupi.offspot.kiwix.org
+- kind: app
+  title: Wikifundi
+  url: //wikifundi.localhost:8000/
+  ident: wikifundi.offspot.kiwix.org
