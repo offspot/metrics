@@ -35,13 +35,11 @@ class LogWatcherHandler(FileSystemEventHandler):
         self.file_positions_map: dict[str, int] = {}
         self.line_process_func = handler
         if not Path(data_folder).exists():
-            raise ValueError(
-                f"Logwatcher data folder is missing: {data_folder}"
-            )  # pragma: no cover
+            raise ValueError(f"Logwatcher data folder is missing: {data_folder}")
         self.state_file_path = Path(data_folder).joinpath("log_watcher_state.json")
         if not self.state_file_path.exists():
             return  # This is ok on first startup
-        with open(self.state_file_path) as fh:  # pragma: no cover
+        with open(self.state_file_path) as fh:
             state = json.load(fh)
             self.file_positions_map = state["file_pointers"]
 
@@ -53,7 +51,6 @@ class LogWatcherHandler(FileSystemEventHandler):
 
     def process_new_lines(self, file_path: Path):
         """Process file to detect new lines appended"""
-
         # Reset position if it looks like file has been truncated
         if file_path.stat().st_size < self.file_positions_map[str(file_path)]:
             self.file_positions_map[str(file_path)] = 0
@@ -72,7 +69,7 @@ class LogWatcherHandler(FileSystemEventHandler):
                     self.line_process_func(
                         NewLineEvent(file_path=file_path, line_content=line.strip())
                     )
-                except Exception as ex:  # pragma: no cover
+                except Exception as ex:
                     logger.debug(
                         f"Error occured while processing line in {file_path} at"
                         f" {self.file_positions_map[str(file_path)]}",
@@ -111,7 +108,7 @@ class LogWatcherHandler(FileSystemEventHandler):
                 self.file_positions_map[event.src_path] = 0
             try:
                 self.process_new_lines(Path(event.src_path))
-            except FileNotFoundError:  # pragma: no cover
+            except FileNotFoundError:
                 pass
 
         elif self._is_moved_event(event):
@@ -122,13 +119,18 @@ class LogWatcherHandler(FileSystemEventHandler):
                 del self.file_positions_map[event.src_path]
             try:
                 self.process_new_lines(Path(event.dest_path))
-            except FileNotFoundError:  # pragma: no cover
+            except FileNotFoundError:
                 pass
 
-        elif event.event_type == EVENT_TYPE_DELETED:  # pragma: no cover
+        elif event.event_type == EVENT_TYPE_DELETED:
             # Cleanup to limit memory footprint + allow file name to be reused
             if event.src_path in self.file_positions_map:
                 del self.file_positions_map[event.src_path]
+
+        else:  # pragma: no cover
+            # we should never get there except if the list of suported events is
+            # modified and we do not act appropriately
+            raise AttributeError(f"Unexpected event type {event.event_type}")
 
         with open(self.state_file_path, "w") as fh:
             json.dump({"file_pointers": self.file_positions_map}, fh)
@@ -213,7 +215,7 @@ class LogWatcher:
         if self.observer.is_alive():
             logger.info("Log watcher is stopping")
             self.observer.stop()
-        else:  # pragma: no cover
+        else:
             logger.info("Log watcher is already dead")
 
     def process_existing_files(self):
@@ -221,7 +223,7 @@ class LogWatcher:
         for file in self.watched_folder.rglob("*"):
             try:
                 if not file.is_file():
-                    continue  # pragma: no cover
+                    continue
                 # Let's consider that all existing files have been modified, so that we
                 # process any line that might have appeared since our last execution
                 event = FileSystemEvent(str(file))
