@@ -19,10 +19,10 @@ class Processor:
         for indicator in self.indicators:
             try:
                 indicator.process_input(input_=input_)
-            except Exception as ex:
+            except Exception as exc:
                 logger.debug(
                     f"Error processing input for indicator {indicator.unique_id}",
-                    exc_info=ex,
+                    exc_info=exc,
                 )
 
     def reset_state(self) -> None:

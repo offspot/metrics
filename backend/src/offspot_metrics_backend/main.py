@@ -113,8 +113,8 @@ class Main:
             logger.debug("Generating a ClockTick input")
             try:
                 self.processor.process_input(ClockTick(ts=Period.now().datetime))
-            except Exception as ex:
-                logger.debug("Exception occured in clock tick", exc_info=ex)
+            except Exception as exc:
+                logger.debug("Exception occured in clock tick", exc_info=exc)
 
     async def processing_ticker(self):
         """Start processing cycles with one minute pauses between them
@@ -129,8 +129,8 @@ class Main:
             logger.debug("Background processing started")
             try:
                 self.processor.process_tick(tick_period=Period.now().period)
-            except Exception as ex:
-                logger.debug("Exception occured in clock tick", exc_info=ex)
+            except Exception as exc:
+                logger.debug("Exception occured in clock tick", exc_info=exc)
             logger.debug("Background processing completed")
 
     def handle_log_event(self, event: NewLineEvent):
@@ -141,10 +141,10 @@ class Main:
                 logger.debug(f"Processing input: {input_}")
                 try:
                     self.processor.process_input(input_=input_)
-                except Exception as ex:
-                    logger.debug("Error processing input", exc_info=ex)
-        except Exception as ex:
-            logger.debug("Error log event", exc_info=ex)
+                except Exception as exc:
+                    logger.debug("Error processing input", exc_info=exc)
+        except Exception as exc:
+            logger.debug("Error log event", exc_info=exc)
 
     def create_app(self) -> FastAPI:
         self.app = FastAPI(
