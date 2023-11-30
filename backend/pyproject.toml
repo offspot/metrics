@@ -201,7 +201,9 @@ ban-relative-imports = "all"
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 # Simulator is using pseudo-random generator and magic values on purpose
-"src/offspot_metrics_backend/simulator.py" = ["S311", "PLR2004"]
+"dev_tools/simulator.py" = ["S311", "PLR2004"]
+# Synthetic data generator is using pseudo-random generator on purpose
+"dev_tools/synthetic_data.py" = ["S311"]
 
 [tool.pytest.ini_options]
 minversion = "7.3"
@@ -224,7 +226,6 @@ omit = [
   "src/offspot_metrics_backend/business/indicators/shared_files.py", # straightforward implementation, pointless to test
   "src/offspot_metrics_backend/business/indicators/uptime.py", # straightforward implementation, pointless to test
   "src/offspot_metrics_backend/business/indicators/total_usage.py", # straightforward implementation, pointless to test
-  "src/offspot_metrics_backend/simulator.py", # developer tool
 ]
 
 [tool.coverage.report]
@@ -235,7 +236,7 @@ exclude_lines = [
 ]
 
 [tool.pyright]
-include = ["src", "tests", "tasks.py"]
+include = ["src", "tests", "dev_tools", "tasks.py"]
 exclude = [".env/**", ".venv/**"]
 extraPaths = ["src"]
 pythonVersion = "3.11"
