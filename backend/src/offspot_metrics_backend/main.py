@@ -109,19 +109,17 @@ class Main:
         overwhelm the system with 60 inputs per hour).
         """
         while True:
-            _, now_datetime = Period.now()
-            await sleep(TICK_PERIOD - now_datetime.second)
+            await sleep(TICK_PERIOD - Period.now().datetime.second)
             logger.debug("Generating a ClockTick input")
             try:
-                _, now_datetime = Period.now()
-                self.processor.process_input(ClockTick(ts=now_datetime))
+                self.processor.process_input(ClockTick(ts=Period.now().datetime))
             except Exception as ex:
                 logger.debug("Exception occured in clock tick", exc_info=ex)
 
     async def processing_ticker(self):
         """Start processing cycles with one minute pauses between them
 
-        We do not what / need something precise here because we want to let
+        We do not need something precise here because we want to let
         the system "breath" between processing cycle and the processing logic
         does not mind if there is not 60 cycles per hour, it just need to
         regularly persist data in DB + perform needed computation every hour.
@@ -130,8 +128,7 @@ class Main:
             await sleep(TICK_PERIOD)
             logger.debug("Background processing started")
             try:
-                now_period, _ = Period.now()
-                self.processor.process_tick(tick_period=now_period)
+                self.processor.process_tick(tick_period=Period.now().period)
             except Exception as ex:
                 logger.debug("Exception occured in clock tick", exc_info=ex)
             logger.debug("Background processing completed")
