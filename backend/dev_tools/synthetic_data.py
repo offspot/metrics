@@ -14,7 +14,6 @@ from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.business.indicators import get_indicator_name
 from offspot_metrics_backend.business.indicators.package import (
     PackageHomeVisit,
-    PackageItemVisit,
 )
 from offspot_metrics_backend.business.indicators.shared_files import (
     SharedFilesOperations,
@@ -27,9 +26,6 @@ from offspot_metrics_backend.business.kpis.popularity import (
     PackagePopularity,
     PackagePopularityItem,
     PackagePopularityValue,
-    PopularPages,
-    PopularPagesItem,
-    PopularPagesValue,
 )
 from offspot_metrics_backend.business.kpis.shared_files import (
     SharedFiles,
@@ -90,10 +86,6 @@ class Dataset:
     content_popularity_total: int
     content_popularity_random_packages_amount: int
     content_popularity_random_packages_visits: int
-    content_object_popularity_items: list["PopularPagesData"]
-    content_object_popularity_total: int
-    content_object_popularity_items_random_pages_amount: int
-    content_object_popularity_items_random_pages_visits: int
     usage_by_package: list["UsageData"]
     usage_overall: int
     shared_files_created: int
@@ -106,23 +98,11 @@ class Dataset:
         visits: int
 
     @dataclass
-    class PopularPagesDataItem:
-        item: str
-        visits: int
-
-    @dataclass
-    class PopularPagesData:
-        package: str
-        items: list["Dataset.PopularPagesDataItem"]
-
-    @dataclass
     class UsageData:
         package: str
         nb_slots: int  # number of 10 minutes slots
 
     PackD: TypeAlias = PackagePopularityData
-    PageD: TypeAlias = PopularPagesData
-    PageI: TypeAlias = PopularPagesDataItem
     UD: TypeAlias = UsageData
 
 
@@ -214,19 +194,6 @@ def create_average_yearly_data(kind: DatasetKind):
         DatasetKind.THOUSAND_LIGHT: 984,
     }
 
-    content_object_popularity_items_random_pages_amount_dict: dict[DatasetKind, int] = {
-        DatasetKind.TWENTY: 4000,
-        DatasetKind.FIFTY: 10000,
-        DatasetKind.HUNDRED: 20000,
-        DatasetKind.HUNDRED_LIGHT: 10000,
-        DatasetKind.TWOHUNDRED: 40000,
-        DatasetKind.TWOHUNDRED_LIGHT: 10000,
-        DatasetKind.FIVEHUNDRED: 80000,
-        DatasetKind.FIVEHUNDRED_LIGHT: 10000,
-        DatasetKind.THOUSAND: 160000,
-        DatasetKind.THOUSAND_LIGHT: 10000,
-    }
-
     return Dataset(
         shared_files_created=500,
         shared_files_deleted=100,
@@ -259,109 +226,6 @@ def create_average_yearly_data(kind: DatasetKind):
             content_popularity_random_packages_amount_dict[kind]
         ),
         content_popularity_random_packages_visits=50,
-        content_object_popularity_total=180000,
-        content_object_popularity_items=[
-            Dataset.PageD(
-                package="Wikipedia EN",
-                items=[
-                    Dataset.PageI(item="United States Senate", visits=5000),
-                    Dataset.PageI(item="Barack Obama", visits=5000),
-                    Dataset.PageI(item="Cleopatra", visits=5000),
-                    Dataset.PageI(item="Chernobyl disaster", visits=5000),
-                    Dataset.PageI(item="The Beatles", visits=5000),
-                    Dataset.PageI(item="Abraham Lincoln", visits=2000),
-                    Dataset.PageI(item="September 11 attacks", visits=2000),
-                    Dataset.PageI(item="Rihanna", visits=2000),
-                    Dataset.PageI(item="Elvis Presley", visits=2000),
-                    Dataset.PageI(item="Angelina Jolie", visits=2000),
-                    Dataset.PageI(item="Facebook", visits=1000),
-                    Dataset.PageI(item="Stephen Hawking", visits=1000),
-                    Dataset.PageI(item="Kanye West", visits=1000),
-                    Dataset.PageI(item="Jeffrey Dahmer", visits=1000),
-                ],
-            ),
-            Dataset.PageD(
-                package="Khan Academy",
-                items=[
-                    Dataset.PageI(
-                        item="khan_academy_ed_talk_with_bob_hughes_tuesday_march_23.html",
-                        visits=5000,
-                    ),
-                ],
-            ),
-            Dataset.PageD(
-                package="WikiMed Medical Encyclopedia EN",
-                items=[
-                    Dataset.PageI(item="Appendicitis", visits=1000),
-                    Dataset.PageI(item="Gastritis", visits=1000),
-                ],
-            ),
-            Dataset.PageD(
-                package="How does my brain works?",
-                items=[
-                    Dataset.PageI(
-                        item="the-mysterious-workings-of-the-adolescent-brain ",
-                        visits=1000,
-                    ),
-                ],
-            ),
-            Dataset.PageD(
-                package="Wikipedia FR",
-                items=[
-                    Dataset.PageI(item="Cookie (informatique)", visits=2000),
-                    Dataset.PageI(item="Robert Oppenheimer", visits=2000),
-                    Dataset.PageI(item="Gérard Leclerc (journaliste)", visits=2000),
-                    Dataset.PageI(
-                        item="Coupe du monde féminine de football 2023", visits=2000
-                    ),
-                    Dataset.PageI(item="Geneviève de Fontenay", visits=2000),
-                    Dataset.PageI(item="Abaya", visits=1000),
-                    Dataset.PageI(item="Evgueni Prigojine", visits=1000),
-                    Dataset.PageI(item="Lionel Messi", visits=1000),
-                    Dataset.PageI(item="Neymar", visits=1000),
-                    Dataset.PageI(item="Hélène Carrère d'Encausse", visits=1000),
-                    Dataset.PageI(item="Google", visits=1000),
-                    Dataset.PageI(item="Oppenheimer (film)", visits=500),
-                    Dataset.PageI(item="YouTube", visits=500),
-                    Dataset.PageI(item="Cristiano Ronaldo", visits=500),
-                    Dataset.PageI(item="Julien Clerc", visits=500),
-                    Dataset.PageI(item="Togo", visits=200),
-                    Dataset.PageI(item="Kylian Mbappé", visits=200),
-                    Dataset.PageI(item="Niger", visits=200),
-                    Dataset.PageI(
-                        item="Communauté économique des États de l'Afrique",
-                        visits=200,
-                    ),
-                    Dataset.PageI(
-                        item="Ligue des champions de l'UEFA 2023-2024", visits=100
-                    ),
-                    Dataset.PageI(item="Facebook", visits=100),
-                    Dataset.PageI(item="Margot Robbie", visits=100),
-                    Dataset.PageI(item="Julie Leclerc", visits=100),
-                    Dataset.PageI(item="Brigitte Bardot", visits=100),
-                    Dataset.PageI(item="Jean-Louis Georgelin", visits=100),
-                    Dataset.PageI(item="BRICS", visits=100),
-                    Dataset.PageI(item="Ousmane Dembélé", visits=100),
-                    Dataset.PageI(item="Décès en août 2023", visits=100),
-                    Dataset.PageI(
-                        item="Coupe du monde féminine de football", visits=100
-                    ),
-                    Dataset.PageI(item="États-Unis", visits=100),
-                    Dataset.PageI(item="Wahid Bouzidi", visits=100),
-                    Dataset.PageI(item="Barbie (film)", visits=100),
-                    Dataset.PageI(item="Lamine Yamal", visits=100),
-                ],
-            ),
-        ],
-        # random pages that will be injected (to mimic real number of pages with low
-        # total number of visits, which won't make it to the KPI but are still
-        # stored for one year in indicators), with
-        # - amount: total number of pages to create
-        # - visit: yearly number of visits on each page (will be randomized)
-        content_object_popularity_items_random_pages_amount=(
-            content_object_popularity_items_random_pages_amount_dict[kind]
-        ),
-        content_object_popularity_items_random_pages_visits=10,
         usage_by_package=[
             Dataset.UD(package="Wikipedia FR", nb_slots=500),
             Dataset.UD(package="Wikipedia EN", nb_slots=500),
@@ -462,46 +326,6 @@ def inject_package_popularity_kpis(
                         )[:10],
                         total_visits=scale_and_randomize_value(
                             average_yearly_data.content_popularity_total,
-                            agg_kind=previous_aggregation.agg_kind,
-                            lower_probability=50,
-                        ),
-                    ),
-                )
-            )
-
-
-def inject_popular_pages_kpis(
-    average_yearly_data: Dataset, previous_aggregations: list[AggKindAndValue]
-):
-    """Create popular pages KPIs in DB for all aggregations (year, month, ...)"""
-
-    logging.info("Inject Popular Pages KPIs")
-    with Session.begin() as session:
-        for previous_aggregation in previous_aggregations:
-            session.add(
-                dbm.KpiRecord(
-                    kpi_id=PopularPages.unique_id,
-                    agg_kind=previous_aggregation.agg_kind,
-                    agg_value=previous_aggregation.agg_value,
-                    kpi_value=PopularPagesValue(
-                        items=sorted(
-                            [
-                                PopularPagesItem(
-                                    package=copi.package,
-                                    item=item.item,
-                                    visits=scale_and_randomize_value(
-                                        item.visits,
-                                        agg_kind=previous_aggregation.agg_kind,
-                                    ),
-                                )
-                                for copi in average_yearly_data.content_object_popularity_items  # noqa: E501
-                                for item in copi.items
-                            ],
-                            key=lambda ppi: ppi.visits,
-                            reverse=True,
-                        )[:50],
-                        total_visits=scale_and_randomize_value(
-                            average_yearly_data.content_object_popularity_total,
                             agg_kind=previous_aggregation.agg_kind,
                             lower_probability=50,
                         ),
@@ -717,99 +541,6 @@ def inject_package_popularity_indicators(average_yearly_data: Dataset):
                     session=session,
                     value0=package_data.package,
                     value1=None,
-                    value2=None,
-                )
-                record.dimension_id = dimension.iden
-                record.period_id = period_ts
-                session.add(record)
-
-
-def inject_popular_pages_indicators(average_yearly_data: Dataset):
-    """Create indicator records (and dimensions and periods) for popular pages"""
-
-    logging.info("Inject Popular Pages Indicators")
-    with Session.begin() as session:
-        # First, randomly select a period for every input we should have received.
-        # We have to select all periods first and count the number of visits per
-        # package and page and period.
-        # For convenience, we reuse the PopularPagesValue dataclass to hold
-        # this temporary data.
-        values_per_period2: dict[int, PopularPagesValue] = {}
-        for copi in average_yearly_data.content_object_popularity_items:
-            for item in copi.items:
-                for _ in range(int(item.visits * 364 / 365)):
-                    # for every visit, select a random period and count 1
-                    period = get_random_period(session=session)
-                    current_value = values_per_period2.get(period.timestamp, None)
-                    if not current_value:
-                        current_value = PopularPagesValue(
-                            items=[],
-                            total_visits=0,  # Unused, we only inject the indicator here
-                        )
-                        values_per_period2[period.timestamp] = current_value
-
-                    current_item = next(
-                        filter(
-                            lambda value_item: value_item.package == copi.package
-                            and value_item.item == item.item,
-                            current_value.items,
-                        ),
-                        None,
-                    )
-                    if not current_item:
-                        current_item = PopularPagesItem(
-                            package=copi.package, item=item.item, visits=0
-                        )
-                        current_value.items.append(current_item)
-                    current_item.visits += 1
-
-        # Also create random pages with low volume of visits
-        for item_number in range(
-            average_yearly_data.content_object_popularity_items_random_pages_amount
-        ):
-            package = f"Package{item_number}"
-            page = f"Page{item_number}"
-            for _ in range(
-                scale_and_randomize_value(
-                    average_yearly_data.content_object_popularity_items_random_pages_visits,
-                    lower_probability=20,
-                    lower_value=1,
-                )
-            ):
-                period = get_random_period(session=session)
-                current_value = values_per_period2.get(period.timestamp, None)
-                if not current_value:
-                    current_value = PopularPagesValue(
-                        items=[],
-                        total_visits=0,  # Unused, we only inject the indicator here
-                    )
-                    values_per_period2[period.timestamp] = current_value
-
-                current_item = next(
-                    filter(
-                        lambda value_item: value_item.package == package
-                        and value_item.item == page,
-                        current_value.items,
-                    ),
-                    None,
-                )
-                if not current_item:
-                    current_item = PopularPagesItem(
-                        package=package, item=page, visits=0
-                    )
-                    current_value.items.append(current_item)
-                current_item.visits += 1
-
-        # Then we create indicator records (and dimensions if needed)
-        for period_ts, value in values_per_period2.items():
-            for package_data in value.items:
-                record = dbm.IndicatorRecord(
-                    indicator_id=PackageItemVisit.unique_id, value=package_data.visits
-                )
-                dimension = get_or_create_indicator_dimension(
-                    session=session,
-                    value0=package_data.package,
-                    value1=package_data.item,
                     value2=None,
                 )
                 record.dimension_id = dimension.iden
@@ -1080,10 +811,6 @@ def synthetic_data():
         average_yearly_data=average_yearly_data,
         previous_aggregations=previous_kpi_aggregations,
     )
-    inject_popular_pages_kpis(
-        average_yearly_data=average_yearly_data,
-        previous_aggregations=previous_kpi_aggregations,
-    )
     inject_total_usage_kpis(
         average_yearly_data=average_yearly_data,
         previous_aggregations=previous_kpi_aggregations,
@@ -1097,7 +824,6 @@ def synthetic_data():
         previous_aggregations=previous_kpi_aggregations,
     )
     inject_package_popularity_indicators(average_yearly_data=average_yearly_data)
-    inject_popular_pages_indicators(average_yearly_data=average_yearly_data)
     inject_total_usage_by_package_indicators(average_yearly_data=average_yearly_data)
     inject_total_usage_overall_indicators(average_yearly_data=average_yearly_data)
     inject_uptime_indicators(average_yearly_data=average_yearly_data)

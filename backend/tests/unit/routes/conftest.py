@@ -14,9 +14,6 @@ from offspot_metrics_backend.business.kpis.popularity import (
     PackagePopularity,
     PackagePopularityItem,
     PackagePopularityValue,
-    PopularPages,
-    PopularPagesItem,
-    PopularPagesValue,
 )
 from offspot_metrics_backend.business.kpis.shared_files import (
     SharedFiles,
@@ -63,17 +60,6 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, Any]:
 async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
     dbsession.execute(delete(KpiRecord))
     kpis = [
-        KpiRecord(
-            kpi_id=PopularPages.unique_id,
-            agg_kind="D",
-            agg_value="2023-03-01",
-            kpi_value=PopularPagesValue(
-                items=[
-                    PopularPagesItem(package="onecontent", item="oneitem", visits=12)
-                ],
-                total_visits=51,
-            ),
-        ),
         KpiRecord(
             kpi_id=PackagePopularity.unique_id,
             agg_kind="D",

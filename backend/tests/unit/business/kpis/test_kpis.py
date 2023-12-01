@@ -427,7 +427,6 @@ def test_restore_kpis_from_filled_db(
     "kpi_id, expected_name",
     [
         (2001, "PackagePopularity"),
-        (2002, "PopularPages"),
         (2003, "TotalUsage"),
         (2004, "Uptime"),
         (2005, "SharedFiles"),

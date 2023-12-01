@@ -266,7 +266,6 @@ def test_restore_from_db_start_new_period(
     "kpi_id, expected_name",
     [
         (1001, "PackageHomeVisit"),
-        (1002, "PackageItemVisit"),
         (1003, "SharedFilesOperations"),
         (1004, "Uptime"),
         (1005, "TotalUsageOverall"),

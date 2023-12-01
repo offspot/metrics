@@ -10,7 +10,6 @@ from tests.unit.conftest import DummyKpi
 from offspot_metrics_backend.business.indicators.indicator import Indicator
 from offspot_metrics_backend.business.indicators.package import (
     PackageHomeVisit,
-    PackageItemVisit,
 )
 from offspot_metrics_backend.business.indicators.shared_files import (
     SharedFilesOperations,
@@ -81,12 +80,6 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                     indicator=PackageHomeVisit, value=10, dimension_value0="value1"
                 ),
                 DataRecord(
-                    indicator=PackageItemVisit,
-                    value=12,
-                    dimension_value0="value1",
-                    dimension_value1="value2",
-                ),
-                DataRecord(
                     indicator=SharedFilesOperations,
                     value=33,
                     dimension_value0=SharedFilesOperationKind.FILE_CREATED,
@@ -115,12 +108,6 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                 ),
                 DataRecord(
                     indicator=PackageHomeVisit, value=14, dimension_value0="value2"
-                ),
-                DataRecord(
-                    indicator=PackageItemVisit,
-                    value=16,
-                    dimension_value0="value1",
-                    dimension_value1="value2",
                 ),
                 DataRecord(
                     indicator=SharedFilesOperations,
@@ -179,18 +166,6 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
                 DataRecord(
                     indicator=PackageHomeVisit, value=4, dimension_value0="value1"
                 ),
-                DataRecord(
-                    indicator=PackageItemVisit,
-                    value=6,
-                    dimension_value0="value1",
-                    dimension_value1="value2",
-                ),
-                DataRecord(
-                    indicator=PackageItemVisit,
-                    value=8,
-                    dimension_value0="value1",
-                    dimension_value1="value3",
-                ),
             ],
         ),
         Data(
@@ -198,12 +173,6 @@ def kpi_dataset(dbsession: Session) -> NoneGenerator:
             records=[
                 DataRecord(
                     indicator=PackageHomeVisit, value=40, dimension_value0="value1"
-                ),
-                DataRecord(
-                    indicator=PackageItemVisit,
-                    value=36,
-                    dimension_value0="value1",
-                    dimension_value1="value4",
                 ),
                 DataRecord(
                     indicator=SharedFilesOperations,
