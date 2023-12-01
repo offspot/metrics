@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from offspot_metrics_backend.business.indicators.indicator import Indicator
 from offspot_metrics_backend.business.inputs.input import Input
 from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.constants import logger
 from offspot_metrics_backend.db.persister import Persister
 
 
@@ -16,7 +17,13 @@ class Processor:
     def process_input(self, input_: Input) -> None:
         """Update all indicators for a given input"""
         for indicator in self.indicators:
-            indicator.process_input(input_=input_)
+            try:
+                indicator.process_input(input_=input_)
+            except Exception as exc:
+                logger.debug(
+                    f"Error processing input for indicator {indicator.unique_id}",
+                    exc_info=exc,
+                )
 
     def reset_state(self) -> None:
         """Reset all indicators"""

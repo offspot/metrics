@@ -27,9 +27,12 @@ def test_no_input(processor: Processor, total_indicator: Indicator) -> None:
 
 
 def test_one_input(
-    processor: Processor, input1: Input, total_indicator: Indicator
+    processor: Processor,
+    input1: Input,
+    total_indicator: Indicator,
+    failing_indicator: Indicator,
 ) -> None:
-    processor.indicators = [total_indicator]
+    processor.indicators = [failing_indicator, total_indicator, failing_indicator]
     processor.process_input(input1)
     assert list(total_indicator.get_records()) == [
         Record(value=1, dimensions=DimensionsValues(None, None, None)),

@@ -80,7 +80,7 @@ class TotalUsage(Kpi):
         )
 
         return TotalUsageValue(
-            total_minutes_activity=total_usage,
+            total_minutes_activity=total_usage or 0,
             items=[
                 TotalUsageItem(package=record.package, minutes_activity=record.usage)
                 for record in session.execute(query)

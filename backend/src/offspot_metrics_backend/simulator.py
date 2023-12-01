@@ -12,7 +12,7 @@ from offspot_metrics_backend.business.inputs.package import (
 )
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
-from offspot_metrics_backend.constants import BackendConf
+from offspot_metrics_backend.constants import BackendConf, logger
 
 # Some known contents (some are repeated many times to influence the distribution)
 contents = [
@@ -77,7 +77,6 @@ items = {
 logging.basicConfig(
     level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
-logger = logging.getLogger(__name__)
 
 
 def restart_processor(now: datetime) -> Processor:

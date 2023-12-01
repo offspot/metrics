@@ -1,4 +1,6 @@
+import functools
 import logging
+import sys
 from asyncio import Task, create_task, sleep
 from contextlib import asynccontextmanager
 from typing import Any
@@ -14,7 +16,7 @@ from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEven
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
-from offspot_metrics_backend.constants import BackendConf
+from offspot_metrics_backend.constants import BackendConf, logger
 from offspot_metrics_backend.db.initializer import Initializer
 from offspot_metrics_backend.routes import aggregations, kpis
 
@@ -33,9 +35,6 @@ logging.basicConfig(
 )
 
 
-logger = logging.getLogger(__name__)
-
-
 class Main:
     def __init__(self) -> None:
         self.log_watcher = None
@@ -45,9 +44,6 @@ class Main:
                 handler=self.handle_log_event,
                 data_folder=BackendConf.logwatcher_data_folder,
             )
-        self.processor = Processor()
-        self.config = ReverseProxyConfig()
-        self.converter = CaddyLogConverter(self.config)
         self.background_tasks = set[Task[Any]]()
 
     @asynccontextmanager
@@ -57,15 +53,29 @@ class Main:
         Initializer.upgrade_db_schema()
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
+            self.processor = Processor()
+            self.config = ReverseProxyConfig()
             self.config.parse_configuration()
+            self.converter = CaddyLogConverter(self.config)
             self.processor.startup(current_period=Period.now().period)
+
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)
-            log_watcher_task.add_done_callback(self.background_tasks.discard)
+            log_watcher_task.add_done_callback(
+                functools.partial(self.task_stopped, "Log Watcher")
+            )
 
-            ticker_task = create_task(self.ticker())
-            self.background_tasks.add(ticker_task)
-            ticker_task.add_done_callback(self.background_tasks.discard)
+            input_ticker_task = create_task(self.input_ticker())
+            self.background_tasks.add(input_ticker_task)
+            input_ticker_task.add_done_callback(
+                functools.partial(self.task_stopped, "Input ticker")
+            )
+
+            processing_ticker_task = create_task(self.processing_ticker())
+            self.background_tasks.add(processing_ticker_task)
+            processing_ticker_task.add_done_callback(
+                functools.partial(self.task_stopped, "Processing ticker")
+            )
         else:
             logger.warning("Processing is disabled")
         # Startup complete
@@ -74,27 +84,67 @@ class Main:
         if self.log_watcher:
             self.log_watcher.stop()
 
+    def task_stopped(self, task_name: str, task: Task[Any]) -> None:
+        if task.cancelled():
+            return
+        exc = task.exception()
+        self.background_tasks.discard(task)
+        if exc:
+            logger.error(f"{task_name} has stopped anormally", exc_info=exc)
+            sys.exit(1)
+
     async def start_watcher(self):
         """Start the log watcher as a coroutine"""
         if not self.log_watcher:
             raise ValueError("Log watcher has not been initialized")
         await self.log_watcher.run_async()
 
-    async def ticker(self):
-        """Start a processor tick every minute"""
+    async def input_ticker(self):
+        """Generate a ClockTick input every minute
+
+        We need this input to be as precisely as possible generated every
+        minute, i.e. 60 times per hour. Currently we assume that the logic
+        processing input is fast enough to take less than one minute (if it
+        does take longer, we have many other issues anyway so no need to
+        overwhelm the system with 60 inputs per hour).
+        """
+        while True:
+            await sleep(TICK_PERIOD - Period.now().datetime.second)
+            logger.debug("Generating a ClockTick input")
+            try:
+                self.processor.process_input(ClockTick(ts=Period.now().datetime))
+            except Exception as exc:
+                logger.debug("Exception occured in clock tick", exc_info=exc)
+
+    async def processing_ticker(self):
+        """Start processing cycles with one minute pauses between them
+
+        We do not need something precise here because we want to let
+        the system "breath" between processing cycle and the processing logic
+        does not mind if there is not 60 cycles per hour, it just need to
+        regularly persist data in DB + perform needed computation every hour.
+        """
         while True:
             await sleep(TICK_PERIOD)
-            logger.debug("Processing a clock tick")
-            now_period, now_datetime = Period.now()
-            self.processor.process_input(ClockTick(ts=now_datetime))
-            self.processor.process_tick(tick_period=now_period)
+            logger.debug("Background processing started")
+            try:
+                self.processor.process_tick(tick_period=Period.now().period)
+            except Exception as exc:
+                logger.debug("Exception occured in clock tick", exc_info=exc)
+            logger.debug("Background processing completed")
 
     def handle_log_event(self, event: NewLineEvent):
         logger.debug(f"Log watcher sent: {event.line_content}")
-        result = self.converter.process(event.line_content)
-        for input_ in result.inputs:
-            logger.debug(f"Processing input: {input_}")
-            self.processor.process_input(input_=input_)
+        try:
+            result = self.converter.process(event.line_content)
+            for input_ in result.inputs:
+                logger.debug(f"Processing input: {input_}")
+                try:
+                    self.processor.process_input(input_=input_)
+                except Exception as exc:
+                    logger.debug("Error processing input", exc_info=exc)
+        except Exception as exc:
+            logger.debug("Error log event", exc_info=exc)
 
     def create_app(self) -> FastAPI:
         self.app = FastAPI(

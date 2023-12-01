@@ -117,9 +117,14 @@ class Period:
             start = datetime.datetime(
                 year=self.year, month=self.month, day=1, tzinfo=datetime.UTC
             )
-            stop = datetime.datetime(
-                year=self.year, month=self.month + 1, day=1, tzinfo=datetime.UTC
-            )
+            if self.month <= 11:  # noqa PLR2004
+                stop = datetime.datetime(
+                    year=self.year, month=self.month + 1, day=1, tzinfo=datetime.UTC
+                )
+            else:
+                stop = datetime.datetime(
+                    year=self.year + 1, month=1, day=1, tzinfo=datetime.UTC
+                )
             return Interval(
                 start=int(start.timestamp()),
                 stop=int(stop.timestamp()),

@@ -248,7 +248,7 @@ def test_process_ok(
     converter = CaddyLogConverter(reverse_proxy_config("conf_ok.yaml"))
     result = converter.process(log_line)
     assert result.warning is None
-    assert set(result.inputs) == set(expected_inputs)
+    assert set(result.inputs) == set(expected_inputs)  # items order is not relevant
 
 
 def test_process_nok(reverse_proxy_config: Callable[[str], ReverseProxyConfig]):

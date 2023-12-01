@@ -1,5 +1,4 @@
 import datetime
-import logging
 from typing import NamedTuple
 
 from pydantic import BaseModel, Field, ValidationError
@@ -14,8 +13,6 @@ from offspot_metrics_backend.business.input_generator import (
 from offspot_metrics_backend.business.inputs.input import Input
 from offspot_metrics_backend.business.log_data import LogData
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
-
-logger = logging.getLogger(__name__)
 
 
 class CaddyLogRequest(BaseModel):

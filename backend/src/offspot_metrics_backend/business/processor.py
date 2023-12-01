@@ -41,7 +41,7 @@ class Processor:
 
     @dbsession
     def process_tick(self, tick_period: Period, session: Session):
-        """Process a tick (once per minute)"""
+        """Process a tick (more or less once per minute)"""
         self.indicator_processor.process_tick(
             tick_period=tick_period,
             session=session,

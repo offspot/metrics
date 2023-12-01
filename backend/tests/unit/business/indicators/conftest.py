@@ -20,6 +20,31 @@ InputGenerator: TypeAlias = Generator[Input, None, None]
 ProcessorGenerator: TypeAlias = Generator[Processor, None, None]
 
 
+class FailingRecorder(Recorder):
+    """A recorder that fails to process input"""
+
+    def process_input(
+        self,
+        input_: Input,  # noqa: ARG002
+    ) -> None:
+        """Processing an input consists simply in raising an exception"""
+        raise ValueError()
+
+    @property
+    def value(self) -> int:
+        """Retrieving the value consists simply is raising an exception"""
+        raise ValueError()
+
+    @property
+    def state(self) -> str:
+        """Fails to retrieve state"""
+        raise ValueError()
+
+    def restore_state(self, value: str):  # noqa: ARG002
+        """Fails to restore state"""
+        raise ValueError()
+
+
 @dataclass
 class TestInput(Input):
     """Test input, with a content and a subfolder"""
@@ -64,6 +89,21 @@ class TotalByContentIndicator(Indicator):
     def get_dimensions_values(self, input_: Input) -> DimensionsValues:
         input_ = cast(TestInput, input_)
         return DimensionsValues(input_.content, None, None)
+
+
+class FailingIndicator(Indicator):
+    """An indicator that fails to process input"""
+
+    unique_id = -1004
+
+    def can_process_input(self, input_: Input) -> bool:
+        return isinstance(input_, TestInput)
+
+    def get_new_recorder(self) -> Recorder:
+        return FailingRecorder()
+
+    def get_dimensions_values(self, input_: Input) -> DimensionsValues:  # noqa: ARG002
+        return DimensionsValues(None, None, None)
 
 
 class TotalByContentAndSubfolderIndicator(Indicator):
@@ -120,3 +160,8 @@ def total_by_content_and_subfolder_indicator() -> IndicatorGenerator:
 @pytest.fixture()
 def processor(init_datetime: datetime) -> ProcessorGenerator:
     yield Processor(Period(init_datetime))
+
+
+@pytest.fixture()
+def failing_indicator() -> IndicatorGenerator:
+    yield FailingIndicator()

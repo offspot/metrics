@@ -1,8 +1,7 @@
-import logging
 import subprocess
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from offspot_metrics_backend.constants import logger
 
 
 class Initializer:

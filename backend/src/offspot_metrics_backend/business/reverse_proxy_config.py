@@ -1,4 +1,3 @@
-import logging
 import re
 from typing import Any
 
@@ -11,9 +10,7 @@ except ImportError:  # pragma: no cover
     # we don't NEED cython ext but it's faster so use it if avail.
     from yaml import SafeLoader
 
-from offspot_metrics_backend.constants import BackendConf
-
-logger = logging.getLogger(__name__)
+from offspot_metrics_backend.constants import BackendConf, logger
 
 
 class IncorrectConfigurationError(Exception):
