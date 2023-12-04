@@ -55,7 +55,6 @@ class Setup:
 
     class NormalizedZimActivity(NamedTuple):
         homepage: int
-        randompage: int
         randomasset: int
 
     class ZimAndScale(NamedTuple):
@@ -97,7 +96,6 @@ SETUP = Setup(
     ],
     zim_normalized_activity=Setup.NormalizedZimActivity(
         homepage=10,
-        randompage=100,
         randomasset=1000,
     ),
     zims_with_scaling=[
@@ -295,22 +293,13 @@ def generate_zims_tmp_lines(
     zim_with_scale: Setup.ZimAndScale,
 ) -> Generator[Any, None, None]:
     """Generate all logs lines for Zim activity"""
-    for i in range(normalized_activity.randompage * zim_with_scale.scale_factor):
-        yield {
-            "status": "200",
-            "request": {
-                "host": zim_with_scale.hostname,
-                "method": "GET",
-                "uri": f"/content/{zim_with_scale.zim}/page{i}.html",
-            },
-        }
     for i in range(normalized_activity.randomasset * zim_with_scale.scale_factor):
         yield {
             "status": "200",
             "request": {
                 "host": zim_with_scale.hostname,
                 "method": "GET",
-                "uri": f"/content/{zim_with_scale.zim}/page{i}.html",
+                "uri": f"/content/{zim_with_scale.zim}/page{i}.js",
             },
             "resp_headers": {"Content-Type": ["application/javascript; charset=utf-8"]},
         }

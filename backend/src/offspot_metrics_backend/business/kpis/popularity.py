@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.business.indicators.package import (
     PackageHomeVisit,
-    PackageItemVisit,
 )
 from offspot_metrics_backend.business.kpis.kpi import Kpi
 from offspot_metrics_backend.db.models import (
@@ -82,82 +81,6 @@ class PackagePopularity(Kpi):
                 PackagePopularityItem(
                     package=record.package,
                     visits=record.package_count,
-                )
-                for record in session.execute(query)
-            ],
-            total_visits=total_count or 0,
-        )
-
-
-class PopularPagesItem(BaseModel):
-    package: str
-    item: str
-    visits: int
-
-
-class PopularPagesValue(BaseModel, KpiValue):
-    items: list[PopularPagesItem]
-    total_visits: int
-
-
-class PopularPages(Kpi):
-    """A KPI which computes content objects popularity
-
-    Value is the top 50 list of all objects (content name + object name), sorted by nb
-    of visits + total number of visits
-    """
-
-    unique_id = 2002
-
-    # the KPI will hold only the top pages
-    top_count = 50
-
-    def compute_value_from_indicators(
-        self,
-        agg_kind: AggKind,  # noqa: ARG002
-        start_ts: int,
-        stop_ts: int,
-        session: Session,
-    ) -> PopularPagesValue:
-        """For a kind of aggregation (daily, weekly, ...) and a given period, return
-        the KPI value."""
-
-        total_count = session.execute(
-            select(
-                func.sum(IndicatorRecord.value).label("count"),
-            )
-            .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == PackageItemVisit.unique_id)
-            .where(IndicatorPeriod.timestamp >= start_ts)
-            .where(IndicatorPeriod.timestamp <= stop_ts)
-        ).scalar_one()
-
-        subquery = (
-            select(
-                IndicatorDimension.value0.label("package"),
-                IndicatorDimension.value1.label("item"),
-                func.sum(IndicatorRecord.value).label("visits"),
-            )
-            .join(IndicatorRecord)
-            .join(IndicatorPeriod)
-            .where(IndicatorRecord.indicator_id == PackageItemVisit.unique_id)
-            .where(IndicatorPeriod.timestamp >= start_ts)
-            .where(IndicatorPeriod.timestamp <= stop_ts)
-            .group_by("package", "item")
-        ).subquery("packages")
-
-        query = (
-            select(subquery.c.visits, subquery.c.package, subquery.c.item)
-            .order_by(desc(subquery.c.visits), subquery.c.package, subquery.c.item)
-            .limit(PopularPages.top_count)
-        )
-
-        return PopularPagesValue(
-            items=[
-                PopularPagesItem(
-                    package=record.package,
-                    item=record.item,
-                    visits=record.visits,
                 )
                 for record in session.execute(query)
             ],

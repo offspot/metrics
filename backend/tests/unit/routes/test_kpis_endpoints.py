@@ -18,21 +18,6 @@ from offspot_metrics_backend.main import PREFIX
             {"items": [{"package": "onecontent", "visits": 34}], "total_visits": 45},
         ),
         (
-            2002,
-            "D",
-            "2023-03-01",
-            {
-                "items": [
-                    {
-                        "package": "onecontent",
-                        "item": "oneitem",
-                        "visits": 12,
-                    }
-                ],
-                "total_visits": 51,
-            },
-        ),
-        (
             2003,
             "W",
             "2023 W10",

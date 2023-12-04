@@ -11,7 +11,6 @@ from offspot_metrics_backend.business.caddy_log_converter import (
 from offspot_metrics_backend.business.inputs.input import Input
 from offspot_metrics_backend.business.inputs.package import (
     PackageHomeVisit,
-    PackageItemVisit,
     PackageRequest,
 )
 from offspot_metrics_backend.business.inputs.shared_files import (
@@ -44,10 +43,6 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r""""resp_headers":{"Content-Type":["text/html; charset=utf"]},"""
             r""""ts":1688459792.8632474}""",
             [
-                PackageItemVisit(
-                    package_title="Wikipedia",
-                    item_path="/questions/149/1-5-million-lines-of-code-0-tests-where",
-                ),
                 PackageRequest(
                     ts=datetime.datetime.fromtimestamp(1688459792.8632474),
                     package_title="Wikipedia",

@@ -7,7 +7,6 @@ from pydantic.dataclasses import dataclass
 from offspot_metrics_backend.business.inputs.input import Input
 from offspot_metrics_backend.business.inputs.package import (
     PackageHomeVisit,
-    PackageItemVisit,
     PackageRequest,
 )
 from offspot_metrics_backend.business.inputs.shared_files import (
@@ -61,20 +60,7 @@ class ZimInputGenerator(InputGenerator):
                 PackageRequest(ts=log.ts, package_title=self.package_title),
             ]
 
-        if log.content_type is None:
-            return [PackageRequest(ts=log.ts, package_title=self.package_title)]
-
-        if (
-            "html" in log.content_type
-            or "epub" in log.content_type
-            or "pdf" in log.content_type
-        ):
-            return [
-                PackageRequest(ts=log.ts, package_title=self.package_title),
-                PackageItemVisit(package_title=self.package_title, item_path=zim_path),
-            ]
-        else:
-            return [PackageRequest(ts=log.ts, package_title=self.package_title)]
+        return [PackageRequest(ts=log.ts, package_title=self.package_title)]
 
 
 @dataclass

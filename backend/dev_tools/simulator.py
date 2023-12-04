@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 import offspot_metrics_backend.db.models as dbm
 from offspot_metrics_backend.business.inputs.package import (
     PackageHomeVisit,
-    PackageItemVisit,
 )
 from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.business.processor import Processor
@@ -31,48 +30,6 @@ contents = [
     "TED EN - How to survive following your passions",
     "TED EN - How to survive following your passions",
 ]
-
-# For every known content, some known items
-# (some are repeated many times to influence the distribution)
-items = {
-    "Wikipedia FR": [
-        "Coupe_de_France_de_rugby_à_XIII_1938-1939",
-        "Électricité_de_France",
-        "Esthétique_environnementale",
-        "Esthétique_environnementale",
-        "Ouganda",
-        "Jikji",
-        "Kiwix",
-        "Kiwix",
-        "Kiwix",
-    ],
-    "Wikipedia EN": [
-        "Kiwix",
-    ],
-    "Gutenberg Project": [
-        "Romeo and Juliet_cover.1513",
-        "The Blue Castle%3A a novel.67979",
-        "The Odyssey_cover.1727",
-    ],
-    "StackOverflow": [
-        "questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-"
-        "unsorted-array",
-        "questions/2003505/how-do-i-delete-a-git-branch-locally-and-remotely",
-    ],
-    "TED EN - 11 must see talks": [
-        "do-schools-kill-creativity",
-        "do-schools-kill-creativity",
-        "the-danger-of-a-single-story",
-    ],
-    "TED EN - How to survive following your passions": [
-        "how-to-find-work-you-love",
-        "how-to-find-work-you-love",
-        "how-to-find-work-you-love",
-        "a-kinder-gentler-philosophy-of-success",
-        "a-kinder-gentler-philosophy-of-success",
-    ],
-}
-
 
 logging.basicConfig(
     level=logging.INFO, format="[%(asctime)s: %(levelname)s] %(message)s"
@@ -124,40 +81,6 @@ def get_random_content() -> str:
     return contents[random.randint(0, len(contents) - 1)]
 
 
-def get_random_item(content: str) -> str:
-    """Return one random item"""
-    if random.randint(0, 3) == 3:
-        rnd = random.randint(0, 100)
-        if rnd < 10:
-            return "random_item_1"
-        elif rnd < 12:
-            return "random_item_2"
-        elif rnd < 18:
-            return "random_item_3"
-        elif rnd < 25:
-            return "random_item_4"
-        elif rnd < 40:
-            return "random_item_5"
-        elif rnd < 52:
-            return "random_item_6"
-        elif rnd < 66:
-            return "random_item_7"
-        elif rnd < 72:
-            return "random_item_8"
-        elif rnd < 84:
-            return "random_item_9"
-        elif rnd < 90:
-            return "random_item_10"
-        elif rnd < 94:
-            return "random_item_11"
-        elif rnd < 96:
-            return "random_item_12"
-        else:
-            return "random_item_11"
-    else:
-        return items[content][random.randint(0, len(items[content]) - 1)]
-
-
 def rand_sim():
     """This is a big simulation, inputing random stuff many times"""
     nbsteps = 10000
@@ -182,12 +105,8 @@ def rand_sim():
 
         content = get_random_content()
 
-        random_item = get_random_item(content)
-
         if random.randint(0, 10) == 10:
             processor.process_input(PackageHomeVisit(content))
-        else:
-            processor.process_input(PackageItemVisit(content, random_item))
 
         if random.randint(0, 10) == 10:
             processor.process_tick(tick_period=Period(now))
@@ -206,13 +125,11 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(PackageItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(PackageHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(seconds=45)
 
     for i in range(10):
-        processor.process_input(PackageItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(PackageHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(seconds=15)
@@ -222,7 +139,6 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(PackageItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(PackageHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(minutes=1)
@@ -234,7 +150,6 @@ def small_sim():
     processor = restart_processor(now)
 
     for i in range(10):
-        processor.process_input(PackageItemVisit("content1", f"item{(i+2) % 4}"))
         processor.process_input(PackageHomeVisit(f"content{(i+2) % 3}"))
 
     now = now + timedelta(minutes=1)

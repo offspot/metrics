@@ -1,13 +1,17 @@
 from offspot_metrics_backend.business.kpis.kpi import Kpi
 from offspot_metrics_backend.business.kpis.popularity import (
     PackagePopularity,
-    PopularPages,
 )
 from offspot_metrics_backend.business.kpis.shared_files import SharedFiles
 from offspot_metrics_backend.business.kpis.total_usage import TotalUsage
 from offspot_metrics_backend.business.kpis.uptime import Uptime
 
-__all__ = ["PackagePopularity", "PopularPages", "SharedFiles", "TotalUsage", "Uptime"]
+__all__ = [
+    "PackagePopularity",
+    "SharedFiles",
+    "TotalUsage",
+    "Uptime",
+]
 
 ALL_KPIS: list[Kpi] = [globals()[klass]() for klass in __all__]
 
