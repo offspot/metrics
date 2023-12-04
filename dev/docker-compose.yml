@@ -35,10 +35,13 @@ services:
       - ../backend/tasks.py:/src/tasks.py
       - ../backend/dev_tools:/src/dev_tools
       - ../backend/tests:/src/tests
+      - reverse-proxy-srv:/reverse-proxy-logs
     environment:
       PROCESSING_DISABLED: "True"
       DATABASE_URL: sqlite+pysqlite:////src/src/offspot_metrics_backend/dev.db
       TEST_DATABASE_URL: sqlite+pysqlite:////src/tests/test.db
+      LOG_INJECTOR_TARGET: /reverse-proxy-logs
+      LOG_INJECTOR_TMP: /tmp/log_injector
   frontend-tools:
     build:
       dockerfile: ../dev/frontend-tools/Dockerfile
