@@ -96,6 +96,12 @@ async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
             agg_value="2023 W10",
             kpi_value=UptimeValue(nb_minutes_on=654),
         ),
+        KpiRecord(
+            kpi_id=Uptime.unique_id,
+            agg_kind="D",
+            agg_value="2023-02-28",
+            kpi_value=UptimeValue(nb_minutes_on=456),
+        ),
     ]
     for kpi in kpis:
         dbsession.add(kpi)
