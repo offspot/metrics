@@ -423,16 +423,16 @@ def main():
         f" times on 24 hours, i.e one every {interval} seconds"
     )
 
-    cnt = 0
+    count = 0
     while True:
         for line in get_next_log_line(all_logs):
             log_file = get_log_file(log_folder, SETUP.max_log_size)
             with open(log_file, "a") as fh:
                 inject_one_line(line, fh)
-            cnt += 1
-            if cnt == ACCELERATION:
+            count += 1
+            if count == ACCELERATION:
                 print(".", end="", flush=True)  # noqa T201
-                cnt = 0
+                count = 0
             time.sleep(interval)
 
 
