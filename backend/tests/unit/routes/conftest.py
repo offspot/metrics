@@ -73,7 +73,7 @@ async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
             kpi_id=DummyKpi.unique_id,
             agg_kind="W",
             agg_value="2023 W10",
-            kpi_value=DummyKpiValue.model_validate("199"),
+            kpi_value=DummyKpiValue(root="199"),
         ),
         KpiRecord(
             kpi_id=TotalUsage.unique_id,
@@ -95,6 +95,12 @@ async def kpis(dbsession: Session) -> AsyncGenerator[list[KpiRecord], Any]:
             agg_kind="W",
             agg_value="2023 W10",
             kpi_value=UptimeValue(nb_minutes_on=654),
+        ),
+        KpiRecord(
+            kpi_id=Uptime.unique_id,
+            agg_kind="W",
+            agg_value="2023 W11",
+            kpi_value=UptimeValue(nb_minutes_on=235),
         ),
         KpiRecord(
             kpi_id=Uptime.unique_id,

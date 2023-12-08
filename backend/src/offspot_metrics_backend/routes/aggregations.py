@@ -10,7 +10,6 @@ from offspot_metrics_backend.routes.schemas import (
     Aggregation,
     Aggregations,
     AggregationsByKind,
-    KpiValue,
 )
 
 router = APIRouter(
@@ -66,21 +65,25 @@ def aggregation_by_kind(
     records = session.execute(query).all()
 
     agg_values = sorted({record.agg_value for record in records})
+    kpi_ids = sorted({record.kpi_id for record in records})
 
     return AggregationsByKind(
         agg_kind=AggKind(agg_kind),
-        aggregations=[
-            AggregationsByKind.AggregationWithKpis(
-                agg_value=agg_value,
-                kpis=sorted(
+        values_available=agg_values,
+        kpis=[
+            AggregationsByKind.KpiValues(
+                kpi_id=kpi_id,
+                values=sorted(
                     [
-                        KpiValue(kpi_id=record.kpi_id, value=record.kpi_value)
+                        AggregationsByKind.KpiValueByAggregation(
+                            agg_value=record.agg_value, kpi_value=record.kpi_value
+                        )
                         for record in records
-                        if record.agg_value == agg_value
+                        if record.kpi_id == kpi_id
                     ],
-                    key=lambda kpi: kpi.kpi_id,
+                    key=lambda value: value.agg_value,
                 ),
             )
-            for agg_value in agg_values
+            for kpi_id in kpi_ids
         ],
     )

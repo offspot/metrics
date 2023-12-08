@@ -38,7 +38,7 @@ from offspot_metrics_backend.main import PREFIX
             "2023 W10",
             {"filesCreated": 65, "filesDeleted": 45},
         ),
-        (-2001, "W", "2023 W10", "199"),
+        (-2001, "W", "2023 W10", {"root": "199"}),
     ],
 )
 async def test_kpis_get(

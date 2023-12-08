@@ -20,7 +20,7 @@ from offspot_metrics_backend.db.models import KpiRecord, KpiValue
 @pytest.fixture
 def get_dummy_value() -> Callable[[str], DummyKpiValue]:
     def func(value: str) -> DummyKpiValue:
-        return DummyKpiValue.model_validate(value)
+        return DummyKpiValue(root=value)
 
     return func
 

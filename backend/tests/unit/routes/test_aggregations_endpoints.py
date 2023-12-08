@@ -21,6 +21,7 @@ async def test_aggregations(
         {"kind": "D", "value": "2023-02-28"},
         {"kind": "D", "value": "2023-03-01"},
         {"kind": "W", "value": "2023 W10"},
+        {"kind": "W", "value": "2023 W11"},
     ]
 
 
@@ -32,21 +33,24 @@ async def test_aggregations(
             "D",
             {
                 "aggKind": "D",
-                "aggregations": [
+                "valuesAvailable": ["2023-02-28", "2023-03-01"],
+                "kpis": [
                     {
-                        "aggValue": "2023-02-28",
-                        "kpis": [{"kpiId": 2004, "value": {"nbMinutesOn": 456}}],
-                    },
-                    {
-                        "aggValue": "2023-03-01",
-                        "kpis": [
+                        "kpiId": 2001,
+                        "values": [
                             {
-                                "kpiId": 2001,
-                                "value": {
+                                "aggValue": "2023-03-01",
+                                "kpiValue": {
                                     "items": [{"package": "onecontent", "visits": 34}],
                                     "totalVisits": 45,
                                 },
-                            },
+                            }
+                        ],
+                    },
+                    {
+                        "kpiId": 2004,
+                        "values": [
+                            {"aggValue": "2023-02-28", "kpiValue": {"nbMinutesOn": 456}}
                         ],
                     },
                 ],
@@ -56,17 +60,20 @@ async def test_aggregations(
             "W",
             {
                 "aggKind": "W",
-                "aggregations": [
+                "valuesAvailable": ["2023 W10", "2023 W11"],
+                "kpis": [
                     {
-                        "aggValue": "2023 W10",
-                        "kpis": [
+                        "kpiId": -2001,
+                        "values": [
+                            {"aggValue": "2023 W10", "kpiValue": {"root": "199"}}
+                        ],
+                    },
+                    {
+                        "kpiId": 2003,
+                        "values": [
                             {
-                                "kpiId": -2001,
-                                "value": "199",
-                            },
-                            {
-                                "kpiId": 2003,
-                                "value": {
+                                "aggValue": "2023 W10",
+                                "kpiValue": {
                                     "items": [
                                         {
                                             "minutesActivity": 98,
@@ -75,12 +82,23 @@ async def test_aggregations(
                                     ],
                                     "totalMinutesActivity": 143,
                                 },
-                            },
-                            {"kpiId": 2004, "value": {"nbMinutesOn": 654}},
+                            }
+                        ],
+                    },
+                    {
+                        "kpiId": 2004,
+                        "values": [
+                            {"aggValue": "2023 W10", "kpiValue": {"nbMinutesOn": 654}},
+                            {"aggValue": "2023 W11", "kpiValue": {"nbMinutesOn": 235}},
+                        ],
+                    },
+                    {
+                        "kpiId": 2005,
+                        "values": [
                             {
-                                "kpiId": 2005,
-                                "value": {"filesCreated": 65, "filesDeleted": 45},
-                            },
+                                "aggValue": "2023 W10",
+                                "kpiValue": {"filesCreated": 65, "filesDeleted": 45},
+                            }
                         ],
                     },
                 ],
