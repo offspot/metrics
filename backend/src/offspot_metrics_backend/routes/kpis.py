@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
@@ -7,19 +6,12 @@ from sqlalchemy import select
 from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.routes import DbSession
+from offspot_metrics_backend.routes.schemas import KpiValue
 
 router = APIRouter(
     prefix="/kpis",
     tags=["all"],
 )
-
-
-@dataclass
-class KpiValue:
-    """A KPI value with its ID"""
-
-    kpi_id: int
-    value: Any
 
 
 @router.get(

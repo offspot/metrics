@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -18,7 +17,7 @@ from offspot_metrics_backend.db.models import (
 )
 
 
-class SharedFilesValue(BaseModel, KpiValue):
+class SharedFilesValue(KpiValue):
     files_created: int
     files_deleted: int
 

@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import APIRouter, Path
@@ -7,30 +6,17 @@ from sqlalchemy import select
 from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.routes import DbSession
-from offspot_metrics_backend.routes.kpis import KpiValue
+from offspot_metrics_backend.routes.schemas import (
+    Aggregation,
+    Aggregations,
+    AggregationsByKind,
+    KpiValue,
+)
 
 router = APIRouter(
     prefix="/aggregations",
     tags=["all"],
 )
-
-
-@dataclass(eq=True, frozen=True)
-class Aggregation:
-    """One aggregation value with its kind"""
-
-    kind: str
-    value: str
-
-
-@dataclass(eq=True, frozen=True)
-class Aggregations:
-    """A list of aggregation values
-
-    This is mandatory to not return a list as top Json object since it is not
-    recommended for security reasons in Javascript"""
-
-    aggregations: list[Aggregation]
 
 
 @router.get(
@@ -58,19 +44,6 @@ def aggregations(
             for record in session.execute(query)
         ]
     )
-
-
-@dataclass(eq=True, frozen=True)
-class AggregationsByKind:
-    """Details about all aggregations of a given kind"""
-
-    agg_kind: AggKind
-    aggregations: list["AggregationWithKpis"]
-
-    @dataclass(eq=True, frozen=True)
-    class AggregationWithKpis:
-        agg_value: str
-        kpis: list[KpiValue]
 
 
 @router.get(

@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -12,7 +11,7 @@ from offspot_metrics_backend.db.models import (
 )
 
 
-class UptimeValue(BaseModel, KpiValue):
+class UptimeValue(KpiValue):
     nb_minutes_on: int
 
 

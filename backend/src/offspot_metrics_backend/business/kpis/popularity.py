@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
@@ -7,6 +6,7 @@ from offspot_metrics_backend.business.indicators.package import (
     PackageHomeVisit,
 )
 from offspot_metrics_backend.business.kpis.kpi import Kpi
+from offspot_metrics_backend.business.schemas import CamelModel
 from offspot_metrics_backend.db.models import (
     IndicatorDimension,
     IndicatorPeriod,
@@ -15,12 +15,12 @@ from offspot_metrics_backend.db.models import (
 )
 
 
-class PackagePopularityItem(BaseModel):
+class PackagePopularityItem(CamelModel):
     package: str
     visits: int
 
 
-class PackagePopularityValue(BaseModel, KpiValue):
+class PackagePopularityValue(KpiValue):
     items: list[PackagePopularityItem]
     total_visits: int
 

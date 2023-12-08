@@ -31,20 +31,20 @@ async def test_aggregations(
         [
             "D",
             {
-                "agg_kind": "D",
+                "aggKind": "D",
                 "aggregations": [
                     {
-                        "agg_value": "2023-02-28",
-                        "kpis": [{"kpi_id": 2004, "value": {"nb_minutes_on": 456}}],
+                        "aggValue": "2023-02-28",
+                        "kpis": [{"kpiId": 2004, "value": {"nbMinutesOn": 456}}],
                     },
                     {
-                        "agg_value": "2023-03-01",
+                        "aggValue": "2023-03-01",
                         "kpis": [
                             {
-                                "kpi_id": 2001,
+                                "kpiId": 2001,
                                 "value": {
                                     "items": [{"package": "onecontent", "visits": 34}],
-                                    "total_visits": 45,
+                                    "totalVisits": 45,
                                 },
                             },
                         ],
@@ -55,31 +55,31 @@ async def test_aggregations(
         [
             "W",
             {
-                "agg_kind": "W",
+                "aggKind": "W",
                 "aggregations": [
                     {
-                        "agg_value": "2023 W10",
+                        "aggValue": "2023 W10",
                         "kpis": [
                             {
-                                "kpi_id": -2001,
+                                "kpiId": -2001,
                                 "value": "199",
                             },
                             {
-                                "kpi_id": 2003,
+                                "kpiId": 2003,
                                 "value": {
                                     "items": [
                                         {
-                                            "minutes_activity": 98,
+                                            "minutesActivity": 98,
                                             "package": "othercontent",
                                         }
                                     ],
-                                    "total_minutes_activity": 143,
+                                    "totalMinutesActivity": 143,
                                 },
                             },
-                            {"kpi_id": 2004, "value": {"nb_minutes_on": 654}},
+                            {"kpiId": 2004, "value": {"nbMinutesOn": 654}},
                             {
-                                "kpi_id": 2005,
-                                "value": {"files_created": 65, "files_deleted": 45},
+                                "kpiId": 2005,
+                                "value": {"filesCreated": 65, "filesDeleted": 45},
                             },
                         ],
                     },
