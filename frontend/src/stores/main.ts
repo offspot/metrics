@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import AggregationDetails from '@/types/AggregationDetails'
 import AggregationKpiValue from '@/types/AggregationKpiValue'
-
+import { getRandomColor } from '../utils'
 export enum Page {
   Dashboard,
   TotalUsage,
@@ -15,6 +15,7 @@ export type RootState = {
   isLoading: boolean
   errorMessage: string | null
   currentPage: Page
+  packagesColors: { [id: string]: string }
 }
 export const useMainStore = defineStore('main', {
   state: () =>
@@ -25,6 +26,7 @@ export const useMainStore = defineStore('main', {
       isLoading: false,
       errorMessage: null,
       currentPage: Page.Dashboard,
+      packagesColors: {},
     }) as RootState,
   getters: {
     aggregationValue: (state) =>
@@ -64,6 +66,16 @@ export const useMainStore = defineStore('main', {
           return null
         }
         return kpisMatch[0]
+      }
+    },
+    getPackageColor(state) {
+      // for now, package color is purely random ; later, it will be stored in database
+      // and customisable (see #56 and #57)
+      return (packageName: string): string => {
+        if (!(packageName in state.packagesColors)) {
+          state.packagesColors[packageName] = getRandomColor()
+        }
+        return state.packagesColors[packageName]
       }
     },
   },
