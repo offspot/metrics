@@ -24,7 +24,8 @@ const store = useMainStore()
       </v-btn-toggle>
     </div>
     <div class="flex-1-1">
-      <span>{{ store.aggregationValue }}</span>
+      <!-- Hidden for now, to be reworked once we create the real slider-->
+      <span class="hidden">{{ store.aggregationValue }}</span>
     </div>
     <div class="flex-0-1">
       <v-btn
@@ -52,4 +53,8 @@ const store = useMainStore()
   </v-col>
 </template>
 
-<style scoped></style>
+<style scoped>
+.hidden {
+  display: none;
+}
+</style>

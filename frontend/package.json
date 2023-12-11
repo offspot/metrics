@@ -13,11 +13,13 @@
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/vue-fontawesome": "^3.0.5",
+    "apexcharts": "^3.44.2",
     "axios": "^1.6.0",
     "pinia": "^2.1.4",
     "vite-plugin-vuetify": "^1.0.2",
     "vue": "^3.2.47",
     "vue-router": "4",
+    "vue3-apexcharts": "^1.4.4",
     "vuetify": "^3.4.4"
   },
   "devDependencies": {

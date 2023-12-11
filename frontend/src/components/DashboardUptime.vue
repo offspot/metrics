@@ -1,17 +1,95 @@
 <script setup lang="ts">
-import { useMainStore } from '../stores/main'
-import { kpiIds } from '../constants'
-const store = useMainStore()
+import VueApexCharts from 'vue3-apexcharts'
+import { useUptimeStore } from '../stores/uptime'
+import { computed } from 'vue'
+const uptimeStore = useUptimeStore()
+
+const chartOptions = computed(() => {
+  return {
+    labels: ['Completed Task'],
+    chart: { type: 'radialBar' },
+    plotOptions: {
+      radialBar: {
+        offsetY: 10,
+        startAngle: -140,
+        endAngle: 140,
+        hollow: { size: '50%' },
+        track: {
+          show: false,
+        },
+        dataLabels: {
+          name: {
+            show: false,
+          },
+          value: {
+            offsetY: 10,
+            fontSize: '32px',
+            fontWeight: '600',
+            fontFamily: 'Avenir',
+            formatter: () => uptimeStore.legend,
+          },
+        },
+      },
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        type: 'horizontal',
+        colorStops: [
+          {
+            offset: 0,
+            color: 'rgb(59,233,159)',
+            opacity: 0.4,
+          },
+          {
+            offset: 100,
+            color: 'rgb(125,255,75)',
+            opacity: 1,
+          },
+        ],
+      },
+    },
+    stroke: { dashArray: 10 },
+  }
+})
 </script>
 
 <template>
-  <h4>Uptime:</h4>
-  <code>{{ store.getCurrentKpiValue(kpiIds.uptime) }}</code>
+  <div id="container">
+    <VueApexCharts
+      id="box"
+      :options="chartOptions"
+      :series="uptimeStore.series"
+      height="250px"
+    />
+
+    <v-card-title>Uptime</v-card-title>
+    <v-card-subtitle class="pt-2">During selected period</v-card-subtitle>
+    <v-card-text>
+      <span class="text-subtitle-1 font-weight-medium">{{
+        uptimeStore.date_part_1
+      }}</span>
+      <span class="text-h5 font-weight-bold">{{
+        uptimeStore.date_part_2
+      }}</span>
+      <span class="text-subtitle-1 font-weight-medium">{{
+        uptimeStore.date_part_3
+      }}</span>
+    </v-card-text>
+  </div>
 </template>
 
 <style scoped>
-code {
-  font-size: xx-small;
-  line-height: 0;
+#container {
+  min-height: 200px;
+}
+#box {
+  position: absolute;
+  top: -20px;
+  right: -50px;
+}
+.v-card-text {
+  position: absolute;
+  bottom: 0px;
 }
 </style>

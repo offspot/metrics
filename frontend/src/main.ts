@@ -42,4 +42,7 @@ app.use(vuetify)
 const pinia = createPinia()
 app.use(pinia)
 
+import VueApexCharts from 'vue3-apexcharts'
+app.use(VueApexCharts)
+
 app.mount('#app')
