@@ -7,8 +7,7 @@ import { kpiIds } from '../constants'
 export const useTotalUsageStore = defineStore('totalUsage', {
   getters: {
     kpiValue() {
-      const mainStore = useMainStore()
-      return mainStore.getCurrentKpiValue(kpiIds.totalUsage)
+      return useMainStore().getCurrentKpiValue(kpiIds.totalUsage)
         ?.kpiValue as TotalUsageKpiValue
     },
     totalValue(): string {
@@ -40,9 +39,8 @@ export const useTotalUsageStore = defineStore('totalUsage', {
       }
     },
     itemColor(): (item: TotalUsageKpiItem) => string {
-      const mainStore = useMainStore()
       return (item: TotalUsageKpiItem) =>
-        mainStore.getPackageColor(item.package)
+        useMainStore().getPackageColor(item.package)
     },
   },
 })

@@ -1,3 +1,6 @@
+/*
+ * Get a random Hex color like "#32FF4D", to be used in CSS
+ */
 export const getRandomColor = (): string => {
   const letters = '0123456789ABCDEF'
   let color = '#'
