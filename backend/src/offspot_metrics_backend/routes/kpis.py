@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
@@ -7,19 +6,12 @@ from sqlalchemy import select
 from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.routes import DbSession
+from offspot_metrics_backend.routes.schemas import KpiValueById
 
 router = APIRouter(
     prefix="/kpis",
     tags=["all"],
 )
-
-
-@dataclass
-class KpiValue:
-    """A KPI value with its ID"""
-
-    kpi_id: int
-    value: Any
 
 
 @router.get(
@@ -36,7 +28,7 @@ async def kpi_values(
     agg_kind: Annotated[str, Query(pattern=AggKind.pattern())],
     agg_value: Annotated[str, Query()],
     session: DbSession,
-) -> KpiValue:
+) -> KpiValueById:
     query = (
         select(KpiRecord.kpi_id, KpiRecord.kpi_value)
         .where(KpiRecord.kpi_id == kpi_id)
@@ -51,4 +43,4 @@ async def kpi_values(
             detail="KPI not found",
         )
 
-    return KpiValue(kpi_id=item.kpi_id, value=item.kpi_value)
+    return KpiValueById(kpi_id=item.kpi_id, value=item.kpi_value)

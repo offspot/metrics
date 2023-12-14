@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
@@ -8,6 +7,7 @@ from offspot_metrics_backend.business.indicators.total_usage import (
     TotalUsageOverall,
 )
 from offspot_metrics_backend.business.kpis.kpi import Kpi
+from offspot_metrics_backend.business.schemas import CamelModel
 from offspot_metrics_backend.db.models import (
     IndicatorDimension,
     IndicatorPeriod,
@@ -16,12 +16,12 @@ from offspot_metrics_backend.db.models import (
 )
 
 
-class TotalUsageItem(BaseModel):
+class TotalUsageItem(CamelModel):
     package: str
     minutes_activity: int
 
 
-class TotalUsageValue(BaseModel, KpiValue):
+class TotalUsageValue(KpiValue):
     items: list[TotalUsageItem]
     total_minutes_activity: int
 

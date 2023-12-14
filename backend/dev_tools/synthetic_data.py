@@ -102,8 +102,9 @@ class Dataset:
         package: str
         nb_slots: int  # number of 10 minutes slots
 
-    PackD: TypeAlias = PackagePopularityData
-    UD: TypeAlias = UsageData
+
+PackD: TypeAlias = Dataset.PackagePopularityData
+UD: TypeAlias = Dataset.UsageData
 
 
 @dataclass
@@ -199,22 +200,22 @@ def create_average_yearly_data(kind: DatasetKind):
         shared_files_deleted=100,
         offspot_uptime=90000,  # ~ 8 hours per day, 3.5 days per week in average
         content_popularity=[
-            Dataset.PackD(package="Wikipedia FR", visits=4000),
-            Dataset.PackD(package="Wikipedia EN", visits=4000),
-            Dataset.PackD(package="iFixit Guides FR", visits=4000),
-            Dataset.PackD(package="Khan Academy", visits=1000),
-            Dataset.PackD(package="Movies and TV", visits=1000),
-            Dataset.PackD(package="WikiMed Medical Encyclopedia FR", visits=1000),
-            Dataset.PackD(package="TED MED", visits=1000),
-            Dataset.PackD(package="3D Printing", visits=500),
-            Dataset.PackD(package="African Storybooks", visits=500),
-            Dataset.PackD(package="Harnessing the future of data", visits=500),
-            Dataset.PackD(package="Project Gutenberg Library", visits=500),
-            Dataset.PackD(package="MathOverflow", visits=200),
-            Dataset.PackD(package="Chess", visits=200),
-            Dataset.PackD(package="WikiMed Medical Encyclopedia EN", visits=200),
-            Dataset.PackD(package="The quest to end poverty", visits=100),
-            Dataset.PackD(package="TED Talks - Entertainment", visits=100),
+            PackD(package="Wikipedia FR", visits=4000),
+            PackD(package="Wikipedia EN", visits=4000),
+            PackD(package="iFixit Guides FR", visits=4000),
+            PackD(package="Khan Academy", visits=1000),
+            PackD(package="Movies and TV", visits=1000),
+            PackD(package="WikiMed Medical Encyclopedia FR", visits=1000),
+            PackD(package="TED MED", visits=1000),
+            PackD(package="3D Printing", visits=500),
+            PackD(package="African Storybooks", visits=500),
+            PackD(package="Harnessing the future of data", visits=500),
+            PackD(package="Project Gutenberg Library", visits=500),
+            PackD(package="MathOverflow", visits=200),
+            PackD(package="Chess", visits=200),
+            PackD(package="WikiMed Medical Encyclopedia EN", visits=200),
+            PackD(package="The quest to end poverty", visits=100),
+            PackD(package="TED Talks - Entertainment", visits=100),
         ],
         content_popularity_total=30000,
         # random packages that will be injected (to mimic real number of packages with
@@ -227,22 +228,22 @@ def create_average_yearly_data(kind: DatasetKind):
         ),
         content_popularity_random_packages_visits=50,
         usage_by_package=[
-            Dataset.UD(package="Wikipedia FR", nb_slots=500),
-            Dataset.UD(package="Wikipedia EN", nb_slots=500),
-            Dataset.UD(package="iFixit Guides FR", nb_slots=200),
-            Dataset.UD(package="Khan Academy", nb_slots=100),
-            Dataset.UD(package="Movies and TV", nb_slots=100),
-            Dataset.UD(package="WikiMed Medical Encyclopedia FR", nb_slots=100),
-            Dataset.UD(package="TED MED", nb_slots=100),
-            Dataset.UD(package="3D Printing", nb_slots=50),
-            Dataset.UD(package="African Storybooks", nb_slots=50),
-            Dataset.UD(package="Harnessing the future of data", nb_slots=50),
-            Dataset.UD(package="Project Gutenberg Library", nb_slots=50),
-            Dataset.UD(package="MathOverflow", nb_slots=20),
-            Dataset.UD(package="Chess", nb_slots=20),
-            Dataset.UD(package="WikiMed Medical Encyclopedia EN", nb_slots=20),
-            Dataset.UD(package="The quest to end poverty", nb_slots=10),
-            Dataset.UD(package="TED Talks - Entertainment", nb_slots=10),
+            UD(package="Wikipedia FR", nb_slots=500),
+            UD(package="Wikipedia EN", nb_slots=500),
+            UD(package="iFixit Guides FR", nb_slots=200),
+            UD(package="Khan Academy", nb_slots=100),
+            UD(package="Movies and TV", nb_slots=100),
+            UD(package="WikiMed Medical Encyclopedia FR", nb_slots=100),
+            UD(package="TED MED", nb_slots=100),
+            UD(package="3D Printing", nb_slots=50),
+            UD(package="African Storybooks", nb_slots=50),
+            UD(package="Harnessing the future of data", nb_slots=50),
+            UD(package="Project Gutenberg Library", nb_slots=50),
+            UD(package="MathOverflow", nb_slots=20),
+            UD(package="Chess", nb_slots=20),
+            UD(package="WikiMed Medical Encyclopedia EN", nb_slots=20),
+            UD(package="The quest to end poverty", nb_slots=10),
+            UD(package="TED Talks - Entertainment", nb_slots=10),
         ],
         usage_overall=10000,  # minutes
     )

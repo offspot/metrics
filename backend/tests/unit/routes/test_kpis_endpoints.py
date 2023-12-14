@@ -15,30 +15,30 @@ from offspot_metrics_backend.main import PREFIX
             2001,
             "D",
             "2023-03-01",
-            {"items": [{"package": "onecontent", "visits": 34}], "total_visits": 45},
+            {"items": [{"package": "onecontent", "visits": 34}], "totalVisits": 45},
         ),
         (
             2003,
             "W",
             "2023 W10",
             {
-                "items": [{"package": "othercontent", "minutes_activity": 98}],
-                "total_minutes_activity": 143,
+                "items": [{"package": "othercontent", "minutesActivity": 98}],
+                "totalMinutesActivity": 143,
             },
         ),
         (
             2004,
             "W",
             "2023 W10",
-            {"nb_minutes_on": 654},
+            {"nbMinutesOn": 654},
         ),
         (
             2005,
             "W",
             "2023 W10",
-            {"files_created": 65, "files_deleted": 45},
+            {"filesCreated": 65, "filesDeleted": 45},
         ),
-        (-2001, "W", "2023 W10", "199"),
+        (-2001, "W", "2023 W10", {"root": "199"}),
     ],
 )
 async def test_kpis_get(
@@ -54,9 +54,9 @@ async def test_kpis_get(
     )
     assert response.status_code == HTTPStatus.OK
     response_json = response.json()
-    assert "kpi_id" in response_json
+    assert "kpiId" in response_json
     assert "value" in response_json
-    assert response_json["kpi_id"] == kpi_id
+    assert response_json["kpiId"] == kpi_id
     assert response_json["value"] == expected_value
 
 

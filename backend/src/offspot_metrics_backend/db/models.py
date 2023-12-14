@@ -3,8 +3,6 @@ from datetime import datetime
 from types import MappingProxyType
 from typing import Any, cast
 
-from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
 from sqlalchemy import (
     DateTime,
     Dialect,
@@ -26,14 +24,14 @@ from sqlalchemy.sql.schema import MetaData
 
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.period import Period
+from offspot_metrics_backend.business.schemas import CamelModel
 
 
-@dataclass
-class KpiValue:
+class KpiValue(CamelModel):
     pass
 
 
-class SerializedData(BaseModel):
+class SerializedData(CamelModel):
     module: str
     name: str
     data: Any
@@ -56,8 +54,8 @@ class KpiValueType(types.TypeDecorator[KpiValue]):
         return SerializedData(
             module=value.__class__.__module__,
             name=value.__class__.__name__,
-            data=cast(BaseModel, value).model_dump(),
-        ).model_dump_json()
+            data=cast(CamelModel, value).model_dump(by_alias=True),
+        ).model_dump_json(by_alias=True)
 
     def process_result_value(
         self,
@@ -77,7 +75,7 @@ class KpiValueType(types.TypeDecorator[KpiValue]):
                 f"Class not found for module {ser_info.module}"
                 f" and name {ser_info.name}"
             )
-        return cast(KpiValue, cast(BaseModel, clazz).model_validate(ser_info.data))
+        return cast(KpiValue, cast(CamelModel, clazz).model_validate(ser_info.data))
 
 
 class Base(MappedAsDataclass, DeclarativeBase):

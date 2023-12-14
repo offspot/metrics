@@ -1,43 +1,46 @@
-<script setup>
-import Kpi1 from '../components/Kpi1.vue'
-import Kpi2 from '../components/Kpi2.vue'
-import Selector from '../components/Selector.vue'
-
-
-import { onMounted, ref } from "vue";
-import { useMainStore } from '../stores/main'
-const main = useMainStore()
-
-onMounted(() => {
-  main.fetchAggregations();
-});
-
+<!-- eslint-disable vue/multi-word-component-names -->
+<script setup lang="ts">
+import DashboardPackagePopularity from '../components/DashboardPackagePopularity.vue'
+import DashboardTotalUsage from '../components/DashboardTotalUsage.vue'
+import DashboardSharedFiles from '../components/DashboardSharedFiles.vue'
+import DashboardUptime from '../components/DashboardUptime.vue'
 </script>
 
 <template>
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-4 col-lg-3">
-        <Selector @valueUpdated="main.update_kpi" :values="['Top contents', 'Top 50 resources']" />
-        <Selector @valueUpdated="main.update_agg_kind" :values="['Daily', 'Weekly', 'Monthly', 'Yearly']" />
-        <Selector @valueUpdated="main.update_agg_value" :values="main.agg_values_for_selected_agg_kind" :start_from_last="true" />
-      </div>
-      <div class="col-md-8 col-lg-9">
-        <div class="container-fluid">
-          <div class="row" v-if="main.is_loading">
-            Loading ...
-          </div>
-          <div class="row" v-if="!main.is_loading">
-            <div v-if="main.value_for_selected_kpi_id">
-              <Kpi1 v-if="main.selected_kpi_id === 2001" :value="main.value_for_selected_kpi_id" />
-              <Kpi2 v-if="main.selected_kpi_id === 2002" :value="main.value_for_selected_kpi_id" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+  <v-container class="pt-6">
+    <v-row>
+      <v-col cols="12" md="6" lg="4">
+        <v-container class="pa-0">
+          <v-row>
+            <v-col cols="12">
+              <v-card elevation="0">
+                <DashboardUptime />
+              </v-card>
+            </v-col>
+            <v-col cols="12">
+              <v-card elevation="0"> <DashboardSharedFiles /> </v-card
+            ></v-col>
+          </v-row>
+        </v-container>
+      </v-col>
+      <v-col cols="12" md="6" lg="8">
+        <v-container class="pa-0">
+          <v-row>
+            <v-col cols="12" lg="6">
+              <v-card elevation="0">
+                <DashboardPackagePopularity />
+              </v-card>
+            </v-col>
+            <v-col cols="12" lg="6">
+              <v-card elevation="0">
+                <DashboardTotalUsage />
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <style scoped></style>

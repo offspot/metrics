@@ -8,6 +8,7 @@ It is recommended to use it in combination with Mutagen to effeciently sync data
 - Kiwix-serve ("fake"): http://localhost:8001
 - Backend API: http://localhost:8002
 - Dev Frontend: http://localhost:8003
+- Edupi ("fake"): http://localhost:8004
 
 ## List of containers
 
@@ -46,6 +47,10 @@ It is configured with a sample sets of contents :
 - a fake `nomad` content from `file-browser-data/nomad`
 - a fake `mathews` content from `file-browser-data/mathews`
 
+### edupi
+
+This is an Edupi serve, to host files locally. See docker-compose for admin credentials.
+
 ## Instructions
 
 Download the ZIMs you want to use for tests in the `zims` folder.
@@ -77,24 +82,26 @@ You can also check that everything is ok:
 docker exec -it om_backend-tools invoke alembic check
 ```
 
-### Run a simulation to inject synthetic data
+### Inject synthetic data
 
-In order to inject synthetic data into the database, a simulation script can be run
+In order to inject synthetic data into the database, a script can be run:
 
 ```sh
-docker exec -it om_backend-tools python src/simulator.py
+docker exec -it om_backend-tools env FORCE="Y" DATASET_KIND="TWENTY" python dev_tools/synthetic_data.py
 ```
+
+Various DATASET_KIND are available, see the script for details. TWENTY is the smallest one, usually enough for UI tests.
 
 ### Create real data
 
 You can test the whole integration suite (i.e. with landing page, kiwix-serve and Filebeat).
 
-**Nota:** this is not compatible with simulator data which will progressively be erased by new live data.
+**Nota:** this is not compatible with synthetic data which will progressively be erased by new live data.
 
 You first have to enable processing in `docker-compose.yml`: set `PROCESSING_DISABLED: "False"` (or just remove the environment variable).
 
 ```
-docker compose -p om up -d --force-recreate backend
+docker compose -p offspot_metrics up -d --force-recreate backend
 ```
 
 You can then browse packages at http://127.0.0.1:8000/ and statistics will show up after up to 1 hour in the web UI at http://127.0.0.1:8003/

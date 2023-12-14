@@ -2,7 +2,6 @@ import pathlib
 from collections.abc import Callable, Generator
 
 import pytest
-from pydantic import RootModel
 from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.business.agg_kind import AggKind
@@ -35,7 +34,9 @@ def reverse_proxy_config() -> (
     BackendConf.package_conf_file_location = previous_location
 
 
-class DummyKpiValue(RootModel[str], KpiValue):
+class DummyKpiValue(KpiValue):
+    root: str
+
     def __lt__(self, other: "DummyKpiValue") -> bool:
         """Custom comparator just to make tests more easy"""
         return self.root < other.root
@@ -55,6 +56,4 @@ class DummyKpi(Kpi):
     ) -> DummyKpiValue:
         """For a kind of aggregation (daily, weekly, ...) and a given period, return
         the KPI value."""
-        return DummyKpiValue.model_validate(
-            f"{agg_kind.value} - {start_ts} - {stop_ts}"
-        )
+        return DummyKpiValue(root=f"{agg_kind.value} - {start_ts} - {stop_ts}")
