@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PropType } from 'vue'
 import { useMainStore, Page } from '../stores/main'
-const main = useMainStore()
+const store = useMainStore()
 
 defineProps({
   title: {
@@ -21,10 +21,10 @@ defineProps({
 
 <template>
   <v-list-item
-    :active="main.currentPage == value"
+    :active="store.currentPage == value"
     link
     class="rounded-lg mx-2 py-0"
-    @click="main.currentPage = value"
+    @click="store.currentPage = value"
   >
     <div class="d-flex align-center">
       <v-icon :icon="icon" size="xs" start />

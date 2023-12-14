@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useMainStore } from '../stores/main'
-const main = useMainStore()
+import { kpiIds } from '../constants'
+const store = useMainStore()
 </script>
 
 <template>
   <h4>Total Usage:</h4>
-  <code>{{ main.getCurrentKpiValue(2003) }}</code>
+  <code>{{ store.getCurrentKpiValue(kpiIds.totalUsage) }}</code>
 </template>
 
 <style scoped>

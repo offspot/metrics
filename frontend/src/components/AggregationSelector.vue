@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMainStore } from '../stores/main'
-const main = useMainStore()
+const store = useMainStore()
 </script>
 
 <template>
@@ -11,8 +11,8 @@ const main = useMainStore()
         divided
         mandatory
         density="compact"
-        :model-value="main.aggregationKind"
-        @update:model-value="(newValue) => main.setAggregationKind(newValue)"
+        :model-value="store.aggregationKind"
+        @update:model-value="(newValue) => store.setAggregationKind(newValue)"
       >
         <v-btn value="D"> Day </v-btn>
 
@@ -24,7 +24,7 @@ const main = useMainStore()
       </v-btn-toggle>
     </div>
     <div class="flex-1-1">
-      <span>{{ main.aggregationValue }}</span>
+      <span>{{ store.aggregationValue }}</span>
     </div>
     <div class="flex-0-1">
       <v-btn
@@ -32,8 +32,8 @@ const main = useMainStore()
         min-width="10em"
         prepend-icon="fas fa-arrow-left"
         variant="flat"
-        :disabled="!main.hasPrevAggregationValue"
-        @click="main.toPreviousAggregrationValue"
+        :disabled="!store.hasPrevAggregationValue"
+        @click="store.toPreviousAggregrationValue"
       >
         Previous
       </v-btn>
@@ -43,8 +43,8 @@ const main = useMainStore()
         min-width="10em"
         append-icon="fas fa-arrow-right"
         variant="flat"
-        :disabled="!main.hasNextAggregationValue"
-        @click="main.toNextAggregationValue"
+        :disabled="!store.hasNextAggregationValue"
+        @click="store.toNextAggregationValue"
       >
         Next
       </v-btn>

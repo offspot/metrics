@@ -8,15 +8,15 @@ import TotalUsage from '../views/TotalUsage.vue'
 
 import { onMounted, ref } from 'vue'
 import { useMainStore, Page } from '../stores/main'
-const main = useMainStore()
+const store = useMainStore()
 const drawer = ref(true)
 onMounted(() => {
-  main.fetchAggregationDetails()
+  store.fetchAggregationDetails()
 })
 </script>
 
 <template>
-  <v-app v-if="main.aggregationsDetails" id="home">
+  <v-app v-if="store.aggregationsDetails" id="home">
     <v-navigation-drawer v-model="drawer" class="pa-2">
       <div class="d-flex ma-4 mb-0 align-center">
         <v-img :width="60" src="./Kiwix_logo_v3.svg"></v-img>
@@ -42,7 +42,7 @@ onMounted(() => {
       />
     </v-navigation-drawer>
 
-    <v-app-bar flat height="100" style="background-color: rgb(248, 247, 250)">
+    <v-app-bar flat height="100">
       <v-app-bar-nav-icon
         class="d-lg-none"
         @click="drawer = !drawer"
@@ -50,15 +50,11 @@ onMounted(() => {
       <AggregationSelector />
     </v-app-bar>
 
-    <v-main style="background-color: rgb(243, 239, 245)">
-      <Dashboard v-if="main.currentPage == Page.Dashboard" />
-      <PackagePopularity v-if="main.currentPage == Page.PackagePopularity" />
-      <TotalUsage v-if="main.currentPage == Page.TotalUsage" />
-      <v-footer
-        style="background-color: rgb(243, 239, 245)"
-        app
-        class="text-caption"
-      >
+    <v-main>
+      <Dashboard v-if="store.currentPage == Page.Dashboard" />
+      <PackagePopularity v-if="store.currentPage == Page.PackagePopularity" />
+      <TotalUsage v-if="store.currentPage == Page.TotalUsage" />
+      <v-footer app class="text-caption">
         <span class="font-weight-bold me-auto">© 2023 Kiwix Association</span>
         <span class="me-8">Support</span>
         <a href="https://www.kiwix.org" target="_blank"
@@ -70,7 +66,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.v-app-bar.v-toolbar {
+  background-color: rgb(248, 247, 250);
+}
+
+.v-footer {
+  background-color: rgb(243, 239, 245);
+}
+
 .v-footer a {
   color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+}
+
+.v-main {
+  background-color: rgb(243, 239, 245);
 }
 </style>

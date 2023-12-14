@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useMainStore } from '../stores/main'
-const main = useMainStore()
+import { kpiIds } from '../constants'
+const store = useMainStore()
 </script>
 
 <template>
   <h4>Shared Files:</h4>
-  <code>{{ main.getAllKpiValues(2005) }}</code>
+  <code>{{ store.getAllKpiValues(kpiIds.sharedFiles) }}</code>
 </template>
 
 <style scoped>
