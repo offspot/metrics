@@ -48,7 +48,8 @@ services:
       context: ../frontend
     container_name: om_frontend-tools
     volumes:
-      - ../frontend:/work
+      - ../frontend/public:/work/public
+      - ../frontend/src:/work/src
     ports:
       - 127.0.0.1:8003:5173
   kiwix-serve:
