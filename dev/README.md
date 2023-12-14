@@ -55,7 +55,7 @@ This is an Edupi serve, to host files locally. See docker-compose for admin cred
 
 Download the ZIMs you want to use for tests in the `zims` folder.
 
-Caddy is configured to use these two zims:
+Kiwix-serve is configured to use these two zims which should be downloaded in the `zims` folder:
 - https://download.kiwix.org/zim/stack_exchange/sqa.stackexchange.com_en_all_2023-05.zim
 - https://download.kiwix.org/zim/stack_exchange/devops.stackexchange.com_en_all_2023-05.zim
 
@@ -63,8 +63,11 @@ Start the Docker-Compose stack:
 
 ```sh
 cd dev
+docker compose build --no-cache
 docker compose -p offspot_metrics up -d
 ```
+
+Nota: the build is mandatory only if you already started the stack previously and the code has changed significantly.
 
 ### Setup DB
 
