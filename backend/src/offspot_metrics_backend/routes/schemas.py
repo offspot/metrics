@@ -32,6 +32,7 @@ class AggregationsByKind(CamelModel):
 
     agg_kind: AggKind
     values_available: list[str]
+    values_all: list[str]
     kpis: list["KpiValues"]
 
     class KpiValueByAggregation(CamelModel):

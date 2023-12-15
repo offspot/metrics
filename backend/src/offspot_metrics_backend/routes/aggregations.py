@@ -1,9 +1,11 @@
 from typing import Annotated
 
+from dateutil.relativedelta import relativedelta
 from fastapi import APIRouter, Path
 from sqlalchemy import select
 
 from offspot_metrics_backend.business.agg_kind import AggKind
+from offspot_metrics_backend.business.period import Period
 from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.routes import DbSession
 from offspot_metrics_backend.routes.schemas import (
@@ -70,6 +72,9 @@ def aggregation_by_kind(
     return AggregationsByKind(
         agg_kind=AggKind(agg_kind),
         values_available=agg_values,
+        values_all=get_all_values(
+            agg_kind=AggKind(agg_kind), values_available=agg_values
+        ),
         kpis=[
             AggregationsByKind.KpiValues(
                 kpi_id=kpi_id,
@@ -87,3 +92,30 @@ def aggregation_by_kind(
             for kpi_id in kpi_ids
         ],
     )
+
+
+def get_all_values(agg_kind: AggKind, values_available: list[str]) -> list[str]:
+    if len(values_available) == 0 or agg_kind == AggKind.YEAR:
+        return values_available
+    last_day = Period.from_truncated_value(values_available[-1], agg_kind=agg_kind)
+    if agg_kind == AggKind.MONTH:
+        return [
+            last_day.get_shifted(relativedelta(months=delta)).get_truncated_value(
+                agg_kind=AggKind.MONTH
+            )
+            for delta in range(-2, 1)
+        ]
+    elif agg_kind == AggKind.WEEK:
+        return [
+            last_day.get_shifted(relativedelta(weeks=delta)).get_truncated_value(
+                agg_kind=AggKind.WEEK
+            )
+            for delta in range(-3, 1)
+        ]
+    elif agg_kind == AggKind.DAY:  # pragma: no branch
+        return [
+            last_day.get_shifted(relativedelta(days=delta)).get_truncated_value(
+                agg_kind=AggKind.DAY
+            )
+            for delta in range(-6, 1)
+        ]

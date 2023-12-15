@@ -4,8 +4,42 @@ from typing import Any
 import pytest
 from httpx import AsyncClient
 
+from offspot_metrics_backend.business.agg_kind import AggKind
 from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.main import PREFIX
+from offspot_metrics_backend.routes.aggregations import get_all_values
+
+
+@pytest.mark.parametrize(
+    "kind,values_available,expected_all_values",
+    [
+        (AggKind.MONTH, [], []),
+        (AggKind.YEAR, ["2023"], ["2023"]),
+        (AggKind.YEAR, ["2023", "2024"], ["2023", "2024"]),
+        (AggKind.MONTH, ["2023-02"], ["2022-12", "2023-01", "2023-02"]),
+        (AggKind.WEEK, ["2023 W02"], ["2022 W51", "2022 W52", "2023 W01", "2023 W02"]),
+        (
+            AggKind.DAY,
+            ["2024-03-01"],
+            [
+                "2024-02-24",
+                "2024-02-25",
+                "2024-02-26",
+                "2024-02-27",
+                "2024-02-28",
+                "2024-02-29",
+                "2024-03-01",
+            ],
+        ),
+    ],
+)
+def test_aggregations_all_values(
+    kind: AggKind, values_available: list[str], expected_all_values: list[str]
+):
+    assert (
+        get_all_values(agg_kind=kind, values_available=values_available)
+        == expected_all_values
+    )
 
 
 @pytest.mark.asyncio
@@ -34,6 +68,15 @@ async def test_aggregations(
             {
                 "aggKind": "D",
                 "valuesAvailable": ["2023-02-28", "2023-03-01"],
+                "valuesAll": [
+                    "2023-02-23",
+                    "2023-02-24",
+                    "2023-02-25",
+                    "2023-02-26",
+                    "2023-02-27",
+                    "2023-02-28",
+                    "2023-03-01",
+                ],
                 "kpis": [
                     {
                         "kpiId": 2001,
@@ -61,6 +104,7 @@ async def test_aggregations(
             {
                 "aggKind": "W",
                 "valuesAvailable": ["2023 W10", "2023 W11"],
+                "valuesAll": ["2023 W08", "2023 W09", "2023 W10", "2023 W11"],
                 "kpis": [
                     {
                         "kpiId": -2001,
