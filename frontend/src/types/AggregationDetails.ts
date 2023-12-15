@@ -6,5 +6,6 @@ import AggregationKpi from './AggregationKpi'
 export default interface AggregationDetails {
   aggKind: string
   valuesAvailable: string[]
+  valuesAll: string[]
   kpis: AggregationKpi[]
 }

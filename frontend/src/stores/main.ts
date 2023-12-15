@@ -40,6 +40,12 @@ export const useMainStore = defineStore('main', {
           state.aggregationsDetails.valuesAvailable.length - 1
         : false,
     hasPrevAggregationValue: (state) => state.aggregationValueIndex > 0,
+    getAllAggValues(state) {
+      if (!state.aggregationsDetails) {
+        return null
+      }
+      return state.aggregationsDetails.valuesAll
+    },
     getAllKpiValues(state) {
       return (kpiId: number): AggregationKpiValue[] | null => {
         if (!state.aggregationsDetails || !this.aggregationValue) {
@@ -54,19 +60,30 @@ export const useMainStore = defineStore('main', {
         return kpisMatch[0].values
       }
     },
-    getCurrentKpiValue() {
-      return (kpiId: number): AggregationKpiValue | null => {
+    getKpiValue() {
+      return (
+        kpiId: number,
+        aggregationValue: string,
+      ): AggregationKpiValue | null => {
         const currentValues = this.getAllKpiValues(kpiId)
         if (!currentValues) {
           return null
         }
         const kpisMatch = currentValues.filter(
-          (value) => value.aggValue == this.aggregationValue,
+          (value) => value.aggValue == aggregationValue,
         )
         if (kpisMatch.length != 1) {
           return null
         }
         return kpisMatch[0]
+      }
+    },
+    getCurrentKpiValue() {
+      return (kpiId: number): AggregationKpiValue | null => {
+        if (!this.aggregationValue) {
+          return null
+        }
+        return this.getKpiValue(kpiId, this.aggregationValue)
       }
     },
     getPackageColor(state) {
