@@ -3,6 +3,7 @@ import axios from 'axios'
 import AggregationDetails from '@/types/AggregationDetails'
 import AggregationKpiValue from '@/types/AggregationKpiValue'
 import { getRandomColor } from '../utils'
+
 export enum Page {
   Dashboard,
   TotalUsage,
