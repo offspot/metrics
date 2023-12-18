@@ -7,8 +7,7 @@ import { kpiIds } from '../constants'
 export const usePackagePopularityStore = defineStore('packagePopularity', {
   getters: {
     kpiValue() {
-      const mainStore = useMainStore()
-      return mainStore.getCurrentKpiValue(kpiIds.packagePopularity)
+      return useMainStore().getCurrentKpiValue(kpiIds.packagePopularity)
         ?.kpiValue as PackagePopularityKpiValue
     },
     items(): PackagePopularityKpiItem[] {
@@ -35,9 +34,8 @@ export const usePackagePopularityStore = defineStore('packagePopularity', {
       return (item: PackagePopularityKpiItem) => '' + item.visits
     },
     itemColor(): (item: PackagePopularityKpiItem) => string {
-      const mainStore = useMainStore()
       return (item: PackagePopularityKpiItem) =>
-        mainStore.getPackageColor(item.package)
+        useMainStore().getPackageColor(item.package)
     },
   },
 })
