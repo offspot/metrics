@@ -6,7 +6,6 @@ const uptimeStore = useUptimeStore()
 
 const chartOptions = computed(() => {
   return {
-    labels: ['Completed Task'],
     chart: { type: 'radialBar' },
     plotOptions: {
       radialBar: {

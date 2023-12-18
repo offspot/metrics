@@ -38,27 +38,31 @@ const monthText = (monthDigit: string): string => {
 export const useUptimeStore = defineStore('uptime', {
   getters: {
     aggregationKind() {
-      const mainStore = useMainStore()
-      return mainStore.aggregationKind
+      return useMainStore().aggregationKind
     },
     aggregationValue() {
-      const mainStore = useMainStore()
-      return mainStore.aggregationValue || ''
+      return useMainStore().aggregationValue || ''
     },
     kpiValue() {
-      const mainStore = useMainStore()
-      return mainStore.getCurrentKpiValue(kpiIds.uptime)
+      return useMainStore().getCurrentKpiValue(kpiIds.uptime)
         ?.kpiValue as UptimeKpiValue
     },
     series(): number[] {
+      // return the uptime as percentage of the whole aggregation
       switch (this.aggregationKind) {
         case 'D':
+          // whole aggregation is 60 min * 24 hours = 1440 mins
           return [this.kpiValue.nbMinutesOn / 14.4]
         case 'W':
+          // whole aggregation is 7 days * 60 min * 24 hours = 10080 mins
           return [this.kpiValue.nbMinutesOn / 100.8]
         case 'M':
+          // whole aggregation is 365 days * 60 min * 24 hours / 12 months = 43800 mins
+          // nota: this is an average, but we do not mind for now
           return [this.kpiValue.nbMinutesOn / 438]
         case 'Y':
+          // whole aggregation is 365 days * 60 min * 24 hours / 12 months = 525600 mins
+          // nota: this is an average (some years have 366 days), but we do not mind for now
           return [this.kpiValue.nbMinutesOn / 5256]
         default:
           return []
@@ -72,6 +76,14 @@ export const useUptimeStore = defineStore('uptime', {
         return (this.kpiValue.nbMinutesOn / 60).toFixed(0) + 'h'
       }
     },
+    /*
+      The date displayed on the uptime tile is splitted in 3 parts:
+      - date_part_1 which is in normal font weight
+      - date_part_2 which is in bold font weight
+      - date_part_3 which is in normal font weight
+      All three are computed based on current aggregation kind and value,
+      based on our internal convention on aggregation values formats.
+    */
     date_part_1(): string {
       switch (this.aggregationKind) {
         case 'D':
@@ -86,6 +98,7 @@ export const useUptimeStore = defineStore('uptime', {
           return ''
       }
     },
+    // See above
     date_part_2(): string {
       switch (this.aggregationKind) {
         case 'D':
@@ -103,6 +116,7 @@ export const useUptimeStore = defineStore('uptime', {
           return ''
       }
     },
+    // See above
     date_part_3(): string {
       switch (this.aggregationKind) {
         case 'D':
