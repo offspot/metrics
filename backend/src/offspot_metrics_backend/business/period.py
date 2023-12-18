@@ -94,6 +94,12 @@ class Period:
         """Transform a truncated value into a period
 
         First period of the truncated value is returned.
+
+        Examples:
+        - "2023" + YEAR => "2023-01-01 00:00:00"
+        - "2023-12" + MONTH => "2023-12-01 00:00:00",
+        - "2023 W12 + WEEK => "2023-03-20 00:00:00"
+        - "2023-12-25" + DAY => "2023-12-25 00:00:00",
         """
 
         def get_period(value: str, timeformat: str) -> Period:

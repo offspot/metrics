@@ -95,27 +95,51 @@ def aggregation_by_kind(
 
 
 def get_all_values(agg_kind: AggKind, values_available: list[str]) -> list[str]:
-    if len(values_available) == 0 or agg_kind == AggKind.YEAR:
+    """returns all potential values for current aggregation
+
+    This is computed based on the values available (last one, except for yearly where
+    we keep all aggregations)
+
+    This allows to create graphs more easily, not taking into account which aggregations
+    might be missing due to metrics shutdown.
+
+    All values is:
+    - the last 7 days up to last value available if kind is day
+    - the last 4 weeks up to last value available if kind is week
+    - the last 3 months up to last value available if kind is month
+    - all years from first to last value available if kind is year
+    - empty if no values are available
+
+    Example: if agg_kind is "D" and last value available is "2023-11-21", this will
+    return the 7 days from "2023-11-15" up to "2023-11-21"
+
+    """
+    if len(values_available) == 0:
         return values_available
     last_day = Period.from_truncated_value(values_available[-1], agg_kind=agg_kind)
-    if agg_kind == AggKind.MONTH:
+    if agg_kind == AggKind.YEAR:
+        return [
+            str(year)
+            for year in range(int(values_available[0]), int(values_available[-1]) + 1)
+        ]  # all years from first to last
+    elif agg_kind == AggKind.MONTH:
         return [
             last_day.get_shifted(relativedelta(months=delta)).get_truncated_value(
                 agg_kind=AggKind.MONTH
             )
-            for delta in range(-2, 1)
+            for delta in range(-2, 1)  # last 3 months
         ]
     elif agg_kind == AggKind.WEEK:
         return [
             last_day.get_shifted(relativedelta(weeks=delta)).get_truncated_value(
                 agg_kind=AggKind.WEEK
             )
-            for delta in range(-3, 1)
+            for delta in range(-3, 1)  # last 4 weeks
         ]
     elif agg_kind == AggKind.DAY:  # pragma: no branch
         return [
             last_day.get_shifted(relativedelta(days=delta)).get_truncated_value(
                 agg_kind=AggKind.DAY
             )
-            for delta in range(-6, 1)
+            for delta in range(-6, 1)  # last 7 days
         ]

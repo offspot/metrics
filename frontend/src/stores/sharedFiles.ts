@@ -6,12 +6,10 @@ import SharedFilesKpiValue from '@/types/SharedFilesKpiValue'
 export const useSharedFilesStore = defineStore('sharedFiles', {
   getters: {
     aggregationValue() {
-      const mainStore = useMainStore()
-      return mainStore.aggregationValue
+      return useMainStore().aggregationValue
     },
     labels() {
-      const mainStore = useMainStore()
-      return mainStore.getAllAggValues
+      return useMainStore().getAllAggValues
     },
     values() {
       const mainStore = useMainStore()

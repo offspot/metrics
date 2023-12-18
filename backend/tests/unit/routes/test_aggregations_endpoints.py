@@ -16,6 +16,7 @@ from offspot_metrics_backend.routes.aggregations import get_all_values
         (AggKind.MONTH, [], []),
         (AggKind.YEAR, ["2023"], ["2023"]),
         (AggKind.YEAR, ["2023", "2024"], ["2023", "2024"]),
+        (AggKind.YEAR, ["2023", "2026"], ["2023", "2024", "2025", "2026"]),
         (AggKind.MONTH, ["2023-02"], ["2022-12", "2023-01", "2023-02"]),
         (AggKind.WEEK, ["2023 W02"], ["2022 W51", "2022 W52", "2023 W01", "2023 W02"]),
         (
