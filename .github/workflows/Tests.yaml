@@ -42,14 +42,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Ensure we can build the Docker image
-        working-directory: backend
         run: |
-          docker build -t offspot_metrics_backend .
+          docker build -t offspot_metrics .
 
       - name: Ensure we can start the Docker image
         run: |
           echo "Starting the container"
-          docker run -d --name test_container -e PROCESSING_DISABLED='True' offspot_metrics_backend
+          docker run -d --name test_container -e PROCESSING_DISABLED='True' offspot_metrics
           echo "Waiting 5 seconds"
           sleep 5
           echo "Checking container logs"

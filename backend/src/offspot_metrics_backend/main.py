@@ -3,11 +3,15 @@ import logging
 import sys
 from asyncio import Task, create_task, sleep
 from contextlib import asynccontextmanager
+from http import HTTPStatus
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
 
 from offspot_metrics_backend import __about__
 from offspot_metrics_backend.business.caddy_log_converter import CaddyLogConverter
@@ -154,10 +158,13 @@ class Main:
             lifespan=self.lifespan,
         )
 
-        @self.app.get("/")
+        @self.app.get("/api")
         async def landing() -> RedirectResponse:  # pyright: ignore
             """Redirect to root of latest version of the API"""
-            return RedirectResponse(f"/{__about__.__api_version__}/", status_code=308)
+            return RedirectResponse(
+                f"/api/{__about__.__api_version__}/",
+                status_code=HTTPStatus.TEMPORARY_REDIRECT,
+            )
 
         api = FastAPI(
             title=__about__.__api_title__,
@@ -192,6 +199,50 @@ class Main:
         api.include_router(router=aggregations.router)
         api.include_router(router=kpis.router)
 
-        self.app.mount(f"/{__about__.__api_version__}", api)
+        self.app.mount(f"/api/{__about__.__api_version__}", api)
+
+        class ServeVueUiFromRoot(BaseHTTPMiddleware):
+            """Custom middleware to serve the Vue.JS application
+
+            We need a bit of black magic to:
+            - serve the Vue.JS UI from "/"
+            - but still keep the API on "/api"
+            - and support Vue.JS routes like "/home"
+            - and still return 404 when the UI is requesting a file which does not exits
+            """
+
+            ui_location = Path()
+
+            async def dispatch(
+                self, request: Request, call_next: RequestResponseEndpoint
+            ):
+                path = request.url.path
+
+                # API is served normally
+                if path.startswith("/api"):
+                    response = await call_next(request)
+                    return response
+
+                # Serve index.html on root
+                if path == "/":
+                    return FileResponse(BackendConf.ui_location.joinpath("index.html"))
+
+                local_path = BackendConf.ui_location.joinpath(path[1:])
+
+                # If there is no dot, then we are probably serving a Vue.JS internal
+                # route, so let's serve Vue.JS app
+                if "." not in local_path.name:
+                    return FileResponse(BackendConf.ui_location.joinpath("index.html"))
+
+                # If the path exists and is a file, serve it
+                if local_path.exists() and local_path.is_file():
+                    return FileResponse(local_path)
+
+                # Otherwise continue to next handler (which is probably a 404)
+                response = await call_next(request)
+                return response
+
+        # Apply the custom middleware
+        self.app.add_middleware(ServeVueUiFromRoot)
 
         return self.app

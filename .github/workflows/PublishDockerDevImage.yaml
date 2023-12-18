@@ -16,7 +16,7 @@ jobs:
         uses: openzim/docker-publish-action@v10
         with:
           context: backend
-          image-name: offspot/metrics_backend
+          image-name: offspot/metrics
           manual-tag: dev
           latest-on-tag: false
           restrict-to: offspot/metrics
