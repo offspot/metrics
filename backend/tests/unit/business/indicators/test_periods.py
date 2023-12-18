@@ -63,5 +63,20 @@ def test_periods(
         ("2023-06-08 10:18:12", AggKind.DAY, "2023-06-08"),
     ],
 )
-def test_truncated_value(curdate: str, kind: AggKind, expected: str) -> None:
+def test_get_truncated_value(curdate: str, kind: AggKind, expected: str) -> None:
     assert Period(datetime.fromisoformat(curdate)).get_truncated_value(kind) == expected
+
+
+@pytest.mark.parametrize(
+    "truncated,kind,expected",
+    [
+        ("2023", AggKind.YEAR, "2023-01-01 00:00:00"),
+        ("2023-12", AggKind.MONTH, "2023-12-01 00:00:00"),
+        ("2023 W12", AggKind.WEEK, "2023-03-20 00:00:00"),
+        ("2023-12-25", AggKind.DAY, "2023-12-25 00:00:00"),
+    ],
+)
+def test_from_truncated_value(truncated: str, kind: AggKind, expected: str) -> None:
+    assert Period.from_truncated_value(
+        truncated_value=truncated, agg_kind=kind
+    ) == Period(datetime.fromisoformat(expected))

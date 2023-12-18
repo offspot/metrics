@@ -89,6 +89,35 @@ class Period:
         # forget to modify this function
         raise AttributeError  # pragma: no cover
 
+    @classmethod
+    def from_truncated_value(cls, truncated_value: str, agg_kind: AggKind) -> "Period":
+        """Transform a truncated value into a period
+
+        First period of the truncated value is returned.
+
+        Examples:
+        - "2023" + YEAR => "2023-01-01 00:00:00"
+        - "2023-12" + MONTH => "2023-12-01 00:00:00",
+        - "2023 W12 + WEEK => "2023-03-20 00:00:00"
+        - "2023-12-25" + DAY => "2023-12-25 00:00:00",
+        """
+
+        def get_period(value: str, timeformat: str) -> Period:
+            return Period(
+                datetime.datetime.strptime(value, timeformat).replace(
+                    tzinfo=datetime.UTC
+                )
+            )
+
+        if agg_kind == AggKind.DAY:
+            return get_period(truncated_value, "%Y-%m-%d")
+        elif agg_kind == AggKind.WEEK:
+            return get_period(f"{truncated_value} 1", "%Y W%W %w")
+        elif agg_kind == AggKind.MONTH:
+            return get_period(f"{truncated_value}-01", "%Y-%m-%d")
+        elif agg_kind == AggKind.YEAR:  # pragma: no branch
+            return get_period(f"{truncated_value}-01-01", "%Y-%m-%d")
+
     def get_interval(self, agg_kind: AggKind) -> Interval:
         """Transform the period into an interval matching the kind of aggregation
 
