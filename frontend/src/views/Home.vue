@@ -30,16 +30,6 @@ onMounted(() => {
         :value="Page.Dashboard"
         icon="far fa-envelope-open"
       />
-      <DrawerItem
-        title="Package popularity"
-        :value="Page.PackagePopularity"
-        icon="fas fa-chart-column"
-      />
-      <DrawerItem
-        title="Total usage"
-        :value="Page.TotalUsage"
-        icon="far fa-clock"
-      />
     </v-navigation-drawer>
 
     <v-app-bar flat height="100">

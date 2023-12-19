@@ -16,7 +16,6 @@ jobs:
       - name: Build and push Docker image
         uses: openzim/docker-publish-action@v10
         with:
-          context: backend
           image-name: offspot/metrics
           tag-pattern: /^v([0-9.]+)$/
           latest-on-tag: true
