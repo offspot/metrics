@@ -52,7 +52,7 @@ def app(reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]):
 
 @pytest_asyncio.fixture()  # pyright: ignore
 async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, Any]:
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(app=app, base_url="http://test/api") as client:
         yield client
 
 

@@ -6,15 +6,20 @@ It is recommended to use it in combination with Mutagen to effeciently sync data
 
 - Reverse proxy ("fake"): http://localhost:8000
 - Kiwix-serve ("fake"): http://localhost:8001
-- Backend API: http://localhost:8002
+- Application: http://localhost:8002
+- Dev Backend/API: http://localhost:8002/api/
 - Dev Frontend: http://localhost:8003
 - Edupi ("fake"): http://localhost:8004
 
 ## List of containers
 
-### backend
+### metrics
 
-This container is the backend web server.
+This container is the full application (UI + API), close to the real production container.
+
+Python code is mounted inside the container and hot-reloaded (i.e. API development can be tested on this).
+
+UI is statically compiled, so changes are not refreshed, use the frontend-tools UI for testing UI changes.
 
 ### backend-tools
 
@@ -30,7 +35,7 @@ Context is setup with appropriate environment variables:
 
 This container hosts the development frontend UI (i.e. `yarn dev`).
 
-It is not the statically compiled version.
+It is not the statically compiled version, so it is very usefull to test UI changes locally.
 
 ### kiwix-serve
 
@@ -109,14 +114,14 @@ docker compose -p offspot_metrics up -d --force-recreate backend
 
 You can then browse packages at http://127.0.0.1:8000/ and statistics will show up after up to 1 hour in the web UI at http://127.0.0.1:8003/
 
-### Restart the backend
+### Restart the application
 
-The backend might typically fail if the DB schema is not up-to-date, or if you create some nasty bug while modifying the code.
+The application might typically fail if the DB schema is not up-to-date, or if you create some nasty bug while modifying the code.
 
 Restart it with:
 
 ```sh
-docker restart om_backend
+docker restart om_metrics
 ```
 
 Other containers might be restarted the same way.

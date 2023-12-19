@@ -1,3 +1,10 @@
+FROM node:20-alpine as metrics_ui
+
+WORKDIR /src
+COPY frontend /src
+RUN yarn install --frozen-lockfile
+RUN VITE_BACKEND_ROOT_API="./api/v1" yarn build
+
 FROM python:3.11-slim-bookworm
 LABEL org.opencontainers.image.source https://github.com/offspot/metrics
 
@@ -14,21 +21,23 @@ ENV ALLOWED_ORIGINS http://localhost:8003|http://127.0.0.1:8003
 ENV DATABASE_URL sqlite+pysqlite:////data/database.db
 ENV LOGWATCHER_DATA_FOLDER /data/logwatcher
 
-COPY pyproject.toml README.md /src/
-COPY src/offspot_metrics_backend/__about__.py /src/src/offspot_metrics_backend/__about__.py
+COPY backend/pyproject.toml backend/README.md /src/
+COPY backend/src/offspot_metrics_backend/__about__.py /src/src/offspot_metrics_backend/__about__.py
 
 # Install project dependencies
 RUN pip install --no-cache-dir /src
 
 # Copy code + associated artifacts
-COPY src /src/src
-COPY *.md /src/
+COPY backend/src /src/src
+COPY backend/*.md /src/
 
 # Install project + cleanup afterwards
 RUN pip install --no-cache-dir /src \
  && mkdir -p /data/logwatcher \
  && cd /src/src \
  && rm -rf /src
+
+COPY --from=metrics_ui /src/dist /src/ui
 
 EXPOSE 80
 

@@ -34,3 +34,5 @@ class BackendConf:
     logwatcher_data_folder = os.getenv(
         "LOGWATCHER_DATA_FOLDER", f"{src_dir}/logwatcher-data"
     )
+
+    ui_location = pathlib.Path(os.getenv("UI_LOCATION", "/src/ui"))
