@@ -7,6 +7,7 @@ It is recommended to use it in combination with Mutagen to effeciently sync data
 - Reverse proxy ("fake"): http://localhost:8000
 - Kiwix-serve ("fake"): http://localhost:8001
 - Application: http://localhost:8002
+- Dev Backend/API: http://localhost:8002/api/
 - Dev Frontend: http://localhost:8003
 - Edupi ("fake"): http://localhost:8004
 
