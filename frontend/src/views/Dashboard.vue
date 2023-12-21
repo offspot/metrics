@@ -18,10 +18,12 @@ import DashboardUptime from '../components/DashboardUptime.vue'
               </v-card>
             </v-col>
             <v-col cols="12">
-              <v-card elevation="0"> <DashboardSharedFiles /> </v-card
-            ></v-col>
+              <v-card elevation="0" class="shared-files">
+                <DashboardSharedFiles />
+              </v-card>
+            </v-col>
             <v-col cols="12" class="d-lg-none">
-              <v-card elevation="0">
+              <v-card elevation="0" class="total-usage">
                 <DashboardTotalUsage />
               </v-card>
             </v-col>
@@ -32,12 +34,12 @@ import DashboardUptime from '../components/DashboardUptime.vue'
         <v-container class="pa-0">
           <v-row>
             <v-col cols="12" lg="6">
-              <v-card elevation="0">
+              <v-card elevation="0" class="package-popularity">
                 <DashboardPackagePopularity />
               </v-card>
             </v-col>
             <v-col cols="12" lg="6" class="d-md-none d-lg-flex">
-              <v-card elevation="0">
+              <v-card elevation="0" class="total-usage">
                 <DashboardTotalUsage />
               </v-card>
             </v-col>
@@ -48,4 +50,16 @@ import DashboardUptime from '../components/DashboardUptime.vue'
   </v-container>
 </template>
 
-<style scoped></style>
+<style scoped>
+.shared-files {
+  min-height: 320px;
+}
+.package-popularity {
+  min-height: 544px;
+}
+
+.total-usage {
+  min-height: 544px;
+  width: 100%;
+}
+</style>

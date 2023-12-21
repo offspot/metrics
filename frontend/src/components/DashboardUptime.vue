@@ -54,7 +54,8 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div id="container">
+  <v-card-title>Uptime</v-card-title>
+  <div v-if="uptimeStore.kpiValue" class="container data">
     <VueApexCharts
       id="box"
       :options="chartOptions"
@@ -62,7 +63,6 @@ const chartOptions = computed(() => {
       height="250px"
     />
 
-    <v-card-title>Uptime</v-card-title>
     <v-card-subtitle class="pt-2">During selected period</v-card-subtitle>
     <v-card-text>
       <span class="text-subtitle-1 font-weight-medium">{{
@@ -76,18 +76,22 @@ const chartOptions = computed(() => {
       }}</span>
     </v-card-text>
   </div>
+
+  <div v-else class="container">
+    <v-card-text>No data</v-card-text>
+  </div>
 </template>
 
 <style scoped>
-#container {
-  min-height: 200px;
+.container {
+  min-height: 152px;
 }
 #box {
   position: absolute;
   top: -20px;
   right: -50px;
 }
-.v-card-text {
+.data.v-card-text {
   position: absolute;
   bottom: 0px;
 }
