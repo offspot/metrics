@@ -19,5 +19,8 @@ export const useSharedFilesStore = defineStore('sharedFiles', {
             ?.kpiValue as SharedFilesKpiValue,
       )
     },
+    hasData() {
+      return this.values?.length > 0
+    },
   },
 })

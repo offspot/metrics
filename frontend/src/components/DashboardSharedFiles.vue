@@ -99,17 +99,17 @@ const series = computed(() => {
 
 <template>
   <v-card-title>Shared Files</v-card-title>
-  <VueApexCharts
-    id="box"
-    :options="chartOptions"
-    :series="series"
-    height="253px"
-  />
+  <div v-if="sharedFilesStore.hasData">
+    <VueApexCharts
+      id="box"
+      :options="chartOptions"
+      :series="series"
+      height="253px"
+    />
+  </div>
+  <div v-else>
+    <v-card-text>No data</v-card-text>
+  </div>
 </template>
 
-<style scoped>
-code {
-  font-size: xx-small;
-  line-height: 0;
-}
-</style>
+<style scoped></style>

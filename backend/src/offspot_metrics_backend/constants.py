@@ -18,7 +18,7 @@ class BackendConf:
         "http://localhost|http://localhost:8000|http://localhost:8080",  # dev fallback
     ).split("|")
 
-    package_conf_file_location = os.getenv("PACKAGE_CONF_FILE", "/conf/packages.yml")
+    package_conf_file_location = os.getenv("PACKAGE_CONF_FILE", "/conf/packages.yaml")
 
     # Boolean stoping background processing of logs + indicators / kpis update / cleanup
     # Useful mostly for local development purpose when we do not want to generate new

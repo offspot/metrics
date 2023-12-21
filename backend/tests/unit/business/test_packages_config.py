@@ -14,7 +14,7 @@ from offspot_metrics_backend.business.reverse_proxy_config import (
 def test_parsing_missing_file_provided(
     reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]
 ):
-    with pytest.raises(FileNotFoundError, match="/conf/packages.yml"):
+    with pytest.raises(FileNotFoundError, match="/conf/packages.yaml"):
         reverse_proxy_config(None)
 
 

@@ -14,7 +14,7 @@ Standard OpenZIM stack:
 
 The business logic is responsible to implement the logic which handles the transformation from raw logs into KPIs.
 
-Raw logs are transformed into inputs via the [LogConverter](backend/src//backend/business/log_converter.py). This LogConverter is configured by the `packages.yml` configuration file used on the `offspot` to configure Caddy reverse proxy. This is mandatory to automatically associate host names with content title for instance.
+Raw logs are transformed into inputs via the [LogConverter](backend/src//backend/business/log_converter.py). This LogConverter is configured by the `packages.yaml` configuration file used on the `offspot` to configure Caddy reverse proxy. This is mandatory to automatically associate host names with content title for instance.
 
 Inputs are then transformed into Indicators by an [Indicator Processor](backend/src//backend/business/indicators/processor.py). This processor knows the list of all indicators configured on the system. It is responsible to :
 - proposes each input to each indicator capable to handle the current kind of input
