@@ -179,7 +179,7 @@ class LogWatcher:
         logger.info("Log watcher has started succesfully")
 
         while self.observer.is_alive():
-            self.observer.join(1)
+            self.observer.join(0.001)
             # perform a very small sleep, just to let the coroutine pause
             await sleep(0.001)
 
@@ -202,7 +202,7 @@ class LogWatcher:
         logger.info("Log watcher has started succesfully")
 
         while self.observer.is_alive():
-            self.observer.join(1)
+            self.observer.join(0.001)
 
         logger.info("Log watcher run is terminating")
 
@@ -215,6 +215,7 @@ class LogWatcher:
         if self.observer.is_alive():
             logger.info("Log watcher is stopping")
             self.observer.stop()
+            self.observer.join()
         else:
             logger.info("Log watcher is already dead")
 
