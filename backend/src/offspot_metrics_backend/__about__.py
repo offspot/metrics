@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.2.0-dev0"
 
 __api_version__: str = "v1"
 __api_title__: str = "Offspot Metrics Backend"
