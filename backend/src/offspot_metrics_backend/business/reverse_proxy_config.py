@@ -54,7 +54,7 @@ class ReverseProxyConfig:
         self.warnings: list[str] = []
 
     def parse_configuration(self):
-        """Parse packages.yml configuration based on provided file"""
+        """Parse packages.yaml configuration based on provided file"""
         logger.info("Parsing PACKAGE_CONF_FILE")
 
         with open(BackendConf.package_conf_file_location) as fh:

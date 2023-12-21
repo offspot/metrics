@@ -6,7 +6,7 @@ services:
       - ../backend/src/offspot_metrics_backend:/usr/local/lib/python3.11/site-packages/offspot_metrics_backend
       - reverse-proxy-srv:/reverse-proxy-logs
       - logwatcher-data:/data/logwatcher
-      - ./packages.yml:/conf/packages.yml
+      - ./packages.yaml:/conf/packages.yaml
     command:
       - uvicorn
       - offspot_metrics_backend.entrypoint:app
@@ -20,7 +20,7 @@ services:
     ports:
       - 127.0.0.1:8002:80
     environment:
-      PACKAGE_CONF_FILE: /conf/packages.yml
+      PACKAGE_CONF_FILE: /conf/packages.yaml
       PROCESSING_DISABLED: "True"
       DATABASE_URL: sqlite+pysqlite:////usr/local/lib/python3.11/site-packages/offspot_metrics_backend/dev.db
   backend-tools:

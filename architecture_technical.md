@@ -40,7 +40,7 @@ The `backend` assumes that:
   - an SQLite database, location based on `DATABASE_URL` environment variable
   - one JSON file currently used by the log watcher, stored in the folder located at `LOGWATCHER_DATA_FOLDER` environment variable
   - in the Docker image, by default both are in the `/data` folder which should be mounted as a volume
-- a `packages.yml` file is mounted in `/conf/packages.yml` or any other location passed via the
+- a `packages.yaml` file is mounted in `/conf/packages.yaml` or any other location passed via the
 `PACKAGE_CONF_FILE` environment variable ; this file contains the `offspot` packages configuration and
  its format is an `offspot` [convention](https://github.com/offspot/container-images/tree/main/dashboard)
     - we parse the list of `packages` and process the `kind`, `title` and `url` attributes
@@ -54,7 +54,7 @@ The `backend` assumes that:
     (e.g. //kiwix.local/content/sqa.stackexchange.com_en_all_2023-05/a_super_home_page)
 - `kiwix-serve` is serving resources through the `/content` url. More precisely, we assume that access logs
 on `kiwix-serve` are matching the `^/content/(?P<zim>.+?)(?P<item>/.*)?$` regular expression when a ZIM
-resource is displayed (where `zim` is the zim alias mentionned above, extracted from the `packages.yml`
+resource is displayed (where `zim` is the zim alias mentionned above, extracted from the `packages.yaml`
 configuration file)
 
 ## SQLite
