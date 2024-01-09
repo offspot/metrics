@@ -5,7 +5,7 @@ COPY frontend /src
 RUN yarn install --frozen-lockfile
 RUN VITE_BACKEND_ROOT_API="./api/v1" yarn build
 
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 LABEL org.opencontainers.image.source https://github.com/offspot/metrics
 
 # Specifying a workdir which is not "/"" is mandatory for proper uvicorn watchfiles

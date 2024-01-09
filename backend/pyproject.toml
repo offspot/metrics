@@ -8,24 +8,24 @@ authors = [
   { name = "Kiwix", email = "dev@kiwix.org" },
 ]
 keywords = ["offpost", "zim", "metrics"]
-requires-python = ">=3.11"
+requires-python = ">=3.12,<3.13"
 description = "offspot Metrics Backend API"
 readme = "README.md"
 license = {text = "GPL-3.0-or-later"}
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 ]
 dependencies = [
-    "alembic == 1.11.3",
-    "fastapi[all] == 0.101.1",
-    "fastapi-pagination == 0.12.9",
-    "pydantic == 2.3.0", # this is also a sub-dep of fastapi but we rely a lot on it
+    "alembic == 1.13.1",
+    "fastapi[all] == 0.108.0",
+    "fastapi-pagination == 0.12.14",
+    "pydantic == 2.5.3", # this is also a sub-dep of fastapi but we rely a lot on it
     "pyhumps==3.8.0",
     "python-dateutil == 2.8.2",
     "PyYAML == 6.0.1",
-    "SQLAlchemy == 2.0.20",
+    "SQLAlchemy == 2.0.25",
     "watchdog == 3.0.0",
 ]
 dynamic = ["version"]
@@ -35,22 +35,22 @@ scripts = [
     "invoke == 2.2.0",
 ]
 lint = [
-    "black == 23.7.0",
-    "ruff == 0.0.285",
+    "black == 23.12.1",
+    "ruff == 0.1.11",
 ]
 check = [
-    "pyright == 1.1.327",
+    "pyright == 1.1.345",
 ]
 test = [
-    "coverage == 7.2.7",
-    "httpx == 0.24.1",
-    "pytest == 7.3.1",
-    "pytest-asyncio == 0.21.0",
+    "coverage == 7.4.0",
+    "httpx == 0.26.0",
+    "pytest == 7.4.4",
+    "pytest-asyncio == 0.23.3",
 ]
 dev = [
-    "pre-commit == 3.3.3",
-    "debugpy == 1.6.7",
-    "ipykernel == 6.25.1",
+    "pre-commit == 3.6.0",
+    "debugpy == 1.8.0",
+    "ipykernel == 6.28.0",
     "offspot_metrics_backend[scripts]",
     "offspot_metrics_backend[lint]",
     "offspot_metrics_backend[test]",
@@ -107,10 +107,10 @@ all = "inv checkall --args '{args}'"
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py312']
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
 line-length = 88
 src = ["src"]
 select = [
@@ -243,5 +243,5 @@ exclude_lines = [
 include = ["src", "tests", "dev_tools", "tasks.py"]
 exclude = [".env/**", ".venv/**"]
 extraPaths = ["src"]
-pythonVersion = "3.11"
+pythonVersion = "3.12"
 typeCheckingMode="strict"
