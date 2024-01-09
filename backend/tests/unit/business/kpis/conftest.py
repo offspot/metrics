@@ -1,7 +1,6 @@
 from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TypeAlias
 
 import pytest
 from sqlalchemy.orm import Session
@@ -31,10 +30,10 @@ from offspot_metrics_backend.db.models import (
     IndicatorRecord,
 )
 
-ProcessorGenerator: TypeAlias = Generator[Processor, None, None]
-KpiGenerator: TypeAlias = Generator[Kpi, None, None]
-DatetimeGenerator: TypeAlias = Generator[datetime, None, None]
-NoneGenerator: TypeAlias = Generator[None, None, None]
+type ProcessorGenerator = Generator[Processor, None, None]
+type KpiGenerator = Generator[Kpi, None, None]
+type DatetimeGenerator = Generator[datetime, None, None]
+type NoneGenerator = Generator[None, None, None]
 
 
 @pytest.fixture()
