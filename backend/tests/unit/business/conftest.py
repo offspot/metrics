@@ -1,10 +1,9 @@
 from collections.abc import Generator
 from datetime import datetime
-from typing import TypeAlias
 
 import pytest
 
-DatetimeGenerator: TypeAlias = Generator[datetime, None, None]
+type DatetimeGenerator = Generator[datetime, None, None]
 
 
 @pytest.fixture()

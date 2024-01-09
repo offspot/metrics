@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TypeAlias, cast
+from typing import cast
 
 import pytest
 
@@ -15,9 +15,9 @@ from offspot_metrics_backend.business.indicators.recorder import (
 from offspot_metrics_backend.business.inputs.input import Input
 from offspot_metrics_backend.business.period import Period
 
-IndicatorGenerator: TypeAlias = Generator[Indicator, None, None]
-InputGenerator: TypeAlias = Generator[Input, None, None]
-ProcessorGenerator: TypeAlias = Generator[Processor, None, None]
+type IndicatorGenerator = Generator[Indicator, None, None]
+type InputGenerator = Generator[Input, None, None]
+type ProcessorGenerator = Generator[Processor, None, None]
 
 
 class FailingRecorder(Recorder):

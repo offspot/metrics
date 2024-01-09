@@ -1,8 +1,6 @@
-import asyncio
 from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
-import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
@@ -33,18 +31,7 @@ from offspot_metrics_backend.db.models import KpiRecord
 from offspot_metrics_backend.main import Main
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    try:
-        yield asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        yield loop
-        loop.close()
-
-
-@pytest.fixture()
+@pytest_asyncio.fixture()  # pyright: ignore
 def app(reverse_proxy_config: Callable[[str | None], ReverseProxyConfig]):
     reverse_proxy_config("conf_no_packages.yaml")
     return Main().create_app()
