@@ -80,8 +80,8 @@ def persisted_data() -> dict[str, Any]:
     """A sample dataset that could have been persisted to disk"""
     return {
         "file_pointers": {
-            "file1.log": 123,
-            "file2.log": 456,
+            "caddy_access_logs.json": 123,
+            "caddy_access_logs-2024-01-09T13-43-07.371.json": 456,
         }
     }
 
@@ -96,7 +96,7 @@ def test_log_watcher_noop(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_simple(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.write("L1.2\n")
 
@@ -105,9 +105,20 @@ def test_log_watcher_simple(log_watcher_tester: LogWatcherTester):
     assert sorted(log_watcher_tester.new_lines) == ["L1.1", "L1.2"]
 
 
+def test_log_watcher_simple_not_matching(log_watcher_tester: LogWatcherTester):
+    def modify_files(watched_path: Path):
+        with open(watched_path.joinpath("other_file.json"), mode="w") as fh:
+            fh.write("L1.1\n")
+            fh.write("L1.2\n")
+
+    log_watcher_tester.run(modify_files)
+
+    assert sorted(log_watcher_tester.new_lines) == []
+
+
 def test_log_watcher_simple_with_pending_line(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.write("L1.2\n")
             fh.write("L1.3")
@@ -119,7 +130,7 @@ def test_log_watcher_simple_with_pending_line(log_watcher_tester: LogWatcherTest
 
 def test_log_watcher_simple_with_flush(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        fh = open(watched_path.joinpath("file1.txt"), mode="w")
+        fh = open(watched_path.joinpath("caddy_access_logs.json"), mode="w")
         fh.write("L1.1\n")
         fh.write("L1.2\n")
         fh.flush()
@@ -133,7 +144,7 @@ def test_log_watcher_simple_with_flush(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_simple_with_pause(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.write("L1.2\n")
             fh.write("L1")
@@ -149,7 +160,7 @@ def test_log_watcher_simple_with_pause(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_simple_with_failures(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.write("L1.2\n")
             fh.write("Lfails\n")
@@ -163,31 +174,43 @@ def test_log_watcher_simple_with_failures(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1.1\n")
             fh.flush()
             fh.write("L1.2\n")
             fh.flush()
             fh.write("L1.3")
-        with open(watched_path.joinpath("file2.txt"), mode="w") as fh:
+        with open(
+            watched_path.joinpath("caddy_access_logs-2024-01-09T13-43-07.371.json"),
+            mode="w",
+        ) as fh:
             fh.write("L2.1\n")
             fh.write("L2.2\n")
             fh.write("L2.")
             fh.write("3\n")
             fh.write("L2.4\n")
-        with open(watched_path.joinpath("file3.txt"), mode="w") as fh:
+        with open(
+            watched_path.joinpath("caddy_access_logs-2024-01-08T13-43-07.371.json"),
+            mode="w",
+        ) as fh:
             fh.write("L3.1\n")
             fh.write("L3.2\n")
             fh.write("L3.3\n")
             fh.write("L3.")
             fh.write("4\n")
 
-        fh4 = open(watched_path.joinpath("file4.txt"), mode="w")
+        fh4 = open(
+            watched_path.joinpath("caddy_access_logs-2024-01-07T13-43-07.371.json"),
+            mode="w",
+        )
         fh4.write("L4.1\n")
         fh4.write("L4.2\n")
         fh4.flush()
 
-        fh5 = open(watched_path.joinpath("file5.txt"), mode="w")
+        fh5 = open(
+            watched_path.joinpath("caddy_access_logs-2024-01-06T13-43-07.371.json"),
+            mode="w",
+        )
         fh5.write("L5.1\n")
         fh5.write("L5.2\n")
         fh5.write("L5.3\n")
@@ -200,7 +223,10 @@ def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
         fh4.write("4\n")
         fh4.close()
 
-        fh5 = open(watched_path.joinpath("file5.txt"), mode="a")
+        fh5 = open(
+            watched_path.joinpath("caddy_access_logs-2024-01-06T13-43-07.371.json"),
+            mode="a",
+        )
         fh5.write("L5")
         fh5.write(".4\n")
         fh5.write("L5.")
@@ -236,16 +262,20 @@ def test_log_watcher_many_append(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_file_moved(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1\nL2\nL3")
             fh.flush()
             time.sleep(PAUSE_IN_MS)
             fh.write("\nL4")
         shutil.move(
-            watched_path.joinpath("file1.txt"), watched_path.joinpath("file2.txt")
+            watched_path.joinpath("caddy_access_logs.json"),
+            watched_path.joinpath("caddy_access_logs-2024-01-06T13-43-07.371.json"),
         )
         time.sleep(PAUSE_IN_MS)
-        with open(watched_path.joinpath("file2.txt"), mode="a") as fh:
+        with open(
+            watched_path.joinpath("caddy_access_logs-2024-01-06T13-43-07.371.json"),
+            mode="a",
+        ) as fh:
             fh.write("\nL5\nL6")
 
     log_watcher_tester.run(modify_files)
@@ -255,12 +285,12 @@ def test_log_watcher_file_moved(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_file_deleted(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1\nL2\nL3")
         time.sleep(PAUSE_IN_MS)
-        watched_path.joinpath("file1.txt").unlink()
+        watched_path.joinpath("caddy_access_logs.json").unlink()
         time.sleep(PAUSE_IN_MS)
-        with open(watched_path.joinpath("file1.txt"), mode="a") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="a") as fh:
             fh.write("L4\nL5\n")
 
     log_watcher_tester.run(modify_files)
@@ -271,9 +301,16 @@ def test_log_watcher_file_deleted(log_watcher_tester: LogWatcherTester):
 def test_log_watcher_file_existing_files_untouched(
     log_watcher_tester: LogWatcherTester,
 ):
-    with open(log_watcher_tester.watched_path.joinpath("file1.txt"), mode="w") as fh:
+    with open(
+        log_watcher_tester.watched_path.joinpath("caddy_access_logs.json"), mode="w"
+    ) as fh:
         fh.write("L1\nL2\nL3")
-    with open(log_watcher_tester.watched_path.joinpath("file3.txt"), mode="w") as fh:
+    with open(
+        log_watcher_tester.watched_path.joinpath(
+            "caddy_access_logs-2024-01-06T13-43-07.371.json"
+        ),
+        mode="w",
+    ) as fh:
         fh.write("M1\nM2\n")
     log_watcher_tester.watched_path.joinpath("subdir").mkdir()
 
@@ -288,9 +325,16 @@ def test_log_watcher_file_existing_files_untouched(
 def test_log_watcher_file_existing_files_with_failures(
     log_watcher_tester: LogWatcherTester,
 ):
-    with open(log_watcher_tester.watched_path.joinpath("file1.txt"), mode="w") as fh:
+    with open(
+        log_watcher_tester.watched_path.joinpath("caddy_access_logs.json"), mode="w"
+    ) as fh:
         fh.write("L1\nLfails\nL3")
-    with open(log_watcher_tester.watched_path.joinpath("file3.txt"), mode="w") as fh:
+    with open(
+        log_watcher_tester.watched_path.joinpath(
+            "caddy_access_logs-2024-01-06T13-43-07.371.json"
+        ),
+        mode="w",
+    ) as fh:
         fh.write("M1\nM2\n")
     log_watcher_tester.watched_path.joinpath("subdir").mkdir()
 
@@ -306,15 +350,25 @@ def test_log_watcher_file_existing_files_with_failures(
 def test_log_watcher_file_existing_files_modified(
     log_watcher_tester: LogWatcherTester,
 ):
-    with open(log_watcher_tester.watched_path.joinpath("file1.txt"), mode="w") as fh:
+    with open(
+        log_watcher_tester.watched_path.joinpath("caddy_access_logs.json"), mode="w"
+    ) as fh:
         fh.write("L1\nL2\nL3")
-    with open(log_watcher_tester.watched_path.joinpath("file3.txt"), mode="w") as fh:
+    with open(
+        log_watcher_tester.watched_path.joinpath(
+            "caddy_access_logs-2024-01-06T13-43-07.371.json"
+        ),
+        mode="w",
+    ) as fh:
         fh.write("M1\nM2\n")
 
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="a") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="a") as fh:
             fh.write("\nL4\n")
-        with open(watched_path.joinpath("file3.txt"), mode="a") as fh:
+        with open(
+            watched_path.joinpath("caddy_access_logs-2024-01-06T13-43-07.371.json"),
+            mode="a",
+        ) as fh:
             fh.write("M3\n")
 
     log_watcher_tester.run(modify_files)
@@ -328,10 +382,10 @@ def test_log_watcher_file_truncated_file(
     log_watcher_tester: LogWatcherTester,
 ):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1\nL2\nL3\n")
         time.sleep(PAUSE_IN_MS)
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("M1\nM2\n")
 
     log_watcher_tester.run(modify_files)
@@ -344,7 +398,9 @@ def test_log_watcher_file_nested_file_and_recursive(
 ):
     def modify_files(watched_path: Path):
         watched_path.joinpath("subdir").mkdir()
-        with open(watched_path.joinpath("subdir/file1.txt"), mode="w") as fh:
+        with open(
+            watched_path.joinpath("subdir/caddy_access_logs.json"), mode="w"
+        ) as fh:
             fh.write("L1\nL2\nL3\n")
 
     log_watcher_tester.run(modify_files)
@@ -357,7 +413,9 @@ def test_log_watcher_file_nested_file_and_norecursive(
 ):
     def modify_files(watched_path: Path):
         watched_path.joinpath("subdir").mkdir()
-        with open(watched_path.joinpath("subdir/file1.txt"), mode="w") as fh:
+        with open(
+            watched_path.joinpath("subdir/caddy_access_logs.json"), mode="w"
+        ) as fh:
             fh.write("L1\nL2\nL3\n")
 
     log_watcher_tester.run(modify_files, recursive=False)
@@ -382,10 +440,10 @@ def test_log_watcher_no_exit(noop: Callable[[NewLineEvent], None]):
 
 def test_log_watcher_big_special_chars(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1😁1\n")
         time.sleep(PAUSE_IN_MS)
-        with open(watched_path.joinpath("file1.txt"), mode="a") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="a") as fh:
             fh.write("L1😤2\n")
 
     log_watcher_tester.run(modify_files)
@@ -413,7 +471,7 @@ def test_log_watcher_existing_data_file(
 
 def test_log_watcher_deleted_file(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        created_file = watched_path.joinpath("file1.txt")
+        created_file = watched_path.joinpath("caddy_access_logs.json")
         with open(created_file, mode="w") as fh:
             fh.write("L1.1\n")
 
@@ -437,7 +495,7 @@ def test_log_watcher_deleted_file(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_file_disappeared(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        created_file = watched_path.joinpath("file1.txt")
+        created_file = watched_path.joinpath("caddy_access_logs.json")
 
         with open(created_file, mode="w") as fh:
             fh.write("L1.1\n")
@@ -447,7 +505,9 @@ def test_log_watcher_file_disappeared(log_watcher_tester: LogWatcherTester):
         # we will try to create and move the file so fast that it won't be possible
         # for the watcher to read it (but it will still be notified by watchdog)
         # we will do it 5 times to increase chances that file disappear before read
-        moved_file = watched_path.joinpath("file2.txt")
+        moved_file = watched_path.joinpath(
+            "caddy_access_logs-2024-01-06T13-43-07.371.json"
+        )
         for _ in range(5):
             open(created_file, mode="w").close()
             created_file.rename(moved_file)
@@ -465,7 +525,7 @@ def test_log_watcher_file_disappeared(log_watcher_tester: LogWatcherTester):
 
 def test_log_watcher_stop_twice(log_watcher_tester: LogWatcherTester):
     def modify_files(watched_path: Path):
-        with open(watched_path.joinpath("file1.txt"), mode="w") as fh:
+        with open(watched_path.joinpath("caddy_access_logs.json"), mode="w") as fh:
             fh.write("L1.1\n")
 
     log_watcher_tester.run(modify_files)
