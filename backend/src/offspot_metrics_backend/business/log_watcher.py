@@ -16,7 +16,7 @@ from watchdog.events import (
 )
 from watchdog.observers import Observer
 
-from offspot_metrics_backend.constants import logger
+from offspot_metrics_backend.constants import BackendConf, logger
 
 
 @dataclass
@@ -104,10 +104,16 @@ class LogWatcherHandler(FileSystemEventHandler):
             EVENT_TYPE_CREATED,
             EVENT_TYPE_MODIFIED,
         ]:
+            file_path = Path(event.src_path)
+
+            # Ignore files which are not in our scope of interest
+            if not file_path.match(BackendConf.reverse_proxy_logs_pattern):
+                return
+
             if event.src_path not in self.file_positions_map:
                 self.file_positions_map[event.src_path] = 0
             try:
-                self.process_new_lines(Path(event.src_path))
+                self.process_new_lines(file_path)
             except FileNotFoundError:
                 pass
 

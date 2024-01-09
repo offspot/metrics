@@ -31,6 +31,10 @@ class BackendConf:
         "REVERSE_PROXY_LOGS_LOCATION", "/reverse-proxy-logs"
     )
 
+    reverse_proxy_logs_pattern = os.getenv(
+        "REVERSE_PROXY_LOGS_PATTERN", "caddy_access_logs*.json"
+    )
+
     logwatcher_data_folder = os.getenv(
         "LOGWATCHER_DATA_FOLDER", f"{src_dir}/logwatcher-data"
     )
