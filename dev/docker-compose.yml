@@ -23,6 +23,7 @@ services:
       PACKAGE_CONF_FILE: /conf/packages.yaml
       PROCESSING_DISABLED: "True"
       DATABASE_URL: sqlite+pysqlite:////usr/local/lib/python3.11/site-packages/offspot_metrics_backend/dev.db
+      LOG_LEVEL: DEBUG
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools/Dockerfile
