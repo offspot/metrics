@@ -14,19 +14,14 @@ from starlette.requests import Request
 
 from offspot_metrics_backend import __about__
 from offspot_metrics_backend.business.caddy_log_converter import CaddyLogConverter
-from offspot_metrics_backend.business.inputs.clock_tick import ClockTick
 from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEvent
-from offspot_metrics_backend.business.period import Period
-from offspot_metrics_backend.business.processor import Processor
+from offspot_metrics_backend.business.processor import INACTIVITY_PERIOD, Processor
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
 from offspot_metrics_backend.constants import BackendConf, logger
 from offspot_metrics_backend.db.initializer import Initializer
 from offspot_metrics_backend.routes import aggregations, kpis
 
 PREFIX = "/v1"
-TICK_PERIOD = (
-    60  # tick period in seconds, changing this need a detailed impact analysis
-)
 
 
 class Main:
@@ -51,7 +46,7 @@ class Main:
             self.config = ReverseProxyConfig()
             self.config.parse_configuration()
             self.converter = CaddyLogConverter(self.config)
-            self.processor.startup(current_period=Period.now().period)
+            self.processor.startup()
 
             log_watcher_task = create_task(self.start_watcher())
             self.background_tasks.add(log_watcher_task)
@@ -59,16 +54,10 @@ class Main:
                 functools.partial(self.task_stopped, "Log Watcher")
             )
 
-            input_ticker_task = create_task(self.input_ticker())
-            self.background_tasks.add(input_ticker_task)
-            input_ticker_task.add_done_callback(
-                functools.partial(self.task_stopped, "Input ticker")
-            )
-
-            processing_ticker_task = create_task(self.processing_ticker())
-            self.background_tasks.add(processing_ticker_task)
-            processing_ticker_task.add_done_callback(
-                functools.partial(self.task_stopped, "Processing ticker")
+            check_for_inactivity_task = create_task(self.check_for_inactivity())
+            self.background_tasks.add(check_for_inactivity_task)
+            check_for_inactivity_task.add_done_callback(
+                functools.partial(self.task_stopped, "Check for inactivity")
             )
         else:
             logger.warning("Processing is disabled")
@@ -93,50 +82,32 @@ class Main:
             raise ValueError("Log watcher has not been initialized")
         await self.log_watcher.run_async()
 
-    async def input_ticker(self):
-        """Generate a ClockTick input every minute
+    async def check_for_inactivity(self):
+        """Check for inactivity every 10 seconds
 
-        We need this input to be as precisely as possible generated every
-        minute, i.e. 60 times per hour. Currently we assume that the logic
-        processing input is fast enough to take less than one minute (if it
-        does take longer, we have many other issues anyway so no need to
-        overwhelm the system with 60 inputs per hour).
+        If the system did not received any log since more than 10 seconds and there has
+        been more than 1 minute since the last processing cycle, a new one will be
+        started
         """
         while True:
-            await sleep(TICK_PERIOD - Period.now().datetime.second)
-            logger.debug("Generating a ClockTick input")
+            await sleep(INACTIVITY_PERIOD)
             try:
-                self.processor.process_input(ClockTick(ts=Period.now().datetime))
+                self.processor.check_for_inactivity()
             except Exception as exc:
-                logger.debug("Exception occured in clock tick", exc_info=exc)
-
-    async def processing_ticker(self):
-        """Start processing cycles with one minute pauses between them
-
-        We do not need something precise here because we want to let
-        the system "breath" between processing cycle and the processing logic
-        does not mind if there is not 60 cycles per hour, it just need to
-        regularly persist data in DB + perform needed computation every hour.
-        """
-        while True:
-            await sleep(TICK_PERIOD)
-            logger.debug("Background processing started")
-            try:
-                self.processor.process_tick(tick_period=Period.now().period)
-            except Exception as exc:
-                logger.debug("Exception occured in clock tick", exc_info=exc)
-            logger.debug("Background processing completed")
+                logger.debug(
+                    "Exception occured in check for inactivity tick", exc_info=exc
+                )
 
     def handle_log_event(self, event: NewLineEvent):
+        """Handle one log line
+
+        We first transform the log line into a list of input events, and then feed it to
+        the processing logic.
+        """
         logger.debug(f"Log watcher sent: {event.line_content}")
         try:
             result = self.converter.process(event.line_content)
-            for input_ in result.inputs:
-                logger.debug(f"Processing input: {input_}")
-                try:
-                    self.processor.process_input(input_=input_)
-                except Exception as exc:
-                    logger.debug("Error processing input", exc_info=exc)
+            self.processor.process_inputs(result=result)
         except Exception as exc:
             logger.debug("Error log event", exc_info=exc)
 

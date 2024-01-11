@@ -35,14 +35,20 @@ def test_periods(
     total_indicator: Indicator,
     dbsession: Session,
 ) -> None:
-    processor = Processor(Period(datetime.fromisoformat(init_iso_datetime)))
+    processor = Processor()
     processor.indicators = [total_indicator]
     processor.process_input(input1)
+    processor.process_tick(
+        Period(datetime.fromisoformat(init_iso_datetime)),
+        dbsession,
+    )
+    assert processor.current_period
     init_period = processor.current_period
     processor.process_tick(
         Period(datetime.fromisoformat(next_iso_datetime)),
         dbsession,
     )
+    assert processor.current_period
     assert (init_period != processor.current_period) == has_changed
     db_period = IndicatorPeriod.get_or_none(init_period, dbsession)
     assert db_period

@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from typing import NamedTuple
 
 from dateutil.relativedelta import relativedelta
 
@@ -174,15 +173,23 @@ class Period:
         # forget to modify this function
         raise AttributeError  # pragma: no cover
 
-    @classmethod
-    def now(
-        cls,
-    ) -> "PeriodNow":
-        """Returns current datetime and corresponding period"""
-        now = datetime.datetime.now()  # noqa: DTZ005
-        return PeriodNow(period=Period(now), datetime=now)
+
+class Now:
+    def __init__(self) -> None:
+        self.datetime = datetime.datetime.now()  # noqa: DTZ005
+        self.period = Period(self.datetime)
+        self.tick = Tick(self.datetime)
 
 
-class PeriodNow(NamedTuple):
-    period: "Period"
-    datetime: datetime.datetime
+@dataclass
+class Tick:
+    """A processing tick
+
+    A processing tick occurs every minutes"""
+
+    dt: datetime.datetime
+
+    def __post_init__(self):
+        self.dt = datetime.datetime.combine(
+            self.dt.date(), datetime.time(hour=self.dt.hour, minute=self.dt.minute)
+        )

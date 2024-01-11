@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import cast
 
 import pytest
+from sqlalchemy.orm import Session
 
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.indicators.indicator import Indicator
@@ -158,8 +159,10 @@ def total_by_content_and_subfolder_indicator() -> IndicatorGenerator:
 
 
 @pytest.fixture()
-def processor(init_datetime: datetime) -> ProcessorGenerator:
-    yield Processor(Period(init_datetime))
+def processor(init_datetime: datetime, dbsession: Session) -> ProcessorGenerator:
+    processor = Processor()
+    processor.process_tick(tick_period=Period(init_datetime), session=dbsession)
+    yield processor
 
 
 @pytest.fixture()

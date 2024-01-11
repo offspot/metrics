@@ -173,7 +173,8 @@ def test_restore_from_db_current_period(
     dbsession: Session,
 ) -> None:
     init_dt = "2020-06-01 13:00:00"
-    processor.restore_from_db(Period(datetime.fromisoformat(init_dt)), dbsession)
+    processor.restore_from_db(dbsession)
+    processor.process_tick(Period(datetime.fromisoformat(init_dt)), dbsession)
     assert processor.current_period == Period(datetime.fromisoformat(init_dt))
     datas = [
         # indicator period in DB, now datetime       , expected current datetime
@@ -190,9 +191,8 @@ def test_restore_from_db_current_period(
                 datetime.fromisoformat(indicator_period_in_db)
             )
         )
-        processor.restore_from_db(
-            Period(datetime.fromisoformat(now_datetime)), dbsession
-        )
+        processor.restore_from_db(dbsession)
+        processor.process_tick(Period(datetime.fromisoformat(now_datetime)), dbsession)
         assert processor.current_period == Period(
             datetime.fromisoformat(expected_current_datetime)
         )
@@ -219,7 +219,8 @@ def test_restore_from_db_continue_same_period(
     assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
 
-    processor.restore_from_db(Period(init_datetime + timedelta(minutes=12)), dbsession)
+    processor.restore_from_db(dbsession)
+    processor.process_tick(Period(init_datetime + timedelta(minutes=12)), dbsession)
     assert len(total_by_content_and_subfolder_indicator.recorders) == 3
     assert count_from_stmt(dbsession, select(IndicatorState)) == 3
     assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
@@ -254,7 +255,8 @@ def test_restore_from_db_start_new_period(
     assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
 
-    processor.restore_from_db(Period(init_datetime + timedelta(days=1)), dbsession)
+    processor.restore_from_db(dbsession)
+    processor.process_tick(Period(init_datetime + timedelta(days=1)), dbsession)
     assert len(total_by_content_and_subfolder_indicator.recorders) == 0
     assert count_from_stmt(dbsession, select(IndicatorState)) == 0
     assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3

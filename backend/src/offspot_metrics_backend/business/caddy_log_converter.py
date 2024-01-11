@@ -42,6 +42,7 @@ class CaddyLog(BaseModel):
 
 class ProcessingResult(NamedTuple):
     inputs: list[Input]
+    ts: datetime.datetime | None
     warning: str | None
 
 
@@ -77,14 +78,15 @@ class CaddyLogConverter:
             log = CaddyLog.model_validate_json(line)
             del line
         except ValidationError:
-            return ProcessingResult(inputs=[], warning="JSON parsing failed")
+            return ProcessingResult(inputs=[], ts=None, warning="JSON parsing failed")
 
         if log.level != "info":
-            return ProcessingResult(inputs=[], warning="Unexpected log level")
+            return ProcessingResult(inputs=[], ts=None, warning="Unexpected log level")
 
         if log.msg != "handled request":
-            return ProcessingResult(inputs=[], warning="Unexpected log msg")
+            return ProcessingResult(inputs=[], ts=None, warning="Unexpected log msg")
 
+        ts = datetime.datetime.fromtimestamp(log.ts)
         log_data = LogData(
             content_type=log.resp_headers.content_type[0]
             if log.resp_headers.content_type and len(log.resp_headers.content_type) > 0
@@ -92,7 +94,7 @@ class CaddyLogConverter:
             status=log.status,
             uri=log.request.uri,
             method=log.request.method,
-            ts=datetime.datetime.fromtimestamp(log.ts),
+            ts=ts,
         )
         inputs: list[Input] = []
         for generator in self.generators:
@@ -100,4 +102,4 @@ class CaddyLogConverter:
                 # ignore logs whose host are not matching the generator host
                 continue
             inputs.extend(generator.process(log_data))
-        return ProcessingResult(inputs=inputs, warning=None)
+        return ProcessingResult(inputs=inputs, ts=ts, warning=None)
