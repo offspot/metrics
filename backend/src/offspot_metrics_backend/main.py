@@ -1,5 +1,4 @@
 import functools
-import logging
 import sys
 from asyncio import Task, create_task, sleep
 from contextlib import asynccontextmanager
@@ -27,15 +26,6 @@ from offspot_metrics_backend.routes import aggregations, kpis
 PREFIX = "/v1"
 TICK_PERIOD = (
     60  # tick period in seconds, changing this need a detailed impact analysis
-)
-
-# - fix this, this is not the same log format as uvicorn logs but are mixed in the same
-#  STDOUT...
-# - read debug level from environment variable
-# - output JSON in production
-# - disable some logs? (Inotify)
-logging.basicConfig(
-    level=logging.DEBUG, format="[%(asctime)s: %(levelname)s] %(message)s"
 )
 
 

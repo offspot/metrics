@@ -1,10 +1,17 @@
-import logging
 import os
 import pathlib
 
+from offspot_metrics_backend.logging import get_logger
+
 src_dir = pathlib.Path(__file__).parent.resolve()
 
-logger = logging.getLogger("offspot_metrics")
+logger = get_logger(
+    "offspot_metrics",
+    level=os.getenv(
+        "LOG_LEVEL",
+        "INFO",
+    ),
+)
 
 
 class BackendConf:
