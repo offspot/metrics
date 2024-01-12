@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import VueApexCharts from 'vue3-apexcharts'
 import { useUptimeStore } from '../stores/uptime'
+import { useMainStore } from '../stores/main'
 import { computed } from 'vue'
 const uptimeStore = useUptimeStore()
+const mainStore = useMainStore()
 
 const chartOptions = computed(() => {
   return {
@@ -66,13 +68,11 @@ const chartOptions = computed(() => {
     <v-card-subtitle class="pt-2">During selected period</v-card-subtitle>
     <v-card-text>
       <span class="text-subtitle-1 font-weight-medium">{{
-        uptimeStore.date_part_1
+        mainStore.date_part_1
       }}</span>
-      <span class="text-h5 font-weight-bold">{{
-        uptimeStore.date_part_2
-      }}</span>
+      <span class="text-h5 font-weight-bold">{{ mainStore.date_part_2 }}</span>
       <span class="text-subtitle-1 font-weight-medium">{{
-        uptimeStore.date_part_3
+        mainStore.date_part_3
       }}</span>
     </v-card-text>
   </div>
@@ -91,7 +91,7 @@ const chartOptions = computed(() => {
   top: -20px;
   right: -50px;
 }
-.data.v-card-text {
+.data .v-card-text {
   position: absolute;
   bottom: 0px;
 }
