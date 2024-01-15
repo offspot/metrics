@@ -11,15 +11,19 @@ from offspot_metrics_backend.db.persister import Persister
 class Processor:
     """A processor is responsible for transforming indicator records into kpis"""
 
-    def __init__(self, current_period: Period) -> None:
+    def __init__(self) -> None:
         self.kpis: list[Kpi] = []
-        self.current_period = current_period
-        self.current_day = current_period.get_truncated_value(AggKind.DAY)
+        self.current_period: Period | None = None
 
     def process_tick(self, tick_period: Period, session: Session) -> bool:
         """Process a clock tick
 
         Returns True if KPIs have been updated"""
+
+        # If we do not have a current period, then it means that we are starting from a
+        # fresh DB, so let's set the current period to the tick one
+        if not self.current_period:
+            self.current_period = tick_period
 
         # if we are in the same period, nothing to do
         if self.current_period == tick_period:
@@ -38,7 +42,8 @@ class Processor:
         # create/update KPIs values for yearly aggregation period
         # which are updated only once per day
         tick_day = tick_period.get_truncated_value(AggKind.DAY)
-        if self.current_day != tick_day:
+        current_day = period_to_compute.get_truncated_value(AggKind.DAY)
+        if current_day != tick_day:
             for kpi in self.kpis:
                 Processor.compute_kpi_values_for_aggregation_kind(
                     now=period_to_compute,
@@ -46,7 +51,6 @@ class Processor:
                     agg_kind=AggKind.YEAR,
                     session=session,
                 )
-            self.current_day = tick_day
 
         return True
 
@@ -160,20 +164,19 @@ class Processor:
         if not last_period:
             return
 
+        self.current_period = last_period
+
         # create/update KPIs values for all aggregation kinds which are updated once
         # per hour (D, W, M)
-        if last_period != self.current_period:
-            for kpi in self.kpis:
-                for agg_kind in [AggKind.DAY, AggKind.WEEK, AggKind.MONTH]:
-                    Processor.compute_kpi_values_for_aggregation_kind(
-                        now=last_period, kpi=kpi, agg_kind=agg_kind, session=session
-                    )
+        for kpi in self.kpis:
+            for agg_kind in [AggKind.DAY, AggKind.WEEK, AggKind.MONTH]:
+                Processor.compute_kpi_values_for_aggregation_kind(
+                    now=last_period, kpi=kpi, agg_kind=agg_kind, session=session
+                )
 
         # create/update KPIs values for yearly aggregations
         # which are updated only once per day
-        last_period_day = last_period.get_truncated_value(AggKind.DAY)
-        if self.current_day != last_period_day:
-            for kpi in self.kpis:
-                Processor.compute_kpi_values_for_aggregation_kind(
-                    now=last_period, kpi=kpi, agg_kind=AggKind.YEAR, session=session
-                )
+        for kpi in self.kpis:
+            Processor.compute_kpi_values_for_aggregation_kind(
+                now=last_period, kpi=kpi, agg_kind=AggKind.YEAR, session=session
+            )

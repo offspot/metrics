@@ -3,7 +3,7 @@ services:
     build: ..
     container_name: om_metrics
     volumes:
-      - ../backend/src/offspot_metrics_backend:/usr/local/lib/python3.11/site-packages/offspot_metrics_backend
+      - ../backend/src/offspot_metrics_backend:/usr/local/lib/python3.12/site-packages/offspot_metrics_backend
       - reverse-proxy-srv:/reverse-proxy-logs
       - logwatcher-data:/data/logwatcher
       - ./packages.yaml:/conf/packages.yaml
@@ -16,13 +16,13 @@ services:
       - "80"
       - --reload
       - --reload-dir
-      - /usr/local/lib/python3.11/site-packages/offspot_metrics_backend
+      - /usr/local/lib/python3.12/site-packages/offspot_metrics_backend
     ports:
       - 127.0.0.1:8002:80
     environment:
       PACKAGE_CONF_FILE: /conf/packages.yaml
       PROCESSING_DISABLED: "True"
-      DATABASE_URL: sqlite+pysqlite:////usr/local/lib/python3.11/site-packages/offspot_metrics_backend/dev.db
+      DATABASE_URL: sqlite+pysqlite:////usr/local/lib/python3.12/site-packages/offspot_metrics_backend/dev.db
       LOG_LEVEL: DEBUG
   backend-tools:
     build:

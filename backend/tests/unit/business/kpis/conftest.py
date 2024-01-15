@@ -37,8 +37,10 @@ type NoneGenerator = Generator[None, None, None]
 
 
 @pytest.fixture()
-def processor(init_datetime: datetime) -> ProcessorGenerator:
-    yield Processor(Period(init_datetime))
+def processor(init_datetime: datetime, dbsession: Session) -> ProcessorGenerator:
+    processor = Processor()
+    processor.process_tick(tick_period=Period(init_datetime), session=dbsession)
+    yield processor
 
 
 @pytest.fixture()

@@ -334,18 +334,6 @@ def test_restore_kpis_from_almost_empty_db(
     processor.restore_from_db(session=dbsession)
     assert count_from_stmt(dbsession, select(KpiRecord)) == 0
 
-    init_period = PeriodDb.from_datetime(init_datetime)
-    dbsession.add(init_period)
-    processor.restore_from_db(session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiRecord)) == 0
-    dbsession.delete(init_period)
-
-    minus_1_hour = PeriodDb.from_datetime(init_datetime - timedelta(hours=1))
-    dbsession.add(minus_1_hour)
-    processor.restore_from_db(session=dbsession)
-    assert count_from_stmt(dbsession, select(KpiRecord)) == 3
-    dbsession.delete(minus_1_hour)
-
     minus_1_day = PeriodDb.from_datetime(init_datetime - timedelta(days=1))
     dbsession.add(minus_1_day)
     processor.restore_from_db(session=dbsession)

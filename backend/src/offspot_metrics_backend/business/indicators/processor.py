@@ -10,9 +10,9 @@ from offspot_metrics_backend.db.persister import Persister
 class Processor:
     """A processor is responsible for transforming inputs into indicator records"""
 
-    def __init__(self, current_period: Period) -> None:
+    def __init__(self) -> None:
         self.indicators: list[Indicator] = []
-        self.current_period = current_period
+        self.current_period: Period | None = None
 
     def process_input(self, input_: Input) -> None:
         """Update all indicators for a given input"""
@@ -41,6 +41,11 @@ class Processor:
     def process_tick(self, tick_period: Period, session: Session) -> None:
         """Process a clock tick"""
 
+        # If we do not have a current period, then it means that we are starting from a
+        # fresh DB, so let's set the current period to the tick one
+        if not self.current_period:
+            self.current_period = tick_period
+
         # check if something has happened, otherwise we do nothing except update the
         # current period, no need to persist something if nothing happened
         if not self.has_records_for_our_indicators:
@@ -58,7 +63,7 @@ class Processor:
             indicators=self.indicators, session=session
         )
 
-        # clear indicator states that have been saved
+        # clear former indicator states that have been saved previously
         Persister.clear_indicator_states(session)
 
         # check if we are still in the same period or not
@@ -79,7 +84,7 @@ class Processor:
         """Process a clock tick - cleanup after KPIs have been computed"""
         Persister.cleanup_obsolete_data(tick_period, session)
 
-    def restore_from_db(self, current_period: Period, session: Session) -> None:
+    def restore_from_db(self, session: Session) -> None:
         """Restore data from database, typically after a process restart"""
 
         # reset all internal states, just in case
@@ -88,9 +93,8 @@ class Processor:
         # retrieve last known period from DB
         last_period = Persister.get_last_period(session)
 
-        # if there is no last period, nothing to do except set current period
+        # if there is no last period, nothing to do
         if not last_period:
-            self.current_period = current_period
             return
 
         # set current period as the last one and restore state from DB
@@ -103,6 +107,3 @@ class Processor:
                 recorder = indicator.get_new_recorder()
                 recorder.restore_state(state.state)
                 indicator.add_recorder(state.dimension.to_values(), recorder)
-
-        # process a tick to do what has to be done
-        self.process_tick(tick_period=current_period, session=session)
