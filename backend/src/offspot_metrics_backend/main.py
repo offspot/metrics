@@ -15,7 +15,10 @@ from starlette.requests import Request
 from offspot_metrics_backend import __about__
 from offspot_metrics_backend.business.caddy_log_converter import CaddyLogConverter
 from offspot_metrics_backend.business.log_watcher import LogWatcher, NewLineEvent
-from offspot_metrics_backend.business.processor import INACTIVITY_PERIOD, Processor
+from offspot_metrics_backend.business.processor import (
+    INACTIVITY_THRESHOLD_SECONDS,
+    Processor,
+)
 from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyConfig
 from offspot_metrics_backend.constants import BackendConf, logger
 from offspot_metrics_backend.db.initializer import Initializer
@@ -83,14 +86,9 @@ class Main:
         await self.log_watcher.run_async()
 
     async def check_for_inactivity(self):
-        """Check for inactivity every 10 seconds
-
-        If the system did not received any log since more than 10 seconds and there has
-        been more than 1 minute since the last processing cycle, a new one will be
-        started
-        """
+        """Check for inactivity every INACTIVITY_THRESHOLD_SECONDS seconds"""
         while True:
-            await sleep(INACTIVITY_PERIOD)
+            await sleep(INACTIVITY_THRESHOLD_SECONDS)
             try:
                 self.processor.check_for_inactivity()
             except Exception as exc:

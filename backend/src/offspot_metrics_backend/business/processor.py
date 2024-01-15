@@ -16,7 +16,9 @@ from offspot_metrics_backend.business.period import Now, Period, Tick
 from offspot_metrics_backend.constants import logger
 from offspot_metrics_backend.db import dbsession
 
-INACTIVITY_PERIOD = 10  # in seconds, inactivity period that will force some processing
+INACTIVITY_THRESHOLD_SECONDS = (
+    10  # in seconds, inactivity threshold that will force processing
+)
 
 
 class Processor:
@@ -53,7 +55,11 @@ class Processor:
 
     @dbsession
     def process_inputs(self, result: ProcessingResult, session: Session):
-        """Process all inputs received from a log event"""
+        """Process all inputs received from a log event
+
+        This function also triggers a tick processing every time we changed
+        from tick, i.e. every minutes, more or less.
+        """
 
         with self.lock:
             # processing results are not valid
@@ -73,7 +79,7 @@ class Processor:
             if not self.last_tick_processed:
                 self.last_tick_processed = current_tick
 
-            # if we changed from tick, process one tick
+            # if we changed tick, process one tick
             if current_tick != self.last_tick_processed:
                 logger.debug(f"Natural tick at {current_tick.dt}")
                 self._process_tick(now=current_tick.dt, session=session)
@@ -88,7 +94,11 @@ class Processor:
 
     @dbsession
     def check_for_inactivity(self, session: Session):
-        """Process a tick (more or less once every 10 secs)"""
+        """Check if the system did not received any logs for too long
+
+        If the system did not received any log for too long, we start a new tick
+        processing.
+        """
 
         with self.lock:
             now = Now().datetime
@@ -100,7 +110,7 @@ class Processor:
                 self.last_tick_processed = Tick(now)
 
             # If last action was less then 10 seconds ago, continue to wait
-            if (now - self.last_action).total_seconds() < INACTIVITY_PERIOD:
+            if (now - self.last_action).total_seconds() < INACTIVITY_THRESHOLD_SECONDS:
                 return
 
             # If last tick processed is too far in the past, let's force it to advance
