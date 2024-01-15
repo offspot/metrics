@@ -1,23 +1,35 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import DrawerItem from '../components/DrawerItem.vue'
-import AggregationSelector from '../components/AggregationSelector.vue'
+import AppBarSmallScreen from '../components/AppBarSmallScreen.vue'
+import AppBarBigScreen from '../components/AppBarBigScreen.vue'
+import AggregationSelectorSmallScreen from '../components/AggregationSelectorSmallScreen.vue'
 import Dashboard from '../views/Dashboard.vue'
 import PackagePopularity from '../views/PackagePopularity.vue'
 import TotalUsage from '../views/TotalUsage.vue'
 
-import { onMounted, ref } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useMainStore, Page } from '../stores/main'
+import { useDisplay } from 'vuetify'
+
+const { mdAndUp, lgAndUp } = useDisplay()
 const store = useMainStore()
-const drawer = ref(true)
 onMounted(() => {
   store.fetchAggregationDetails()
+  store.setDrawerVisibility(lgAndUp.value) // at startutp, close drawer on small screens
 })
+
+const height = computed(() => (mdAndUp.value ? 100 : 60))
 </script>
 
 <template>
   <v-app v-if="store.aggregationsDetails" id="home">
-    <v-navigation-drawer v-model="drawer" class="pa-2">
+    <v-navigation-drawer
+      v-if="mdAndUp"
+      v-model="store.drawerVisible"
+      class="pa-2"
+      location="left"
+    >
       <div class="d-flex ma-4 mb-0 align-center">
         <v-img :width="60" src="./Kiwix_logo_v3.svg"></v-img>
         <div class="pl-2 flex-1-1-100">
@@ -29,28 +41,41 @@ onMounted(() => {
         title="Dashboard"
         :value="Page.Dashboard"
         icon="far fa-envelope-open"
+        active-class="active-big"
       />
     </v-navigation-drawer>
 
-    <v-app-bar flat height="100">
-      <v-app-bar-nav-icon
-        class="d-lg-none"
-        @click="drawer = !drawer"
-      ></v-app-bar-nav-icon>
-      <AggregationSelector />
+    <v-navigation-drawer
+      v-if="!mdAndUp"
+      v-model="store.drawerVisible"
+      class="small-drawer py-8 px-4"
+      location="right"
+    >
+      <div class="pb-4 px-2 font-weight-bold">Menu</div>
+      <v-icon
+        id="close-drawer"
+        icon="fas fa-xmark"
+        @click="store.toggleDrawerVisibility()"
+      ></v-icon>
+      <DrawerItem
+        class="py-6"
+        title="Dashboard"
+        :value="Page.Dashboard"
+        icon="far fa-envelope-open"
+        active-class="active-small"
+      />
+    </v-navigation-drawer>
+
+    <v-app-bar flat :height="height">
+      <AppBarBigScreen v-if="mdAndUp" />
+      <AppBarSmallScreen v-if="!mdAndUp" />
     </v-app-bar>
 
     <v-main>
+      <AggregationSelectorSmallScreen v-if="!mdAndUp" />
       <Dashboard v-if="store.currentPage == Page.Dashboard" />
       <PackagePopularity v-if="store.currentPage == Page.PackagePopularity" />
       <TotalUsage v-if="store.currentPage == Page.TotalUsage" />
-      <v-footer app class="text-caption">
-        <span class="font-weight-bold me-auto">© 2023 Kiwix Association</span>
-        <span class="me-8">Support</span>
-        <a href="https://www.kiwix.org" target="_blank"
-          ><span class="font-weight-bold flex-d-1-1-100">www.kiwix.org</span></a
-        >
-      </v-footer>
     </v-main>
   </v-app>
 </template>
@@ -60,15 +85,14 @@ onMounted(() => {
   background-color: rgb(248, 247, 250);
 }
 
-.v-footer {
-  background-color: rgb(243, 239, 245);
-}
-
-.v-footer a {
-  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
-}
-
 .v-main {
   background-color: rgb(243, 239, 245);
+}
+
+#close-drawer {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  font-size: medium;
 }
 </style>
