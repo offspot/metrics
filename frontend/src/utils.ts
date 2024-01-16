@@ -3,28 +3,20 @@
  */
 export const getRandomColor = (): string => {
   /*
-    Color scheme is from https://sashamaps.net/docs/resources/20-colors/
-    We selected colors which are differentiable for 99% of the population and just didn't used
-    the white which was hard to see in our design.
+    Color scheme is from https://venngage.com/tools/accessible-color-palette-generator#colorGenerator
+    We selected colors mostly randomly
   */
   const colorScheme = [
-    '#e6194B',
-    '#3cb44b',
-    '#ffe119',
-    '#4363d8',
-    '#f58231',
-    '#42d4f4',
-    '#f032e6',
-    '#fabed4',
-    '#469990',
-    '#dcbeff',
-    '#9A6324',
-    '#fffac8',
-    '#800000',
-    '#aaffc3',
-    '#000075',
-    '#a9a9a9',
-    '#000000',
+    '#00bf7d',
+    '#00b4c5',
+    '#f57600',
+    '#8babf1',
+    '#e6308a',
+    '#89ce00',
+    '#e6308a',
+    '#9b8bf4',
+    '#606ff3',
+    '#9b8bf4',
   ]
   return colorScheme[Math.floor(Math.random() * colorScheme.length)]
 }
