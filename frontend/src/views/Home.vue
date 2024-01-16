@@ -11,6 +11,7 @@ import TotalUsage from '../views/TotalUsage.vue'
 import { onMounted, computed } from 'vue'
 import { useMainStore, Page } from '../stores/main'
 import { useDisplay } from 'vuetify'
+import ViewInfo from '@/types/ViewInfo'
 
 const { mdAndUp, lgAndUp } = useDisplay()
 const store = useMainStore()
@@ -20,6 +21,19 @@ onMounted(() => {
 })
 
 const height = computed(() => (mdAndUp.value ? 100 : 60))
+
+const views: ViewInfo[] = [
+  {
+    title: 'Dashboard',
+    value: Page.Dashboard,
+    icon: 'far fa-envelope-open',
+  },
+  {
+    title: 'Package popularity',
+    value: Page.PackagePopularity,
+    icon: 'fas fa-chart-column',
+  },
+]
 </script>
 
 <template>
@@ -38,9 +52,11 @@ const height = computed(() => (mdAndUp.value ? 100 : 60))
       </div>
       <div class="my-6"></div>
       <DrawerItem
-        title="Dashboard"
-        :value="Page.Dashboard"
-        icon="far fa-envelope-open"
+        v-for="view in views"
+        :key="view.value"
+        :title="view.title"
+        :value="view.value"
+        :icon="view.icon"
         active-class="active-big"
       />
     </v-navigation-drawer>
@@ -58,10 +74,12 @@ const height = computed(() => (mdAndUp.value ? 100 : 60))
         @click="store.toggleDrawerVisibility()"
       ></v-icon>
       <DrawerItem
+        v-for="view in views"
+        :key="view.value"
         class="py-6"
-        title="Dashboard"
-        :value="Page.Dashboard"
-        icon="far fa-envelope-open"
+        :title="view.title"
+        :value="view.value"
+        :icon="view.icon"
         active-class="active-small"
       />
     </v-navigation-drawer>
