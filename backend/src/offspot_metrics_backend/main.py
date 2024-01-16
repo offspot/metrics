@@ -1,4 +1,6 @@
 import functools
+import os
+import signal
 import sys
 from asyncio import Task, create_task, sleep
 from contextlib import asynccontextmanager
@@ -77,7 +79,11 @@ class Main:
         self.background_tasks.discard(task)
         if exc:
             logger.error(f"{task_name} has stopped anormally", exc_info=exc)
-            sys.exit(1)
+            if BackendConf.inside_docker:
+                logger.error(f"Stopping PID {os.getpid()} with SIGINT")
+                os.kill(1, signal.SIGINT)
+            else:
+                sys.exit(1)
 
     async def start_watcher(self):
         """Start the log watcher as a coroutine"""

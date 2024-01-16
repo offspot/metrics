@@ -20,6 +20,7 @@ RUN python -m pip install --no-cache-dir -U \
 ENV ALLOWED_ORIGINS http://localhost:8003|http://127.0.0.1:8003
 ENV DATABASE_URL sqlite+pysqlite:////data/database.db
 ENV LOGWATCHER_DATA_FOLDER /data/logwatcher
+ENV INSIDE_DOCKER True
 
 COPY backend/pyproject.toml backend/README.md /src/
 COPY backend/src/offspot_metrics_backend/__about__.py /src/src/offspot_metrics_backend/__about__.py
