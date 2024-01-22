@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PackagePopularityElement from '../components/PackagePopularityElement.vue'
+import PackageElement from '../components/PackageElement.vue'
 
 import { usePackagePopularityStore } from '../stores/packagePopularity'
 const packagePopularityStore = usePackagePopularityStore()
@@ -75,12 +75,13 @@ const series = computed(() => {
           Total of {{ packagePopularityStore.kpiValue.totalVisits }} sessions
         </div>
         <div id="first-package">
-          <PackagePopularityElement
+          <PackageElement
             v-if="packagePopularityStore.kpiValue.items.length > 0 && lgAndUp"
-            :visits="packagePopularityStore.kpiValue.items[0].visits"
+            :value="packagePopularityStore.kpiValue.items[0].visits"
             :package="packagePopularityStore.kpiValue.items[0].package"
             :total="packagePopularityStore.kpiValue.totalVisits"
             :inverted="true"
+            label="sessions"
           />
         </div>
       </v-col>
@@ -113,21 +114,23 @@ const series = computed(() => {
         md="6"
         lg="4"
       >
-        <PackagePopularityElement
+        <PackageElement
           v-if="packagePopularityStore.kpiValue.items.length > 0"
-          :visits="packagePopularityStore.kpiValue.items[0].visits"
+          :value="packagePopularityStore.kpiValue.items[0].visits"
           :package="packagePopularityStore.kpiValue.items[0].package"
           :total="packagePopularityStore.kpiValue.totalVisits"
           :inverted="true"
+          label="sessions"
         />
       </v-col>
       <v-col v-for="item_no in 10" :key="item_no" cols="12" md="6" lg="4">
-        <PackagePopularityElement
+        <PackageElement
           v-if="packagePopularityStore.kpiValue.items.length > item_no"
-          :visits="packagePopularityStore.kpiValue.items[item_no].visits"
+          :value="packagePopularityStore.kpiValue.items[item_no].visits"
           :package="packagePopularityStore.kpiValue.items[item_no].package"
           :total="packagePopularityStore.kpiValue.totalVisits"
           :inverted="false"
+          label="sessions"
         />
       </v-col>
     </v-row>
