@@ -31,7 +31,7 @@ const chartOptions = computed(() => {
       labels: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: function (val: any, _: any) {
-          return val + ' %'
+          return `${val} %`
         },
       },
     },
