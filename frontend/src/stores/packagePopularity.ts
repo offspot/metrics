@@ -14,7 +14,7 @@ export const usePackagePopularityStore = defineStore('packagePopularity', {
       return this.kpiValue.items
     },
     firstItems(): PackagePopularityKpiItem[] {
-      return this.kpiValue.items.slice(0, 6)
+      return this.kpiValue.items.slice(0, 5)
     },
     itemPercentage(): (item: PackagePopularityKpiItem) => number {
       return (item: PackagePopularityKpiItem) =>
@@ -24,18 +24,21 @@ export const usePackagePopularityStore = defineStore('packagePopularity', {
       return (item: PackagePopularityKpiItem) => {
         const value = this.itemPercentage(item)
         if (value < 10) {
-          return value.toFixed(1) + '%'
+          return `${value.toFixed(1)}%`
         } else {
-          return value.toFixed(0) + '%'
+          return `${value.toFixed(0)}%`
         }
       }
     },
     itemLabel(): (item: PackagePopularityKpiItem) => string {
-      return (item: PackagePopularityKpiItem) => '' + item.visits
+      return (item: PackagePopularityKpiItem) => `${item.visits}`
     },
     itemColor(): (item: PackagePopularityKpiItem) => string {
-      return (item: PackagePopularityKpiItem) =>
-        useMainStore().getPackageColor(item.package)
+      return (item: PackagePopularityKpiItem) => this.packageColor(item.package)
+    },
+    packageColor(): (packageName: string) => string {
+      return (packageName: string) =>
+        useMainStore().getPackageColor(packageName)
     },
   },
 })

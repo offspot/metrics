@@ -4,6 +4,10 @@ import DashboardPackagePopularity from '../components/DashboardPackagePopularity
 import DashboardTotalUsage from '../components/DashboardTotalUsage.vue'
 import DashboardSharedFiles from '../components/DashboardSharedFiles.vue'
 import DashboardUptime from '../components/DashboardUptime.vue'
+
+import { useMainStore, Page } from '../stores/main'
+
+const mainStore = useMainStore()
 </script>
 
 <template>
@@ -34,7 +38,11 @@ import DashboardUptime from '../components/DashboardUptime.vue'
         <v-container class="pa-0">
           <v-row>
             <v-col cols="12" lg="6">
-              <v-card elevation="0" class="package-popularity">
+              <v-card
+                elevation="0"
+                class="package-popularity"
+                @click="mainStore.currentPage = Page.PackagePopularity"
+              >
                 <DashboardPackagePopularity />
               </v-card>
             </v-col>

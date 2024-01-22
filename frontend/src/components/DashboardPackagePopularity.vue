@@ -18,7 +18,9 @@ const packagePopularityStore = usePackagePopularityStore()
           v-for="item in packagePopularityStore.firstItems"
           :key="item.package"
         >
-          <v-list-item-title class="font-weight-medium text-body-2 mx-4 my-5">
+          <v-list-item-title
+            class="font-weight-medium text-body-2 mx-4 mt-6 mb-7"
+          >
             {{ item.package }}
           </v-list-item-title>
 

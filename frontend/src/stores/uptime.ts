@@ -36,9 +36,9 @@ export const useUptimeStore = defineStore('uptime', {
     legend(): string {
       const hours = this.kpiValue.nbMinutesOn / 60
       if (hours < 10) {
-        return (this.kpiValue.nbMinutesOn / 60).toFixed(1) + 'h'
+        return `${(this.kpiValue.nbMinutesOn / 60).toFixed(1)}h`
       } else {
-        return (this.kpiValue.nbMinutesOn / 60).toFixed(0) + 'h'
+        return `${(this.kpiValue.nbMinutesOn / 60).toFixed(0)}h`
       }
     },
   },

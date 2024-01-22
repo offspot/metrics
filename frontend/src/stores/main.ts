@@ -156,14 +156,14 @@ export const useMainStore = defineStore('main', {
     date_part_2(): string {
       switch (this.aggregationKind) {
         case 'D':
-          return this.aggregationValue.split('-')[2] + ' '
+          return `${this.aggregationValue.split('-')[2]} `
         case 'W':
           if (this.aggregationValue.indexOf(' ') < 0) {
             return '' // Race condition where space is not yet available
           }
-          return this.aggregationValue.split(' ')[1].substring(1) + ' '
+          return `${this.aggregationValue.split(' ')[1].substring(1)} `
         case 'M':
-          return monthText(this.aggregationValue.split('-')[1]) + ' '
+          return `${monthText(this.aggregationValue.split('-')[1])} `
         case 'Y':
           return this.aggregationValue
         default:
