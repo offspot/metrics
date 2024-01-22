@@ -33,6 +33,11 @@ const views: ViewInfo[] = [
     value: Page.PackagePopularity,
     icon: 'fas fa-chart-column',
   },
+  {
+    title: 'Total usage',
+    value: Page.TotalUsage,
+    icon: 'far fa-clock',
+  },
 ]
 </script>
 

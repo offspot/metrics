@@ -28,19 +28,28 @@ export const useTotalUsageStore = defineStore('totalUsage', {
       return (item: TotalUsageKpiItem) =>
         (item.minutesActivity / this.kpiValue.totalMinutesActivity) * 100
     },
+    valueInHours(): (minutes: number) => number {
+      return (minutes: number) => {
+        const value = minutes / 60
+        if (value < 10) {
+          return parseFloat(value.toFixed(1))
+        } else {
+          return parseFloat(value.toFixed(0))
+        }
+      }
+    },
     itemLabel(): (item: TotalUsageKpiItem) => string {
       return (item: TotalUsageKpiItem) => {
-        const value = item.minutesActivity / 60
-        if (value < 10) {
-          return `${value.toFixed(1)}h`
-        } else {
-          return `${value.toFixed(0)}h`
-        }
+        return `${this.valueInHours(item.minutesActivity)}h`
       }
     },
     itemColor(): (item: TotalUsageKpiItem) => string {
       return (item: TotalUsageKpiItem) =>
         useMainStore().getPackageColor(item.package)
+    },
+    packageColor(): (packageName: string) => string {
+      return (packageName: string) =>
+        useMainStore().getPackageColor(packageName)
     },
   },
 })
