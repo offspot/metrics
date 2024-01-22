@@ -41,7 +41,7 @@ const chartOptions = computed(() => {
             offsetY: 10,
             fontSize: '1.8em',
             fontWeight: '600',
-            formatter: () => percentage.value + '%',
+            formatter: () => `${percentage.value} %`,
           },
         },
       },

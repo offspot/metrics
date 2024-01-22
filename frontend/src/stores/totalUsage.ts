@@ -32,9 +32,9 @@ export const useTotalUsageStore = defineStore('totalUsage', {
       return (item: TotalUsageKpiItem) => {
         const value = item.minutesActivity / 60
         if (value < 10) {
-          return value.toFixed(1) + 'h'
+          return `${value.toFixed(1)}h`
         } else {
-          return value.toFixed(0) + 'h'
+          return `${value.toFixed(0)}h`
         }
       }
     },

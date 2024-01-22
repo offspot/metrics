@@ -24,14 +24,14 @@ export const usePackagePopularityStore = defineStore('packagePopularity', {
       return (item: PackagePopularityKpiItem) => {
         const value = this.itemPercentage(item)
         if (value < 10) {
-          return value.toFixed(1) + '%'
+          return `${value.toFixed(1)}%`
         } else {
-          return value.toFixed(0) + '%'
+          return `${value.toFixed(0)}%`
         }
       }
     },
     itemLabel(): (item: PackagePopularityKpiItem) => string {
-      return (item: PackagePopularityKpiItem) => '' + item.visits
+      return (item: PackagePopularityKpiItem) => `${item.visits}`
     },
     itemColor(): (item: PackagePopularityKpiItem) => string {
       return (item: PackagePopularityKpiItem) => this.packageColor(item.package)
