@@ -195,9 +195,9 @@ export const useMainStore = defineStore('main', {
         case 'D': {
           let month = monthText(this.aggregationValue.split('-')[1])
           if (month.length > 3) {
-            month = month.substring(0, 3) + '.'
+            month = `${month.substring(0, 3)}.`
           }
-          return month + ' ' + this.aggregationValue.split('-')[0]
+          return `${month} ${this.aggregationValue.split('-')[0]}`
         }
         case 'W':
           return ''

@@ -33,6 +33,11 @@ const views: ViewInfo[] = [
     value: Page.PackagePopularity,
     icon: 'fas fa-chart-column',
   },
+  {
+    title: 'Total usage',
+    value: Page.TotalUsage,
+    icon: 'far fa-clock',
+  },
 ]
 </script>
 
@@ -45,7 +50,7 @@ const views: ViewInfo[] = [
       location="left"
     >
       <div class="d-flex ma-4 mb-0 align-center">
-        <v-img :width="60" src="./Kiwix_logo_v3.svg"></v-img>
+        <v-img width="60" src="./Kiwix-logo.png"></v-img>
         <div class="pl-2 flex-1-1-100">
           <span class="float-left font-weight-black text-h4">Metrics</span>
         </div>

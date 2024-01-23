@@ -1,21 +1,24 @@
 <script setup lang="ts">
-import { usePackagePopularityStore } from '../stores/packagePopularity'
-const packagePopularityStore = usePackagePopularityStore()
+import { useMainStore } from '../stores/main'
+const mainStore = useMainStore()
 import { computed } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
+
+const invertedGraphicFillColor = '#000000'
 
 const props = withDefaults(
   defineProps<{
     package: string
-    visits: number
+    value: number
     total: number
     inverted: boolean
+    label: string
   }>(),
   { inverted: false },
 )
 
 const percentage = computed(() => {
-  const value = (100.0 * props.visits) / props.total
+  const value = (100.0 * props.value) / props.total
   if (value < 10) {
     return value.toFixed(1)
   } else {
@@ -51,8 +54,8 @@ const chartOptions = computed(() => {
       opacity: 1,
       colors: [
         props.inverted
-          ? '#000000'
-          : packagePopularityStore.packageColor(props.package),
+          ? invertedGraphicFillColor
+          : mainStore.getPackageColor(props.package),
       ],
     },
     stroke: {
@@ -64,7 +67,7 @@ const chartOptions = computed(() => {
 const cardStyle = computed(() =>
   props.inverted
     ? {
-        'background-color': packagePopularityStore.packageColor(props.package),
+        'background-color': mainStore.getPackageColor(props.package),
       }
     : {},
 )
@@ -83,7 +86,7 @@ const cardStyle = computed(() =>
       <div class="ml-4 mt-4">
         <div class="package-name">{{ props.package }}</div>
         <div class="nb-visits">
-          <span>{{ props.visits }}</span> sessions
+          <span>{{ props.value }}</span> {{ props.label }}
         </div>
       </div>
     </div>
