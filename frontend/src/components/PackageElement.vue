@@ -4,6 +4,8 @@ const mainStore = useMainStore()
 import { computed } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
 
+const invertedGraphicFillColor = '#000000'
+
 const props = withDefaults(
   defineProps<{
     package: string
@@ -51,7 +53,9 @@ const chartOptions = computed(() => {
       type: 'solid',
       opacity: 1,
       colors: [
-        props.inverted ? '#000000' : mainStore.getPackageColor(props.package),
+        props.inverted
+          ? invertedGraphicFillColor
+          : mainStore.getPackageColor(props.package),
       ],
     },
     stroke: {
