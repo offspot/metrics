@@ -27,6 +27,9 @@ class NewLineEvent:
 
 ENCODING = "utf-8"
 
+OBSERVER_STOP_MAX_SECONDS = 10
+OBSERVER_PAUSE_SECONDS = 0.001
+
 
 class LogWatcherHandler(FileSystemEventHandler):
     """Handler of watchdog events"""
@@ -185,9 +188,9 @@ class LogWatcher:
         logger.info("Log watcher has started succesfully")
 
         while self.observer.is_alive():
-            self.observer.join(0.001)
+            self.observer.join(OBSERVER_PAUSE_SECONDS)
             # perform a very small sleep, just to let the coroutine pause
-            await sleep(0.001)
+            await sleep(OBSERVER_PAUSE_SECONDS)
 
         logger.info("Log watcher run is terminating")
 
@@ -208,7 +211,7 @@ class LogWatcher:
         logger.info("Log watcher has started succesfully")
 
         while self.observer.is_alive():
-            self.observer.join(0.001)
+            self.observer.join(OBSERVER_PAUSE_SECONDS)
 
         logger.info("Log watcher run is terminating")
 
@@ -221,7 +224,7 @@ class LogWatcher:
         if self.observer.is_alive():
             logger.info("Log watcher is stopping")
             self.observer.stop()
-            self.observer.join()
+            self.observer.join(OBSERVER_STOP_MAX_SECONDS)  # do not wait forever
         else:
             logger.info("Log watcher is already dead")
 
