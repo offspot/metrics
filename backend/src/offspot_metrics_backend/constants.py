@@ -34,8 +34,6 @@ class BackendConf:
     # all other values will enable the processing.
     processing_enabled = os.getenv("PROCESSING_DISABLED", "False").lower() != "true"
 
-    inside_docker = os.getenv("INSIDE_DOCKER", "False").lower() != "false"
-
     reverse_proxy_logs_location = os.getenv(
         "REVERSE_PROXY_LOGS_LOCATION", "/reverse-proxy-logs"
     )
