@@ -97,6 +97,16 @@ class Processor:
         if not last_period:
             return
 
+        # check if we have indicator records for the last period ; if we have,
+        # then it means that everything has been recorded, we do not need to restore
+        # states (there are none anyway) and the current_period is the next after
+        # last_period
+        if Persister.has_indicator_records_for_period(
+            period=last_period, session=session
+        ):
+            self.current_period = last_period.get_next()
+            return
+
         # set current period as the last one and restore state from DB
         self.current_period = last_period
         for indicator in self.indicators:

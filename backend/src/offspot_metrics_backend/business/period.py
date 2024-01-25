@@ -73,6 +73,10 @@ class Period:
         """Return a new period shifted from delta"""
         return Period(self.dt + delta)
 
+    def get_next(self) -> "Period":
+        """Return the next period"""
+        return Period(self.dt + datetime.timedelta(hours=1))
+
     def get_truncated_value(self, agg_kind: AggKind) -> str:
         """Truncate the period to corresponding day, week, month, year."""
         if agg_kind == AggKind.DAY:

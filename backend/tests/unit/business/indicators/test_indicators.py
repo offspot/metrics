@@ -234,7 +234,7 @@ def test_restore_from_db_continue_same_period(
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
 
 
-def test_restore_from_db_start_new_period(
+def test_restore_from_db_start_new_period_not_recorded(
     processor: Processor,
     total_by_content_and_subfolder_indicator: Indicator,
     input1: Input,
@@ -262,6 +262,64 @@ def test_restore_from_db_start_new_period(
     assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
     assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
     assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+    processor.process_input(input1)
+    processor.process_input(input1)
+    processor.process_input(input2)
+    processor.process_input(input3)
+
+    processor.process_tick(
+        Period(init_datetime + timedelta(days=1, hours=1)), dbsession
+    )
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 6
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2
+
+
+def test_restore_from_db_start_new_period_recorded(
+    processor: Processor,
+    total_by_content_and_subfolder_indicator: Indicator,
+    input1: Input,
+    input2: Input,
+    input3: Input,
+    init_datetime: datetime,
+    dbsession: Session,
+) -> None:
+    processor.indicators = [total_by_content_and_subfolder_indicator]
+    processor.process_input(input1)
+    processor.process_input(input1)
+    processor.process_input(input2)
+    processor.process_input(input3)
+
+    processor.process_tick(Period(init_datetime + timedelta(minutes=10)), dbsession)
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+    processor.process_tick(Period(init_datetime + timedelta(days=1)), dbsession)
+
+    assert len(total_by_content_and_subfolder_indicator.recorders) == 0
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 1
+
+    processor.restore_from_db(dbsession)
+
+    processor.process_input(input1)
+    processor.process_input(input1)
+    processor.process_input(input2)
+    processor.process_input(input3)
+
+    processor.process_tick(
+        Period(init_datetime + timedelta(days=1, hours=1)), dbsession
+    )
+    assert count_from_stmt(dbsession, select(IndicatorState)) == 0
+    assert count_from_stmt(dbsession, select(IndicatorRecord)) == 6
+    assert count_from_stmt(dbsession, select(IndicatorDimension)) == 3
+    assert count_from_stmt(dbsession, select(IndicatorPeriod)) == 2
 
 
 @pytest.mark.parametrize(

@@ -86,3 +86,26 @@ def test_from_truncated_value(truncated: str, kind: AggKind, expected: str) -> N
     assert Period.from_truncated_value(
         truncated_value=truncated, agg_kind=kind
     ) == Period(datetime.fromisoformat(expected))
+
+
+@pytest.mark.parametrize(
+    "current_period,next_period",
+    [
+        (
+            "2023-01-01 00:00:00",
+            "2023-01-01 01:00:00",
+        ),
+        (
+            "2023-01-23 23:00:00",
+            "2023-01-24 00:00:00",
+        ),
+        (
+            "2023-12-31 23:00:00",
+            "2024-01-01 00:00:00",
+        ),
+    ],
+)
+def test_get_next(current_period: str, next_period: str) -> None:
+    assert Period(datetime.fromisoformat(current_period)).get_next() == Period(
+        datetime.fromisoformat(next_period)
+    )
