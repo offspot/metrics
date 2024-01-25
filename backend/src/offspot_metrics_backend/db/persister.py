@@ -113,6 +113,17 @@ class Persister:
         )
 
     @classmethod
+    def has_indicator_records_for_period(cls, period: Period, session: Session) -> bool:
+        """Checks if we have indicator records for a given period"""
+        return (
+            session.query(RecordDb)
+            .join(PeriodDb)
+            .where(PeriodDb.timestamp == period.timestamp)
+            .count()
+            > 0
+        )
+
+    @classmethod
     def get_kpi_values(
         cls,
         kpi_id: int,
