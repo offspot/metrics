@@ -196,7 +196,7 @@ rm -rf "$TMP_DIR/*"
 Wait for background processing to trigger yearly computation and complete. Note down execution duration.
 
 ```sh
-docker logs -f offspot_backend
+docker logs -f om_metrics
 ```
 
 Prepare data transfer and stock the stacks.
