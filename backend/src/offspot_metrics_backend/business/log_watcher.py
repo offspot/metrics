@@ -73,7 +73,7 @@ class LogWatcherHandler(FileSystemEventHandler):
                         NewLineEvent(file_path=file_path, line_content=line.strip())
                     )
                 except Exception as exc:
-                    logger.debug(
+                    logger.warn(
                         f"Error occured while processing line in {file_path} at"
                         f" {self.file_positions_map[str(file_path)]}",
                         exc_info=exc,
@@ -87,7 +87,7 @@ class LogWatcherHandler(FileSystemEventHandler):
         try:
             self.process_event(event)
         except Exception as exc:  # pragma: no cover
-            logger.debug(
+            logger.warn(
                 f"Error occured while processing event {event.event_type} on"
                 f" {event.src_path}",
                 exc_info=exc,
@@ -241,4 +241,4 @@ class LogWatcher:
                 event.event_type = EVENT_TYPE_MODIFIED
                 self.event_handler.on_any_event(event)
             except Exception as exc:  # pragma: no cover
-                logger.debug(f"Error processing file {file}", exc_info=exc)
+                logger.warn(f"Error processing file {file}", exc_info=exc)

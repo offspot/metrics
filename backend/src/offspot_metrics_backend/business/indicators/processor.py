@@ -20,7 +20,7 @@ class Processor:
             try:
                 indicator.process_input(input_=input_)
             except Exception as exc:
-                logger.debug(
+                logger.warn(
                     f"Error processing input for indicator {indicator.unique_id}",
                     exc_info=exc,
                 )

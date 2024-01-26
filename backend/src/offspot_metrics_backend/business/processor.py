@@ -90,7 +90,7 @@ class Processor:
                 try:
                     self.process_input(input_=input_)
                 except Exception as exc:
-                    logger.debug("Error processing input", exc_info=exc)
+                    logger.warn("Error processing input", exc_info=exc)
 
     @dbsession
     def check_for_inactivity(self, session: Session):
@@ -123,6 +123,7 @@ class Processor:
                 self.last_action = now
 
     def _process_tick(self, now: datetime.datetime, session: Session):
+        logger.info("Tick processing started")
         self.last_tick_processed = Tick(now)
 
         # Generate a ClockTick input
@@ -130,7 +131,7 @@ class Processor:
             logger.debug("Generating a clock tick")
             self.process_input(ClockTick(ts=now))
         except Exception as exc:
-            logger.debug("Exception occured in clock tick", exc_info=exc)
+            logger.warn("Exception occured in clock tick", exc_info=exc)
 
         # Perform what needs to be done with indicators
         tick_period = Period(now)
@@ -150,6 +151,8 @@ class Processor:
                 tick_period=tick_period,
                 session=session,
             )
+
+        logger.debug("Tick processing completed")
 
     def process_input(self, input_: Input):
         """Process one input"""
