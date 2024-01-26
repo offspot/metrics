@@ -146,7 +146,7 @@ find $(eval echo $BENCH_REPO_PATH/monitored_node/output) -name "*.ndjson*" -type
 
 sudo date 123123582023.00
 
-cp $(eval echo $DB_DIR/dev_twenty.db) $(eval echo $METRICS_REPO_PATH/backend/src/offspot_metrics_backend/dev.db)
+cp $(eval echo $DB_DIR/test_twenty.db) $(eval echo $METRICS_REPO_PATH/backend/src/offspot_metrics_backend/dev.db)
 
 sudo systemctl start benchmarking-compressor.service
 sudo systemctl start benchmarking-metricbeat.service
@@ -215,7 +215,7 @@ docker compose -p offspot down
 Transfer files between Raspberry PI and powerfull server:
 
 ```sh
-rm -rf "$$TMP_DIR/*"
+rm -rf "$TMP_DIR/*"
 scp -r "$RASPBERY_PI_HOSTNAME:$RASPBERY_PI_BENCH_REPO_PATH/monitored_node/output/*" $TMP_DIR/
 scp -r $TMP_DIR/* $POWERFULL_SERVER_HOSTNAME:$POWERFULL_SERVER_BENCH_REPO_PATH/analysis_node/input
 ```

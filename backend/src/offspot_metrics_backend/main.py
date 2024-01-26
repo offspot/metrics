@@ -41,7 +41,7 @@ class Main:
     @asynccontextmanager
     async def lifespan(self, _: FastAPI):
         # Startup
-        logger.debug(f"Database URL: {BackendConf.database_url}")
+        logger.info(f"Database URL: {BackendConf.database_url}")
         Initializer.upgrade_db_schema()
         if BackendConf.processing_enabled:
             logger.info("Starting processing")
@@ -92,7 +92,7 @@ class Main:
             try:
                 self.processor.check_for_inactivity()
             except Exception as exc:
-                logger.debug(
+                logger.warn(
                     "Exception occured in check for inactivity tick", exc_info=exc
                 )
 
@@ -107,7 +107,7 @@ class Main:
             result = self.converter.process(event.line_content)
             self.processor.process_inputs(result=result)
         except Exception as exc:
-            logger.debug("Error log event", exc_info=exc)
+            logger.warn("Error log event", exc_info=exc)
 
     def create_app(self) -> FastAPI:
         self.app = FastAPI(

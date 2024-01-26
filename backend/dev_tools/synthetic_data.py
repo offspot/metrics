@@ -130,7 +130,7 @@ def clear_db():
     logging.info("DB is now empty")
 
 
-now_period = Period(datetime.datetime.fromisoformat("2024-01-01 00:00:00"))
+now_period = Period(datetime.datetime.fromisoformat("2023-12-31 23:00:00"))
 
 
 def scale_and_randomize_value(
