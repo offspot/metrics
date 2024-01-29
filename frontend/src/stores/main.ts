@@ -64,6 +64,9 @@ export const useMainStore = defineStore('main', {
       drawerVisible: true,
     }) as RootState,
   getters: {
+    hasAggregationValues: (state) =>
+      state.aggregationsDetails &&
+      state.aggregationsDetails.valuesAvailable.length > 0,
     aggregationValue: (state) =>
       state.aggregationsDetails
         ? state.aggregationsDetails.valuesAvailable[state.aggregationValueIndex]
