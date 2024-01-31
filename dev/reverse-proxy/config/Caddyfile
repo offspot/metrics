@@ -29,6 +29,6 @@ kiwix.localhost:80 {
     reverse_proxy om_kiwix:80
 }
 
-edupi.localhost:80 {
-    reverse_proxy om_edupi:80
+filemanager.localhost:80 {
+    reverse_proxy om_file-manager:80
 }

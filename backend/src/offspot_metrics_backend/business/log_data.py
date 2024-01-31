@@ -15,3 +15,5 @@ class LogData:
     uri: str
     method: str
     ts: datetime.datetime
+    x_tfm_files_added: int | None  # files added in tiny file manager
+    x_tfm_files_deleted: int | None  # files deleted in tiny file manager

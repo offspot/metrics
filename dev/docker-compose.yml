@@ -73,17 +73,18 @@ services:
       - reverse-proxy-srv:/srv
     ports:
       - 127.0.0.1:8000:80
-  edupi:
-    container_name: om_edupi
-    image: ghcr.io/offspot/edupi:dev
+  file-manager:
+    container_name: om_file-manager
+    image: ghcr.io/offspot/file-manager:dev
     ports:
       - 127.0.0.1:8004:80
     volumes:
-      - edupi-data:/data
+      - file-manager-data:/data
     environment:
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: admin
+      ACCESS_MODE: mixed
 volumes:
   reverse-proxy-srv:
   logwatcher-data:
-  edupi-data:
+  file-manager-data:

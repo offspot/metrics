@@ -78,7 +78,9 @@ class EdupiInputGenerator(InputGenerator):
         ):
             return [
                 PackageRequest(ts=log.ts, package_title=self.package_title),
-                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED),
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_CREATED, count=1
+                ),
             ]
         elif (
             log.method == "DELETE"
@@ -88,10 +90,40 @@ class EdupiInputGenerator(InputGenerator):
         ):
             return [
                 PackageRequest(ts=log.ts, package_title=self.package_title),
-                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED),
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_DELETED, count=1
+                ),
             ]
         else:
             return [PackageRequest(ts=log.ts, package_title=self.package_title)]
+
+
+@dataclass
+class FileManagerInputGenerator(InputGenerator):
+    """A specific generator for file-manger package"""
+
+    package_title: str
+
+    def process(self, log: LogData) -> list[Input]:
+        """Transform one log event identified as edupi into inputs"""
+        result: list[Input] = [
+            PackageRequest(ts=log.ts, package_title=self.package_title)
+        ]
+        if log.x_tfm_files_added:
+            result.append(
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_CREATED,
+                    count=log.x_tfm_files_added,
+                )
+            )
+        if log.x_tfm_files_deleted:
+            result.append(
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_DELETED,
+                    count=log.x_tfm_files_deleted,
+                )
+            )
+        return result
 
 
 @dataclass

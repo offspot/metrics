@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.1] - 2024-01-26
 
+### Added
+
+- Backend: add support for file-manager in addition to EduPi (#104)
+
 ### Fixed
 
 - Backend: Indicator processor sometimes re-process an already recorded period after an application restarts (#97)

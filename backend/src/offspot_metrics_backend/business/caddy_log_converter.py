@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, ValidationError
 from offspot_metrics_backend.business.input_generator import (
     CommonInputGenerator,
     EdupiInputGenerator,
+    FileManagerInputGenerator,
     FilesInputGenerator,
     InputGenerator,
     ZimInputGenerator,
@@ -27,6 +28,10 @@ class CaddyLogResponseHeaders(BaseModel):
     """Sub-model class for parsing the response headers in a JSON log line of Caddy"""
 
     content_type: list[str] | None = Field(alias="Content-Type", default=None)
+    x_tfm_files_added: list[str] | None = Field(alias="X-Tfm-Files-Added", default=None)
+    x_tfm_files_deleted: list[str] | None = Field(
+        alias="X-Tfm-Files-Deleted", default=None
+    )
 
 
 class CaddyLog(BaseModel):
@@ -66,6 +71,10 @@ class CaddyLogConverter:
                 self.generators.append(
                     EdupiInputGenerator(host=app.host, package_title=app.title),
                 )
+            elif app.ident == "file-manager.offspot.kiwix.org":
+                self.generators.append(
+                    FileManagerInputGenerator(host=app.host, package_title=app.title),
+                )
             else:
                 self.generators.append(
                     CommonInputGenerator(host=app.host, package_title=app.title),
@@ -95,6 +104,14 @@ class CaddyLogConverter:
             uri=log.request.uri,
             method=log.request.method,
             ts=ts,
+            x_tfm_files_added=int(log.resp_headers.x_tfm_files_added[0])
+            if log.resp_headers.x_tfm_files_added
+            and len(log.resp_headers.x_tfm_files_added) > 0
+            else None,
+            x_tfm_files_deleted=int(log.resp_headers.x_tfm_files_deleted[0])
+            if log.resp_headers.x_tfm_files_deleted
+            and len(log.resp_headers.x_tfm_files_deleted) > 0
+            else None,
         )
         inputs: list[Input] = []
         for generator in self.generators:
