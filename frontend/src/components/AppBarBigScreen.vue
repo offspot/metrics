@@ -29,10 +29,11 @@ const store = useMainStore()
       </v-btn-toggle>
     </div>
     <div id="agg-value" class="flex-1-1">
-      <span
+      <span v-if="store.hasAggregationValues"
         >{{ store.date_part_1 }}{{ store.date_part_2
         }}{{ store.date_part_3 }}</span
       >
+      <span v-else>No data</span>
     </div>
     <div id="prev-next" class="flex-0-1">
       <v-btn

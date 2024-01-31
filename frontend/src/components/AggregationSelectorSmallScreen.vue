@@ -37,8 +37,11 @@ const height = computed(() => (isOpen.value ? '200px' : '10px'))
         </v-btn-toggle>
       </div>
       <div class="pt-4 pb-4 font-weight-bold">
-        {{ mainStore.date_part_1 }}{{ mainStore.date_part_2
-        }}{{ mainStore.date_part_3_short }}
+        <span v-if="mainStore.hasAggregationValues">
+          {{ mainStore.date_part_1 }}{{ mainStore.date_part_2
+          }}{{ mainStore.date_part_3_short }}</span
+        >
+        <span v-else>No data</span>
       </div>
       <div id="prev-next">
         <v-btn
@@ -65,10 +68,11 @@ const height = computed(() => (isOpen.value ? '200px' : '10px'))
   </div>
   <div id="selector2" @click="toggleOpen">
     <span v-if="isOpen">APPLY</span>
-    <span v-else
+    <span v-else-if="mainStore.hasAggregationValues"
       >{{ mainStore.date_part_1 }}{{ mainStore.date_part_2
       }}{{ mainStore.date_part_3_short }}</span
     >
+    <span v-else>No data</span>
   </div>
 </template>
 
