@@ -65,7 +65,7 @@ const series = computed(() => {
 </script>
 
 <template>
-  <v-container class="pa-6">
+  <v-container class="pa-4">
     <v-row>
       <v-col cols="12" md="6" lg="4" class="d-flex flex-column pt-0">
         <div v-if="lgAndUp" id="package-popularity" class="title">
@@ -136,18 +136,19 @@ const series = computed(() => {
 
 <style scoped>
 #package-popularity {
-  margin-top: 1.4em;
+  margin-top: 1.4rem;
+  font-size: 1.4rem;
 }
 
 .title {
-  font-size: 1.2em;
+  font-size: 1.4rem;
   font-weight: bold;
   color: #4b465c;
 }
 
 #total-sessions {
   margin-top: 1em;
-  font-size: 0.8em;
+  font-size: 1rem;
   color: #908ca3;
 }
 
