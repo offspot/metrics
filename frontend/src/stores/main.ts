@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import AggregationDetails from '@/types/AggregationDetails'
 import AggregationKpiValue from '@/types/AggregationKpiValue'
-import { getRandomColor } from '../utils'
+import { colorScheme } from '../utils'
 
 // Hard-coded for now, to be reworked once we will need this also for the slider
 const monthText = (monthDigit: string): string => {
@@ -49,6 +49,7 @@ export type RootState = {
   errorMessage: string | null
   currentPage: Page
   packagesColors: { [id: string]: string }
+  nextPackageColor: number
   drawerVisible: boolean
 }
 export const useMainStore = defineStore('main', {
@@ -62,6 +63,7 @@ export const useMainStore = defineStore('main', {
       currentPage: Page.Dashboard,
       packagesColors: {},
       drawerVisible: true,
+      nextPackageColor: 0,
     }) as RootState,
   getters: {
     hasAggregationValues: (state) =>
@@ -128,7 +130,12 @@ export const useMainStore = defineStore('main', {
       // and customisable (see #56 and #57)
       return (packageName: string): string => {
         if (!(packageName in state.packagesColors)) {
-          state.packagesColors[packageName] = getRandomColor()
+          state.packagesColors[packageName] =
+            colorScheme[state.nextPackageColor]
+          state.nextPackageColor++
+          if (state.nextPackageColor >= colorScheme.length) {
+            state.nextPackageColor = 0
+          }
         }
         return state.packagesColors[packageName]
       }
