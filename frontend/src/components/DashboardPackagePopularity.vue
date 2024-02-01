@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { usePackagePopularityStore } from '../stores/packagePopularity'
 const packagePopularityStore = usePackagePopularityStore()
+import DashboardRadialGraph from './DashboardRadialGraph.vue'
 </script>
 
 <template>
@@ -17,35 +18,23 @@ const packagePopularityStore = usePackagePopularityStore()
         <v-list-item
           v-for="item in packagePopularityStore.firstItems"
           :key="item.package"
+          class="my-3"
         >
-          <v-list-item-title
-            class="font-weight-medium text-body-2 mx-4 mt-6 mb-7"
-          >
-            {{ item.package }}
-          </v-list-item-title>
-
-          <template #prepend>
-            <v-progress-circular
-              :rotate="360"
-              :size="55"
-              :width="4"
-              :model-value="packagePopularityStore.itemPercentage(item)"
-              :color="packagePopularityStore.itemColor(item)"
-            >
-              <template #default>
-                <span class="percentage">{{
-                  packagePopularityStore.itemPercentageLabel(item)
-                }}</span></template
-              >
-            </v-progress-circular>
-          </template>
-          <template #append>
-            <div class="d-flex align-center">
-              <span class="activity font-weight-medium text-body-1">{{
-                packagePopularityStore.itemLabel(item)
-              }}</span>
+          <div class="d-flex align-center">
+            <div class="flex-0-0 chart-container">
+              <DashboardRadialGraph
+                :package="item.package"
+                :value="item.visits"
+                :total="packagePopularityStore.kpiValue.totalVisits"
+              />
             </div>
-          </template>
+            <div class="flex-1-1 mx-4 my-5 package">
+              {{ item.package }}
+            </div>
+            <div class="flex-0-0 ms-2 value">
+              {{ packagePopularityStore.itemLabel(item) }}
+            </div>
+          </div>
         </v-list-item>
       </v-list>
     </v-card-text>
@@ -56,20 +45,42 @@ const packagePopularityStore = usePackagePopularityStore()
 </template>
 
 <style scoped>
+.chart-container {
+  max-height: 60px;
+  margin-top: -30px;
+  margin-left: -10px;
+  width: 80px;
+}
+
+.v-card-title {
+  font-size: 1.3rem;
+  padding-top: 1.2rem;
+}
+
+.v-card-subtitle {
+  font-size: 0.95rem;
+}
+
+.package {
+  hyphens: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: normal;
+  word-wrap: break-word;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+.value {
+  font-size: 1.2rem;
+}
+
 #legend {
   position: absolute;
   top: 9.3em;
   right: 3.4em;
   font-size: x-small;
   z-index: 2;
-}
-span.activity {
-  min-width: 2.5em;
-  text-align: right;
-  font-size: 1.1rem !important;
-}
-
-.percentage {
-  color: rgba(0, 0, 0, 0.87);
 }
 </style>
