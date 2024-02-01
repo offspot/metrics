@@ -26,7 +26,7 @@ const mainStore = useMainStore()
                 <DashboardSharedFiles />
               </v-card>
             </v-col>
-            <v-col cols="12" class="d-lg-none">
+            <v-col cols="12" class="d-none d-md-flex d-lg-none">
               <v-card
                 elevation="0"
                 class="total-usage"
