@@ -9,7 +9,7 @@ const toggleOpen = () => {
   isOpen.value = !isOpen.value
 }
 
-const height = computed(() => (isOpen.value ? '200px' : '10px'))
+const height = computed(() => (isOpen.value ? '200px' : '15px'))
 </script>
 
 <template>
@@ -37,10 +37,17 @@ const height = computed(() => (isOpen.value ? '200px' : '10px'))
         </v-btn-toggle>
       </div>
       <div class="pt-4 pb-4 font-weight-bold">
-        <span v-if="mainStore.hasAggregationValues">
-          {{ mainStore.date_part_1 }}{{ mainStore.date_part_2
-          }}{{ mainStore.date_part_3_short }}</span
-        >
+        <div v-if="mainStore.hasAggregationValues">
+          <span class="text-subtitle-1 font-weight-medium">{{
+            mainStore.date_part_1
+          }}</span>
+          <span class="text-h5 font-weight-bold">{{
+            mainStore.date_part_2
+          }}</span>
+          <span class="text-subtitle-1 font-weight-medium">{{
+            mainStore.date_part_3
+          }}</span>
+        </div>
         <span v-else>No data</span>
       </div>
       <div id="prev-next">
@@ -67,12 +74,17 @@ const height = computed(() => (isOpen.value ? '200px' : '10px'))
     </div>
   </div>
   <div id="selector2" @click="toggleOpen">
-    <span v-if="isOpen">APPLY</span>
-    <span v-else-if="mainStore.hasAggregationValues"
-      >{{ mainStore.date_part_1 }}{{ mainStore.date_part_2
-      }}{{ mainStore.date_part_3_short }}</span
-    >
-    <span v-else>No data</span>
+    <div v-if="isOpen" id="apply-btn">APPLY</div>
+    <div v-else-if="mainStore.hasAggregationValues">
+      <span class="text-subtitle-1 font-weight-medium">{{
+        mainStore.date_part_1
+      }}</span>
+      <span class="text-h5 font-weight-bold">{{ mainStore.date_part_2 }}</span>
+      <span class="text-subtitle-1 font-weight-medium">{{
+        mainStore.date_part_3
+      }}</span>
+    </div>
+    <div v-else>No data</div>
   </div>
 </template>
 
@@ -84,12 +96,16 @@ const height = computed(() => (isOpen.value ? '200px' : '10px'))
 }
 #selector2 {
   background-color: #7266ed;
-  width: 120px;
+  width: 220px;
   color: white;
   text-align: center;
   margin-left: auto;
   margin-right: auto;
   border-radius: 0 0 6px 6px;
+}
+#selector2 div {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
 }
 #select-timeline {
   width: 300px;
@@ -97,6 +113,11 @@ const height = computed(() => (isOpen.value ? '200px' : '10px'))
   margin-left: auto;
   margin-right: auto;
   font-size: 0.9rem !important;
+}
+
+#apply-btn {
+  letter-spacing: 0.1em;
+  font-weight: bold;
 }
 
 #agg-selector .v-btn-group {
