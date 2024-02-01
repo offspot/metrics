@@ -82,7 +82,6 @@ const views: ViewInfo[] = [
         :title="view.title"
         :value="view.value"
         :icon="view.icon"
-        active-class="active-small"
       />
     </v-navigation-drawer>
 
