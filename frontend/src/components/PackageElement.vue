@@ -41,7 +41,7 @@ const chartOptions = computed(() => {
             offsetY: 10,
             fontSize: '1.8em',
             fontWeight: '600',
-            formatter: () => `${percentage.value} %`,
+            formatter: () => `${percentage.value}%`,
           },
         },
       },
@@ -60,17 +60,17 @@ const chartOptions = computed(() => {
 
 <template>
   <v-card>
-    <div class="d-flex">
-      <div class="chart-container">
+    <div class="d-flex main">
+      <div class="flex-0-0 chart-container">
         <VueApexCharts
           :options="chartOptions"
           :series="[percentage]"
           height="180px"
         />
       </div>
-      <div class="ml-4 mt-4">
-        <div class="package-name">{{ props.package }}</div>
-        <div class="nb-visits">
+      <div class="flex-1-1 ml-4 mt-4 package">
+        <span class="package-name">{{ props.package }}</span>
+        <div class="value-label">
           <span>{{ props.value }}</span> {{ props.label }}
         </div>
       </div>
@@ -79,18 +79,29 @@ const chartOptions = computed(() => {
 </template>
 
 <style scoped>
-.nb-visits {
+.value-label {
   position: absolute;
   bottom: 30px;
   font-size: 0.9em;
 }
-.nb-visits span {
+.value-label span {
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 6px;
   border-width: 4px;
   border-color: rgba(0, 0, 0, 0);
   border-style: solid;
   padding: 2px 4px;
+  margin-right: 6px;
+  font-size: 1rem;
+}
+
+.package {
+  hyphens: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: normal;
+  word-wrap: break-word;
 }
 
 .package-name {
