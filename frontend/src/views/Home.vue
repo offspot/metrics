@@ -52,7 +52,7 @@ const views: ViewInfo[] = [
       <div class="d-flex ma-4 mb-0 align-center">
         <v-img width="60" src="./Kiwix-logo.png"></v-img>
         <div class="pl-2 flex-1-1-100">
-          <span class="float-left font-weight-black text-h4">Metrics</span>
+          <span class="float-left font-weight-black hotspot">Metrics</span>
         </div>
       </div>
       <div class="my-6"></div>
@@ -110,6 +110,10 @@ const views: ViewInfo[] = [
 
 .v-main {
   background-color: rgb(243, 239, 245);
+}
+
+.hotspot {
+  font-size: 1.5rem;
 }
 
 #close-drawer {
