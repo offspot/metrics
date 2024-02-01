@@ -95,7 +95,6 @@ const series = computed(() => {
                 totalUsageStore.kpiValue.totalMinutesActivity,
               )
             "
-            :inverted="true"
             label="hours"
           />
         </div>
@@ -142,7 +141,6 @@ const series = computed(() => {
               totalUsageStore.kpiValue.totalMinutesActivity,
             )
           "
-          :inverted="true"
           label="hours"
         />
       </v-col>
@@ -160,7 +158,6 @@ const series = computed(() => {
               totalUsageStore.kpiValue.totalMinutesActivity,
             )
           "
-          :inverted="false"
           label="hours"
         />
       </v-col>

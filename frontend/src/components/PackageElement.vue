@@ -4,17 +4,14 @@ const mainStore = useMainStore()
 import { computed } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
 
-const invertedGraphicFillColor = '#000000'
-
 const props = withDefaults(
   defineProps<{
     package: string
     value: number
     total: number
-    inverted: boolean
     label: string
   }>(),
-  { inverted: false },
+  {},
 )
 
 const percentage = computed(() => {
@@ -52,29 +49,17 @@ const chartOptions = computed(() => {
     fill: {
       type: 'solid',
       opacity: 1,
-      colors: [
-        props.inverted
-          ? invertedGraphicFillColor
-          : mainStore.getPackageColor(props.package),
-      ],
+      colors: [mainStore.getPackageColor(props.package)],
     },
     stroke: {
       lineCap: 'round',
     },
   }
 })
-
-const cardStyle = computed(() =>
-  props.inverted
-    ? {
-        'background-color': mainStore.getPackageColor(props.package),
-      }
-    : {},
-)
 </script>
 
 <template>
-  <v-card :style="cardStyle">
+  <v-card>
     <div class="d-flex">
       <div class="chart-container">
         <VueApexCharts

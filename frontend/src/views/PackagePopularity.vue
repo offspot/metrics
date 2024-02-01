@@ -80,7 +80,6 @@ const series = computed(() => {
             :value="packagePopularityStore.kpiValue.items[0].visits"
             :package="packagePopularityStore.kpiValue.items[0].package"
             :total="packagePopularityStore.kpiValue.totalVisits"
-            :inverted="true"
             label="sessions"
           />
         </div>
@@ -119,7 +118,6 @@ const series = computed(() => {
           :value="packagePopularityStore.kpiValue.items[0].visits"
           :package="packagePopularityStore.kpiValue.items[0].package"
           :total="packagePopularityStore.kpiValue.totalVisits"
-          :inverted="true"
           label="sessions"
         />
       </v-col>
@@ -129,7 +127,6 @@ const series = computed(() => {
           :value="packagePopularityStore.kpiValue.items[item_no].visits"
           :package="packagePopularityStore.kpiValue.items[item_no].package"
           :total="packagePopularityStore.kpiValue.totalVisits"
-          :inverted="false"
           label="sessions"
         />
       </v-col>
