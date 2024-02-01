@@ -16,10 +16,6 @@ defineProps({
     type: String,
     required: true,
   },
-  activeClass: {
-    type: String,
-    required: true,
-  },
 })
 </script>
 
@@ -27,7 +23,6 @@ defineProps({
   <v-list-item
     :active="store.currentPage == value"
     link
-    :active-class="activeClass"
     class="rounded-lg mx-2 py-0"
     @click="store.currentPage = value"
   >
@@ -40,8 +35,4 @@ defineProps({
   </v-list-item>
 </template>
 
-<style scoped>
-.active-small {
-  background-color: #dbdafb;
-}
-</style>
+<style scoped></style>

@@ -4,7 +4,7 @@ const store = useMainStore()
 </script>
 
 <template>
-  <v-col cols="12" class="d-flex py-2 align-center">
+  <v-col cols="12" class="d-flex py-8 align-center main">
     <v-app-bar-nav-icon
       class="d-lg-none"
       @click="store.toggleDrawerVisibility()"
@@ -29,10 +29,15 @@ const store = useMainStore()
       </v-btn-toggle>
     </div>
     <div id="agg-value" class="flex-1-1">
-      <span v-if="store.hasAggregationValues"
-        >{{ store.date_part_1 }}{{ store.date_part_2
-        }}{{ store.date_part_3 }}</span
-      >
+      <div v-if="store.hasAggregationValues">
+        <span class="text-subtitle-1 font-weight-medium">{{
+          store.date_part_1
+        }}</span>
+        <span class="text-h5 font-weight-bold">{{ store.date_part_2 }}</span>
+        <span class="text-subtitle-1 font-weight-medium">{{
+          store.date_part_3
+        }}</span>
+      </div>
       <span v-else>No data</span>
     </div>
     <div id="prev-next" class="flex-0-1">
@@ -62,6 +67,11 @@ const store = useMainStore()
 <style scoped>
 .hidden {
   display: none;
+}
+
+.main {
+  width: 100%;
+  background-color: #f9f8fb;
 }
 
 #agg-value {

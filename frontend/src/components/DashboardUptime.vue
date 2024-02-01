@@ -65,7 +65,12 @@ const chartOptions = computed(() => {
       height="250px"
     />
 
-    <v-card-subtitle class="pt-2">During selected period</v-card-subtitle>
+    <v-card-subtitle class="pt-2">
+      <div class="d-flex">
+        <div class="flex-1-1">During selected period</div>
+        <div class="flex-0-0 placeholder"></div>
+      </div>
+    </v-card-subtitle>
     <v-card-text>
       <span class="text-subtitle-1 font-weight-medium">{{
         mainStore.date_part_1
@@ -83,9 +88,23 @@ const chartOptions = computed(() => {
 </template>
 
 <style scoped>
+.v-card-subtitle {
+  white-space: normal;
+}
+
+.v-card-subtitle .placeholder {
+  width: 165px;
+}
+
+.v-card-title {
+  font-size: 1.3rem;
+  padding-top: 1.2rem;
+}
+
 .container {
   min-height: 152px;
 }
+
 #box {
   position: absolute;
   top: -20px;

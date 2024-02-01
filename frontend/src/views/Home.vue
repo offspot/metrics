@@ -3,12 +3,11 @@
 import DrawerItem from '../components/DrawerItem.vue'
 import AppBarSmallScreen from '../components/AppBarSmallScreen.vue'
 import AppBarBigScreen from '../components/AppBarBigScreen.vue'
-import AggregationSelectorSmallScreen from '../components/AggregationSelectorSmallScreen.vue'
 import Dashboard from '../views/Dashboard.vue'
 import PackagePopularity from '../views/PackagePopularity.vue'
 import TotalUsage from '../views/TotalUsage.vue'
 
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import { useMainStore, Page } from '../stores/main'
 import { useDisplay } from 'vuetify'
 import ViewInfo from '@/types/ViewInfo'
@@ -19,8 +18,6 @@ onMounted(() => {
   store.fetchAggregationDetails()
   store.setDrawerVisibility(lgAndUp.value) // at startutp, close drawer on small screens
 })
-
-const height = computed(() => (mdAndUp.value ? 100 : 60))
 
 const views: ViewInfo[] = [
   {
@@ -52,7 +49,7 @@ const views: ViewInfo[] = [
       <div class="d-flex ma-4 mb-0 align-center">
         <v-img width="60" src="./Kiwix-logo.png"></v-img>
         <div class="pl-2 flex-1-1-100">
-          <span class="float-left font-weight-black text-h4">Metrics</span>
+          <span class="float-left font-weight-black hotspot">Metrics</span>
         </div>
       </div>
       <div class="my-6"></div>
@@ -85,17 +82,16 @@ const views: ViewInfo[] = [
         :title="view.title"
         :value="view.value"
         :icon="view.icon"
-        active-class="active-small"
       />
     </v-navigation-drawer>
 
-    <v-app-bar flat :height="height">
+    <v-app-bar flat height="undefined">
       <AppBarBigScreen v-if="mdAndUp" />
       <AppBarSmallScreen v-if="!mdAndUp" />
     </v-app-bar>
 
     <v-main>
-      <AggregationSelectorSmallScreen v-if="!mdAndUp" />
+      <!-- <AggregationSelectorSmallScreen v-if="!mdAndUp" />   -->
       <Dashboard v-if="store.currentPage == Page.Dashboard" />
       <PackagePopularity v-if="store.currentPage == Page.PackagePopularity" />
       <TotalUsage v-if="store.currentPage == Page.TotalUsage" />
@@ -104,12 +100,17 @@ const views: ViewInfo[] = [
 </template>
 
 <style scoped>
-.v-app-bar.v-toolbar {
-  background-color: rgb(248, 247, 250);
-}
-
 .v-main {
   background-color: rgb(243, 239, 245);
+  padding-top: 120px;
+}
+
+.v-toolbar {
+  background: transparent;
+}
+
+.hotspot {
+  font-size: 1.5rem;
 }
 
 #close-drawer {

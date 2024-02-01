@@ -26,8 +26,12 @@ const mainStore = useMainStore()
                 <DashboardSharedFiles />
               </v-card>
             </v-col>
-            <v-col cols="12" class="d-lg-none">
-              <v-card elevation="0" class="total-usage">
+            <v-col cols="12" class="d-none d-md-flex d-lg-none">
+              <v-card
+                elevation="0"
+                class="total-usage"
+                @click="mainStore.currentPage = Page.TotalUsage"
+              >
                 <DashboardTotalUsage />
               </v-card>
             </v-col>
@@ -47,7 +51,11 @@ const mainStore = useMainStore()
               </v-card>
             </v-col>
             <v-col cols="12" lg="6" class="d-md-none d-lg-flex">
-              <v-card elevation="0" class="total-usage">
+              <v-card
+                elevation="0"
+                class="total-usage"
+                @click="mainStore.currentPage = Page.TotalUsage"
+              >
                 <DashboardTotalUsage />
               </v-card>
             </v-col>
@@ -60,7 +68,7 @@ const mainStore = useMainStore()
 
 <style scoped>
 .shared-files {
-  min-height: 320px;
+  min-height: 310px;
 }
 .package-popularity {
   min-height: 544px;

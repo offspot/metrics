@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useTotalUsageStore } from '../stores/totalUsage'
 const totalUsageStore = useTotalUsageStore()
+import DashboardRadialGraph from './DashboardRadialGraph.vue'
 </script>
 
 <template>
@@ -16,27 +17,21 @@ const totalUsageStore = useTotalUsageStore()
           v-for="item in totalUsageStore.firstItems"
           :key="item.package"
         >
-          <v-list-item-title class="font-weight-medium text-body-2 mx-4 my-5">
-            {{ item.package }}
-          </v-list-item-title>
-
-          <template #append>
-            <div class="d-flex align-center">
-              <div class="me-2" style="inline-size: 4.875rem">
-                <v-progress-linear
-                  :model-value="totalUsageStore.itemPercentage(item)"
-                  :color="totalUsageStore.itemColor(item)"
-                  bg-color="blue-grey"
-                  height="8"
-                  rounded-bar
-                  rounded
-                />
-              </div>
-              <span class="activity text-body-1">{{
-                totalUsageStore.itemLabel(item)
-              }}</span>
+          <div class="d-flex align-center">
+            <div class="flex-0-0 chart-container">
+              <DashboardRadialGraph
+                :package="item.package"
+                :value="item.minutesActivity"
+                :total="totalUsageStore.kpiValue.totalMinutesActivity"
+              />
             </div>
-          </template>
+            <div class="flex-1-1 mx-4 my-5 package">
+              {{ item.package }}
+            </div>
+            <div class="flex-0-0 ms-2 value">
+              {{ totalUsageStore.itemLabel(item) }}
+            </div>
+          </div>
         </v-list-item>
       </v-list>
     </v-card-text>
@@ -47,15 +42,42 @@ const totalUsageStore = useTotalUsageStore()
 </template>
 
 <style scoped>
+.chart-container {
+  max-height: 60px;
+  margin-top: -30px;
+  margin-left: -10px;
+  width: 80px;
+}
+
+.v-card-title {
+  font-size: 1.3rem;
+  padding-top: 1.2rem;
+}
+
+.v-card-subtitle {
+  font-size: 0.95rem;
+}
+
+.package {
+  hyphens: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: normal;
+  word-wrap: break-word;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+.value {
+  font-size: 1.2rem;
+}
+
 #legend {
   position: absolute;
-  top: 9.3em;
-  right: 3.4em;
-  font-size: x-small;
+  top: 7em;
+  right: 2.4em;
+  font-size: small;
   z-index: 2;
-}
-span.activity {
-  min-width: 3em;
-  text-align: right;
 }
 </style>
