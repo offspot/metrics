@@ -68,7 +68,7 @@ const mainStore = useMainStore()
 
 <style scoped>
 .shared-files {
-  min-height: 320px;
+  min-height: 310px;
 }
 .package-popularity {
   min-height: 544px;

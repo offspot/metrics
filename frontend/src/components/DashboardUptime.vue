@@ -96,13 +96,18 @@ const chartOptions = computed(() => {
   width: 165px;
 }
 
+.v-card-title {
+  font-size: 1.3rem;
+  padding-top: 1.2rem;
+}
+
 .container {
   min-height: 152px;
 }
 
 #box {
   position: absolute;
-  top: -30px;
+  top: -20px;
   right: -50px;
 }
 .data .v-card-text {

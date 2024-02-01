@@ -7,7 +7,7 @@ const sharedFilesStore = useSharedFilesStore()
 const chartOptions = computed(() => {
   return {
     chart: {
-      height: 253,
+      height: 220,
       type: 'line',
       zoom: {
         enabled: false,
@@ -104,7 +104,7 @@ const series = computed(() => {
       id="box"
       :options="chartOptions"
       :series="series"
-      height="253px"
+      height="220px"
     />
   </div>
   <div v-else>
@@ -112,4 +112,9 @@ const series = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.v-card-title {
+  font-size: 1.3rem;
+  padding-top: 1.2rem;
+}
+</style>

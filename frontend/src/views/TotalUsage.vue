@@ -34,6 +34,9 @@ const chartOptions = computed(() => {
           return `${val} %`
         },
       },
+      axisTicks: {
+        color: '#333333',
+      },
     },
     yaxis: {
       labels: {
