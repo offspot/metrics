@@ -6,7 +6,11 @@ from offspot_metrics_backend.business.exceptions import (
     TooWideUsageError,
     WrongInputTypeError,
 )
-from offspot_metrics_backend.business.inputs.input import Input, TimedInput
+from offspot_metrics_backend.business.inputs.input import (
+    CountInput,
+    Input,
+    TimedInput,
+)
 
 
 class Recorder(abc.ABC):
@@ -47,6 +51,44 @@ class IntCounterRecorder(Recorder):
     ) -> None:
         """Processing an input consists simply in updating the counter"""
         self.counter += 1
+
+    @property
+    def value(self) -> int:
+        """Retrieving the value consists simply is getting the counter"""
+        return self.counter
+
+    @property
+    def state(self) -> str:
+        """Return a serialized representation of recorder internal state"""
+        return f"{self.counter}"
+
+    def restore_state(self, value: str):
+        """Restore the recorder internal state from its serialized representation"""
+        self.counter = int(value)
+
+
+class CountCounterRecorder(Recorder):
+    """Basic recorder type suming the number of items reported in input `count`"""
+
+    def __init__(self) -> None:
+        self.counter: int = 0
+
+    def process_input(
+        self,
+        input_: Input,
+    ) -> None:
+        """Processing an input consists simply in summing the input values"""
+
+        # first check that the recorder is only receiving TimedInputWithCount (should
+        # always be the case due to Indicators configuration, but better safe with a
+        # clear exception)
+        if not isinstance(input_, CountInput):
+            raise WrongInputTypeError(
+                f"{UsageRecorder.__name__} recorder can only process "
+                f"{CountInput.__name__} inputs"
+            )
+
+        self.counter += input_.count
 
     @property
     def value(self) -> int:

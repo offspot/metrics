@@ -76,6 +76,16 @@ def test_parsing_ok(reverse_proxy_config: Callable[[str | None], ReverseProxyCon
             host="wikifundi.renaud.test",
             ident="wikifundi-en.offspot.kiwix.org",
         ),
+        AppConfig(
+            title="Shared files - fm1",
+            host="filemanager1.renaud.test",
+            ident="file-manager.offspot.kiwix.org",
+        ),
+        AppConfig(
+            title="Shared files - fm2",
+            host="filemanager2.renaud.test",
+            ident="file-manager.offspot.kiwix.org",
+        ),
     }
 
 

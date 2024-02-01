@@ -14,3 +14,11 @@ class TimedInput(Input):
 
     # moment where the input occured
     ts: datetime.datetime
+
+
+@dataclass(eq=True, frozen=True)
+class CountInput(Input):
+    """An input with a number of items"""
+
+    # number of items
+    count: int

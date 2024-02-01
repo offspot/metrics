@@ -62,13 +62,17 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
                 ),
             ],
         ),
+        # ===============
+        # Edupi
         (
             r"""{"level":"info","msg":"handled request","status":"201","""
             r""""request":{"host":"edupi1.renaud.test","method":"POST","""
             r""""uri":"/api/documents/"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
             [
-                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_CREATED),
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_CREATED, count=1
+                ),
                 PackageRequest(
                     ts=datetime.datetime.fromtimestamp(1688459792.8632474),
                     package_title="Shared files 1",
@@ -81,7 +85,9 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r""""uri":"/api/documents/123"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
             [
-                SharedFilesOperation(kind=SharedFilesOperationKind.FILE_DELETED),
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_DELETED, count=1
+                ),
                 PackageRequest(
                     ts=datetime.datetime.fromtimestamp(1688459792.8632474),
                     package_title="Shared files 2",
@@ -185,6 +191,64 @@ from offspot_metrics_backend.business.reverse_proxy_config import ReverseProxyCo
             r""""uri":"/api/documents/123"},"resp_headers":{},"""
             r""""ts":1688459792.8632474}""",
             [],
+        ),
+        # ===============
+        # tiny-file-manager
+        (
+            r"""{"level":"info","msg":"handled request","status":"302","""
+            r""""request":{"host":"filemanager1.renaud.test","method":"POST","""
+            r""""uri":"/admin/index.php?p="},"""
+            r""""resp_headers":{"X-Tfm-Files-Added":["12"]},"""
+            r""""ts":1688459792.8632474}""",
+            [
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_CREATED, count=12
+                ),
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files - fm1",
+                ),
+            ],
+        ),
+        (
+            r"""{"level":"info","msg":"handled request","status":"302","""
+            r""""request":{"host":"filemanager2.renaud.test","method":"POST","""
+            r""""uri":"/admin/index.php?p="},"""
+            r""""resp_headers":{"X-Tfm-Files-Deleted":["22"]},"""
+            r""""ts":1688459792.8632474}""",
+            [
+                SharedFilesOperation(
+                    kind=SharedFilesOperationKind.FILE_DELETED, count=22
+                ),
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459792.8632474),
+                    package_title="Shared files - fm2",
+                ),
+            ],
+        ),
+        (
+            r"""{"level":"info","msg":"handled request","status":"200","""
+            r""""request":{"host":"filemanager2.renaud.test","method":"GET","""
+            r""""uri":"/admin/index.php?p="},"resp_headers":{},"""
+            r""""ts":1688459793.8632474}""",
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459793.8632474),
+                    package_title="Shared files - fm2",
+                )
+            ],
+        ),
+        (
+            r"""{"level":"info","msg":"handled request","status":"300","""
+            r""""request":{"host":"filemanager1.renaud.test","method":"POST","""
+            r""""uri":"/admin/index.php?p="},"resp_headers":{},"""
+            r""""ts":1688459794.8632474}""",
+            [
+                PackageRequest(
+                    ts=datetime.datetime.fromtimestamp(1688459794.8632474),
+                    package_title="Shared files - fm1",
+                )
+            ],
         ),
         (
             r"""{"level":"info","msg":"handled request","request":{"host":"""

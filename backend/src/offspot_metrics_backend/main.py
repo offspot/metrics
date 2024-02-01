@@ -92,7 +92,7 @@ class Main:
             try:
                 self.processor.check_for_inactivity()
             except Exception as exc:
-                logger.warn(
+                logger.warning(
                     "Exception occured in check for inactivity tick", exc_info=exc
                 )
 
@@ -107,7 +107,7 @@ class Main:
             result = self.converter.process(event.line_content)
             self.processor.process_inputs(result=result)
         except Exception as exc:
-            logger.warn("Error log event", exc_info=exc)
+            logger.warning("Error log event", exc_info=exc)
 
     def create_app(self) -> FastAPI:
         self.app = FastAPI(

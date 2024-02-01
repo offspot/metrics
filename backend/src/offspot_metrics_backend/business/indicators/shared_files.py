@@ -3,7 +3,7 @@ from typing import cast
 from offspot_metrics_backend.business.indicators.dimensions import DimensionsValues
 from offspot_metrics_backend.business.indicators.indicator import Indicator
 from offspot_metrics_backend.business.indicators.recorder import (
-    IntCounterRecorder,
+    CountCounterRecorder,
     Recorder,
 )
 from offspot_metrics_backend.business.inputs.input import Input
@@ -19,7 +19,7 @@ class SharedFilesOperations(Indicator):
         return isinstance(input_, SharedFilesOperation)
 
     def get_new_recorder(self) -> Recorder:
-        return IntCounterRecorder()
+        return CountCounterRecorder()
 
     def get_dimensions_values(self, input_: Input) -> DimensionsValues:
         input_ = cast(SharedFilesOperation, input_)

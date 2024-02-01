@@ -9,9 +9,10 @@ from offspot_metrics_backend.business.exceptions import (
     WrongInputTypeError,
 )
 from offspot_metrics_backend.business.indicators.recorder import (
+    CountCounterRecorder,
     UsageRecorder,
 )
-from offspot_metrics_backend.business.inputs.input import Input, TimedInput
+from offspot_metrics_backend.business.inputs.input import CountInput, Input, TimedInput
 
 
 @dataclass
@@ -231,5 +232,47 @@ class TestUsageRecorder:
 
     def test_recorder_value_wrong_input_type(self):
         recorder = UsageRecorder()
+        with pytest.raises(WrongInputTypeError):
+            recorder.process_input(input_=Input())
+
+
+class TestCountCounterRecorder:
+    @pytest.mark.parametrize(
+        "counts, expected_value",
+        [
+            ([], 0),
+            (
+                [12],
+                12,
+            ),
+            (
+                [12, 32],
+                44,
+            ),
+        ],
+    )
+    def test_recorder_value(
+        self,
+        counts: list[int],
+        expected_value: int,
+    ):
+        recorder = CountCounterRecorder()
+        for count in counts:
+            recorder.process_input(input_=CountInput(count=count))
+        assert recorder.value == expected_value
+
+    def test_recorder_state(self):
+        recorder = CountCounterRecorder()
+        for count in [12, 32, 48]:
+            recorder.process_input(input_=CountInput(count=count))
+        assert recorder.state == "92"
+
+    def test_recorder_value_from_state(self):
+        recorder = CountCounterRecorder()
+        recorder.restore_state("87")
+        assert recorder.value == 87
+
+    def test_recorder_value_wrong_input_type(self):
+        recorder = CountCounterRecorder()
         with pytest.raises(WrongInputTypeError):
             recorder.process_input(input_=Input())

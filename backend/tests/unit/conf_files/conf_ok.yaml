@@ -67,3 +67,11 @@ packages:
   ident: wikifundi-en.offspot.kiwix.org
   title: Wikifundi
   url: //wikifundi.renaud.test/
+- kind: app
+  ident: file-manager.offspot.kiwix.org
+  title: Shared files - fm1
+  url: //filemanager1.renaud.test/
+- kind: app
+  ident: file-manager.offspot.kiwix.org
+  title: Shared files - fm2
+  url: //filemanager2.renaud.test/
