@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for processing the new offspot file-manager (#104)
+
+### Changed
+
+- Colors assigned to package names are not random anymore (#109)
+- Many small UI adjustments (#106)
+
+### Fixed
+
+- Top toolbar is not working properly when there is no yearly aggregation (#101)
+
 ## [0.2.1] - 2024-01-26
 
 ### Added
