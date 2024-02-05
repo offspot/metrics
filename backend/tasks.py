@@ -60,9 +60,11 @@ def call_alembic(ctx: Context, cmd: str, *, test_db: bool = False):
             f"alembic {cmd}",
             pty=use_pty,
             env={
-                "DATABASE_URL": os.getenv("TEST_DATABASE_URL")
-                if test_db
-                else os.getenv("DATABASE_URL")
+                "DATABASE_URL": (
+                    os.getenv("TEST_DATABASE_URL")
+                    if test_db
+                    else os.getenv("DATABASE_URL")
+                )
             },
         )
 

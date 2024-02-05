@@ -97,21 +97,28 @@ class CaddyLogConverter:
 
         ts = datetime.datetime.fromtimestamp(log.ts)
         log_data = LogData(
-            content_type=log.resp_headers.content_type[0]
-            if log.resp_headers.content_type and len(log.resp_headers.content_type) > 0
-            else None,
+            content_type=(
+                log.resp_headers.content_type[0]
+                if log.resp_headers.content_type
+                and len(log.resp_headers.content_type) > 0
+                else None
+            ),
             status=log.status,
             uri=log.request.uri,
             method=log.request.method,
             ts=ts,
-            x_tfm_files_added=int(log.resp_headers.x_tfm_files_added[0])
-            if log.resp_headers.x_tfm_files_added
-            and len(log.resp_headers.x_tfm_files_added) > 0
-            else None,
-            x_tfm_files_deleted=int(log.resp_headers.x_tfm_files_deleted[0])
-            if log.resp_headers.x_tfm_files_deleted
-            and len(log.resp_headers.x_tfm_files_deleted) > 0
-            else None,
+            x_tfm_files_added=(
+                int(log.resp_headers.x_tfm_files_added[0])
+                if log.resp_headers.x_tfm_files_added
+                and len(log.resp_headers.x_tfm_files_added) > 0
+                else None
+            ),
+            x_tfm_files_deleted=(
+                int(log.resp_headers.x_tfm_files_deleted[0])
+                if log.resp_headers.x_tfm_files_deleted
+                and len(log.resp_headers.x_tfm_files_deleted) > 0
+                else None
+            ),
         )
         inputs: list[Input] = []
         for generator in self.generators:

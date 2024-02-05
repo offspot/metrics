@@ -109,9 +109,9 @@ class AggKindAndValue:
 
 
 periods_in_db: list[int] = []  # store list of periods already injected in DB
-dimensions_in_db: list[
-    IndicatorData
-] = []  # store list of dimensions already injected in DB
+dimensions_in_db: list[IndicatorData] = (
+    []
+)  # store list of dimensions already injected in DB
 
 
 def clear_db():
@@ -151,13 +151,15 @@ def scale_and_randomize_value(
     factor = (
         1
         if agg_kind == AggKind.YEAR or agg_kind is None
-        else 12
-        if agg_kind == AggKind.MONTH
-        else 52
-        if agg_kind == AggKind.WEEK
-        else 365
-        if agg_kind == AggKind.DAY
-        else 0
+        else (
+            12
+            if agg_kind == AggKind.MONTH
+            else (
+                52
+                if agg_kind == AggKind.WEEK
+                else 365 if agg_kind == AggKind.DAY else 0
+            )
+        )
     )
 
     return max(
