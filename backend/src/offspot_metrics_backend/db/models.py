@@ -144,7 +144,7 @@ class IndicatorDimension(Base):
     It might have up to 3 values for now, meaning a 3 dimensional indicator"""
 
     __tablename__ = "indicator_dimension"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     # only 3 dimension values are supported for now, this is supposed to be way enough
     value0: Mapped[str | None] = mapped_column(index=True)
     value1: Mapped[str | None]
@@ -161,7 +161,7 @@ class IndicatorRecord(Base):
     """
 
     __tablename__ = "indicator_record"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     indicator_id: Mapped[int] = mapped_column(index=True)
     value: Mapped[int]
 
@@ -188,7 +188,7 @@ class IndicatorState(Base):
     """
 
     __tablename__ = "indicator_state"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     indicator_id: Mapped[int] = mapped_column(index=True)
     state: Mapped[str]
 
@@ -213,7 +213,7 @@ class KpiRecord(Base):
     The kind of aggregration is either D (day), W (week), M (month) or Y (year)"""
 
     __tablename__ = "kpi"
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)  # noqa: A003
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     kpi_id: Mapped[int] = mapped_column(index=True)
     agg_kind: Mapped[str]
     agg_value: Mapped[str]
