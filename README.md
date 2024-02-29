@@ -28,3 +28,9 @@ There are also details about the [database structure](database.md) and the [proc
 ## Contributing
 
 For the Python backend, see [backend/README.md](backend/README.md) and [backend/CONTRIBUTING.md](backend/CONTRIBUTING.md).
+
+## Acknowledgements 
+
+**[Hirschmann Stiftung](https://www.hirschmann-stiftung.ch/)**: Development of this tool was made possible through a grant from the Hirschmann Stiftung.
+
+![Hirschmann Stiftung Logo](https://kiwix.org/wp-content/uploads/2023/07/logo_hirschmann_stiftung-1.jpg)
