@@ -31,6 +31,6 @@ For the Python backend, see [backend/README.md](backend/README.md) and [backend/
 
 ## Acknowledgements 
 
-**[Hirschmann Stiftung](https://www.hirschmann-stiftung.ch/)**: Development of this tool was made possible through a grant from the Hirschmann Stiftung.
+Development of this tool was made possible through a grant from the [Hirschmann Stiftung](https://www.hirschmann-stiftung.ch/).
 
-![Hirschmann Stiftung Logo](https://kiwix.org/wp-content/uploads/2023/07/logo_hirschmann_stiftung-1.jpg)
+![Hirschmann Stiftung Logo](metrics\logo_hirschmann_stiftung.jpg)
