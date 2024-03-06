@@ -33,4 +33,4 @@ For the Python backend, see [backend/README.md](backend/README.md) and [backend/
 
 Development of this tool was made possible through a grant from the [Hirschmann Stiftung](https://www.hirschmann-stiftung.ch/).
 
-![Hirschmann Stiftung Logo](docs\images\logo_hirschmann_stiftung.jpg)
+![Hirschmann Stiftung Logo](docs/images/logo_hirschmann_stiftung.jpg)
