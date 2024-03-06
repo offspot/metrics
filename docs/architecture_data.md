@@ -1,7 +1,7 @@
 Metrics - Data architecture
 =======
 
-![Data architecture](docs\images\architecture_data.excalidraw.png)
+![Data architecture](docs/images/architecture_data.excalidraw.png)
 
 ## Raw data
 
