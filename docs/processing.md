@@ -7,7 +7,7 @@ Core processing logic
 - The [indicator level processor](backend/src/offspot_metrics_backend/business/indicators/processor.py) is responsible to operations linked to indicators
 - The [KPI level processor](backend/src/offspot_metrics_backend/business/indicators/processor.py) is responsible to operations linked to KPI
 
-![Processing high level](processing.excalidraw.png)
+![Processing high level](doc/images/processing.excalidraw.png)
 
 These processors are fed with:
 - startup events (when the process starts)

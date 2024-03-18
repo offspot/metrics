@@ -8,7 +8,7 @@ One indicator record hold the value of:
 - for a given [period](#indicator-periods) (8. July 2023 at 8am)
 - and a given [dimension](#indicator-dimensions) (wikipedia)
 
-![Indicators record](database_indicator_record.excalidraw.png)
+![Indicators record](images/database_indicator_record.excalidraw.png)
 
 One given indicator (number of visits on contents homes) may have multiple records for a given period because there is multiple dimensions (wikipedia, ted, gutenberg, ...).
 
@@ -38,7 +38,7 @@ Indicator dimensions might need multiple values for one dimension. For instance 
 
 Indicator states are the transient values of the indicators before they are transformed in records every hour.
 
-![Indicators state](database_indicator_state.excalidraw.png)
+![Indicators state](images/database_indicator_state.excalidraw.png)
 
 States are hence also linked to a period and a dimension, as well as an indicator value (or transient state more exactly). Period and dimension records are shared between states and records.
 
@@ -56,6 +56,6 @@ One single table is used to store KPIs with following columns:
 - `agg_value`: the value of the aggregation for this KPI value (e.g 2023-06-01 for a daily aggregation, 2023 for a yearly aggregation, ...)
 - `kpi_value`: the value of the given KPI for the given `agg_kind` and `agg_value` (e.g. the value of KPI id `1` for the `Month` of `March 2023`)
 
-![KPI](database_kpi.excalidraw.png)
+![KPI](images/database_kpi.excalidraw.png)
 
 Just like for indicators values, KPI values are stored as string so that we can store an serialized object.

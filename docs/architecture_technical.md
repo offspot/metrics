@@ -9,7 +9,7 @@ At some point in the future, the system is meant to centralize data in a Cloud f
 
 ## High-level overview
 
-![Technical architecture](architecture_technical.excalidraw.png)
+![Technical architecture](images/architecture_technical.excalidraw.png)
 
 The backend is directly responsible to extract the various inputs from its environment (by reading rotating log files nicely, polling a webserver to grep some stats, ...).
 
