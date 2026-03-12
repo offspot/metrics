@@ -123,7 +123,7 @@ class Processor:
                 self.last_action = now
 
     def _process_tick(self, now: datetime.datetime, session: Session):
-        logger.info("Tick processing started")
+        logger.debug("Tick processing started")
         self.last_tick_processed = Tick(now)
 
         # Generate a ClockTick input
